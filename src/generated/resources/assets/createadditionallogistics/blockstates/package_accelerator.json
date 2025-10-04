@@ -1,0 +1,30 @@
+{
+  "variants": {
+    "facing=down": {
+      "model": "createadditionallogistics:block/package_accelerator/block",
+      "x": 180
+    },
+    "facing=east": {
+      "model": "createadditionallogistics:block/package_accelerator/block",
+      "x": 90,
+      "y": 90
+    },
+    "facing=north": {
+      "model": "createadditionallogistics:block/package_accelerator/block",
+      "x": 90
+    },
+    "facing=south": {
+      "model": "createadditionallogistics:block/package_accelerator/block",
+      "x": 90,
+      "y": 180
+    },
+    "facing=up": {
+      "model": "createadditionallogistics:block/package_accelerator/block"
+    },
+    "facing=west": {
+      "model": "createadditionallogistics:block/package_accelerator/block",
+      "x": 90,
+      "y": 270
+    }
+  }
+}

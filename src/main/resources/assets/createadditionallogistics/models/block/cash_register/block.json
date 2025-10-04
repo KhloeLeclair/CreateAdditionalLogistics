@@ -1,0 +1,210 @@
+{
+	"format_version": "1.9.0",
+	"parent": "block/block",
+	"texture_size": [64, 64],
+	"render_type": "minecraft:cutout_mipped",
+	"textures": {
+		"5": "createadditionallogistics:block/cash_register",
+		"particle": "createadditionallogistics:block/cash_register"
+	},
+	"elements": [
+		{
+			"name": "base",
+			"from": [0, 0, 0],
+			"to": [16, 4, 15],
+			"faces": {
+				"north": {"uv": [8, 4.5, 12, 5.5], "texture": "#5", "cullface": "north"},
+				"east": {"uv": [8, 6.5, 11.75, 7.5], "texture": "#5", "cullface": "east"},
+				"west": {"uv": [11.75, 6.5, 8, 7.5], "texture": "#5", "cullface": "west"},
+				"up": {"uv": [4, 3.75, 0, 0], "texture": "#5"},
+				"down": {"uv": [4, 3.75, 0, 7.5], "texture": "#5", "cullface": "down"}
+			}
+		},
+		{
+			"name": "back",
+			"from": [0, 4, 0],
+			"to": [16, 13, 6],
+			"faces": {
+				"north": {"uv": [4, 3, 8, 5.25], "texture": "#5", "cullface": "north"},
+				"east": {"uv": [0, 9, 1.5, 11.25], "texture": "#5", "cullface": "east"},
+				"south": {"uv": [4, 5.25, 8, 7.5], "texture": "#5"},
+				"west": {"uv": [1.5, 9, 0, 11.25], "texture": "#5", "cullface": "west"},
+				"up": {"uv": [4, 9, 0, 7.5], "texture": "#5"}
+			}
+		},
+		{
+			"name": "base",
+			"from": [0.01, 4, 0],
+			"to": [14.01, 10, 12],
+			"rotation": {"angle": 45, "axis": "x", "origin": [8, 5, 6]},
+			"faces": {
+				"east": {"uv": [7.5, 7.5, 10.5, 9], "texture": "#5"},
+				"south": {"uv": [7.5, 0, 11, 1.5], "texture": "#5"},
+				"west": {"uv": [8, 3, 11, 4.5], "texture": "#5"},
+				"up": {"uv": [7.5, 3, 4, 0], "texture": "#5"}
+			}
+		},
+		{
+			"name": "row1",
+			"from": [1.5, 4.25, 12.75],
+			"to": [12.5, 5.25, 14.75],
+			"faces": {
+				"south": {"uv": [9.75, 9.75, 12.5, 10], "texture": "#5"},
+				"up": {"uv": [4.25, 10.25, 1.5, 9.75], "texture": "#5"}
+			}
+		},
+		{
+			"name": "row2",
+			"from": [1.5, 6.25, 10.75],
+			"to": [12.5, 7.25, 12.75],
+			"faces": {
+				"south": {"uv": [9.75, 9.75, 12.5, 10], "texture": "#5"},
+				"up": {"uv": [1.5, 9.75, 4.25, 10.25], "texture": "#5"}
+			}
+		},
+		{
+			"name": "row3",
+			"from": [1.5, 8.25, 8.75],
+			"to": [12.5, 9.25, 10.75],
+			"faces": {
+				"south": {"uv": [9.75, 9.75, 12.5, 10], "texture": "#5"},
+				"up": {"uv": [1.5, 9.75, 4.25, 10.25], "texture": "#5"}
+			}
+		},
+		{
+			"name": "row4",
+			"from": [1.5, 10.25, 6.75],
+			"to": [12.5, 11.25, 8.75],
+			"faces": {
+				"south": {"uv": [9.75, 9.75, 12.5, 10], "texture": "#5"},
+				"up": {"uv": [1.5, 9.75, 4.25, 10.25], "texture": "#5"}
+			}
+		},
+		{
+			"name": "left end",
+			"from": [0, 13, 1],
+			"to": [1, 16, 4],
+			"faces": {
+				"north": {"uv": [8.25, 10, 8.5, 10.75], "texture": "#5"},
+				"east": {"uv": [5.75, 10, 6.5, 10.75], "texture": "#5"},
+				"south": {"uv": [8.25, 10, 8.5, 10.75], "texture": "#5"},
+				"west": {"uv": [5.75, 10, 6.5, 10.75], "texture": "#5", "cullface": "west"},
+				"up": {"uv": [8.5, 10.75, 8.25, 10], "texture": "#5", "cullface": "up"}
+			}
+		},
+		{
+			"name": "glass",
+			"from": [1, 13, 1],
+			"to": [15, 16, 4],
+			"faces": {
+				"north": {"uv": [1.5, 9, 5, 9.75], "texture": "#5"},
+				"south": {"uv": [5, 9, 8.5, 9.75], "texture": "#5"},
+				"up": {"uv": [12, 9.75, 8.5, 9], "texture": "#5"}
+			}
+		},
+		{
+			"name": "right end",
+			"from": [15, 13, 1],
+			"to": [16, 16, 4],
+			"faces": {
+				"north": {"uv": [8.25, 10.75, 8.5, 10], "texture": "#5"},
+				"east": {"uv": [5.75, 10, 6.5, 10.75], "texture": "#5", "cullface": "east"},
+				"south": {"uv": [8.25, 10, 8.5, 10.75], "texture": "#5"},
+				"west": {"uv": [5.75, 10, 6.5, 10.75], "texture": "#5"},
+				"up": {"uv": [8.25, 10, 8.5, 10.75], "texture": "#5", "cullface": "up"}
+			}
+		},
+		{
+			"name": "display",
+			"from": [10, 13, 3],
+			"to": [12, 15, 3],
+			"faces": {
+				"north": {"uv": [6.5, 10, 7, 10.5], "texture": "#5"},
+				"south": {"uv": [6.5, 10, 7, 10.5], "texture": "#5"}
+			}
+		},
+		{
+			"name": "shaft",
+			"from": [14, 4.5, 9],
+			"to": [15, 8.5, 10],
+			"rotation": {"angle": 0, "axis": "x", "origin": [13.5, 7.75, 9.5]},
+			"faces": {
+				"north": {"uv": [7, 10, 7.25, 11], "texture": "#5"},
+				"east": {"uv": [7, 10, 7.25, 11], "texture": "#5"},
+				"south": {"uv": [7, 10, 7.25, 11], "texture": "#5"},
+				"west": {"uv": [7, 10, 7.25, 11], "texture": "#5"},
+				"up": {"uv": [9, 10.25, 8.75, 10], "texture": "#5"},
+				"down": {"uv": [9, 10.25, 8.75, 10], "texture": "#5"}
+			}
+		},
+		{
+			"name": "handle",
+			"from": [15, 4, 8.5],
+			"to": [16, 6, 10.5],
+			"rotation": {"angle": 0, "axis": "x", "origin": [13.5, 7.75, 9.5]},
+			"faces": {
+				"north": {"uv": [8.5, 10, 8.75, 10.5], "texture": "#5"},
+				"east": {"uv": [7.25, 10, 7.75, 10.5], "texture": "#5", "cullface": "east"},
+				"south": {"uv": [8.5, 10, 8.75, 10.5], "texture": "#5"},
+				"west": {"uv": [7.25, 10, 7.75, 10.5], "texture": "#5"},
+				"up": {"uv": [8.5, 10, 8.75, 10.5], "texture": "#5"},
+				"down": {"uv": [8.5, 10, 8.75, 10.5], "texture": "#5"}
+			}
+		},
+		{
+			"name": "drawer front",
+			"from": [0, 0, 15],
+			"to": [16, 4, 16],
+			"faces": {
+				"east": {"uv": [7.75, 10, 8, 11], "texture": "#5"},
+				"south": {"uv": [8, 5.5, 12, 6.5], "texture": "#5"},
+				"west": {"uv": [8, 10, 8.25, 11], "texture": "#5"},
+				"up": {"uv": [9.75, 10, 5.75, 9.75], "texture": "#5"},
+				"down": {"uv": [5.75, 9.75, 9.75, 10], "texture": "#5"}
+			}
+		},
+		{
+			"name": "interior",
+			"from": [1, 0.25, 9],
+			"to": [15, 3.25, 15],
+			"faces": {
+				"east": {"uv": [4.25, 9.75, 5.75, 10.5], "texture": "#5"},
+				"west": {"uv": [5.75, 9.75, 4.25, 10.5], "texture": "#5"},
+				"up": {"uv": [11, 3, 7.5, 1.5], "texture": "#5"},
+				"down": {"uv": [7.5, 7.5, 4, 9], "texture": "#5"}
+			}
+		}
+	],
+	"groups": [
+		{
+			"name": "base",
+			"origin": [0, 0, 0],
+			"color": 8,
+			"children": [0, 1]
+		},
+		{
+			"name": "keypad",
+			"origin": [8, 4.95, 6.02],
+			"color": 0,
+			"children": [2, 3, 4, 5, 6]
+		},
+		{
+			"name": "top display",
+			"origin": [0, 0, 0],
+			"color": 0,
+			"children": [7, 8, 9, 10]
+		},
+		{
+			"name": "crank",
+			"origin": [13.5, 7.75, 9.5],
+			"color": 0,
+			"children": [11, 12]
+		},
+		{
+			"name": "drawer",
+			"origin": [0, 0, 0],
+			"color": 0,
+			"children": [13, 14]
+		}
+	]
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    {
+      "tag": "c:dyes/white"
+    },
+    {
+      "tag": "createadditionallogistics:short_seats"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "createadditionallogistics:white_short_seat"
+  }
+}

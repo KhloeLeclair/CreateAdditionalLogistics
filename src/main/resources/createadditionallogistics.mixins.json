@@ -1,0 +1,25 @@
+{
+  "required": true,
+  "package": "dev.khloeleclair.create.additionallogistics.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "MixinFactoryPanelBehaviour",
+    "MixinGlob",
+    "MixinPackageItem",
+    "MixinSeatBlock",
+    "MixinStockTickerInteractionHandler",
+    "MixinSmartBlockEntity"
+  ],
+  "client": [
+    "client.MixinPackagerRenderer",
+    "client.MixinPackagePortScreen",
+    "client.MixinFactoryPanelScreen",
+    "client.MixinStockKeeperRequestScreen"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  },
+  "overwrites": {
+    "requireAnnotations": true
+  }
+}

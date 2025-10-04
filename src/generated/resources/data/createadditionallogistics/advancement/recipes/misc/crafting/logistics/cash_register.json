@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_link": {
+      "conditions": {
+        "items": [
+          {
+            "items": "create:stock_link"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "createadditionallogistics:crafting/logistics/cash_register"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_link"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "createadditionallogistics:crafting/logistics/cash_register"
+    ]
+  }
+}

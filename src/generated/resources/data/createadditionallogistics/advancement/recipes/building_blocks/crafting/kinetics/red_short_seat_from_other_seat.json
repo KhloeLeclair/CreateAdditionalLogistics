@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_short_seat": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#createadditionallogistics:short_seats"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "createadditionallogistics:crafting/kinetics/red_short_seat_from_other_seat"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_short_seat"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "createadditionallogistics:crafting/kinetics/red_short_seat_from_other_seat"
+    ]
+  }
+}

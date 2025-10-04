@@ -1,0 +1,4 @@
+{
+  "parent": "create:block/repackager/tray",
+  "render_type": "minecraft:cutout"
+}

@@ -1,0 +1,4 @@
+{
+  "parent": "create:block/repackager/block",
+  "render_type": "minecraft:cutout_mipped"
+}

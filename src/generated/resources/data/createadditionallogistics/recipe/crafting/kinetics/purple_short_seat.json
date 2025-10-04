@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    {
+      "item": "minecraft:purple_wool"
+    },
+    {
+      "tag": "minecraft:wooden_pressure_plates"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "createadditionallogistics:purple_short_seat"
+  }
+}

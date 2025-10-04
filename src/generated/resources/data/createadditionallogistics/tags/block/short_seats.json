@@ -1,0 +1,20 @@
+{
+  "values": [
+    "createadditionallogistics:white_short_seat",
+    "createadditionallogistics:orange_short_seat",
+    "createadditionallogistics:magenta_short_seat",
+    "createadditionallogistics:light_blue_short_seat",
+    "createadditionallogistics:yellow_short_seat",
+    "createadditionallogistics:lime_short_seat",
+    "createadditionallogistics:pink_short_seat",
+    "createadditionallogistics:gray_short_seat",
+    "createadditionallogistics:light_gray_short_seat",
+    "createadditionallogistics:cyan_short_seat",
+    "createadditionallogistics:purple_short_seat",
+    "createadditionallogistics:blue_short_seat",
+    "createadditionallogistics:brown_short_seat",
+    "createadditionallogistics:green_short_seat",
+    "createadditionallogistics:red_short_seat",
+    "createadditionallogistics:black_short_seat"
+  ]
+}

@@ -1,0 +1,46 @@
+{
+  "variants": {
+    "facing=down,powered=false": {
+      "model": "createadditionallogistics:block/package_editor/block_vertical"
+    },
+    "facing=down,powered=true": {
+      "model": "createadditionallogistics:block/package_editor/block_vertical_powered"
+    },
+    "facing=east,powered=false": {
+      "model": "createadditionallogistics:block/package_editor/block",
+      "y": 270
+    },
+    "facing=east,powered=true": {
+      "model": "createadditionallogistics:block/package_editor/block_powered",
+      "y": 270
+    },
+    "facing=north,powered=false": {
+      "model": "createadditionallogistics:block/package_editor/block",
+      "y": 180
+    },
+    "facing=north,powered=true": {
+      "model": "createadditionallogistics:block/package_editor/block_powered",
+      "y": 180
+    },
+    "facing=south,powered=false": {
+      "model": "createadditionallogistics:block/package_editor/block"
+    },
+    "facing=south,powered=true": {
+      "model": "createadditionallogistics:block/package_editor/block_powered"
+    },
+    "facing=up,powered=false": {
+      "model": "createadditionallogistics:block/package_editor/block_vertical"
+    },
+    "facing=up,powered=true": {
+      "model": "createadditionallogistics:block/package_editor/block_vertical_powered"
+    },
+    "facing=west,powered=false": {
+      "model": "createadditionallogistics:block/package_editor/block",
+      "y": 90
+    },
+    "facing=west,powered=true": {
+      "model": "createadditionallogistics:block/package_editor/block_powered",
+      "y": 90
+    }
+  }
+}

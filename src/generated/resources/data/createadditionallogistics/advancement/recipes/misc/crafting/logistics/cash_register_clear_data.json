@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_cash_register": {
+      "conditions": {
+        "items": [
+          {
+            "items": "createadditionallogistics:cash_register"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "createadditionallogistics:crafting/logistics/cash_register_clear_data"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_cash_register"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "createadditionallogistics:crafting/logistics/cash_register_clear_data"
+    ]
+  }
+}

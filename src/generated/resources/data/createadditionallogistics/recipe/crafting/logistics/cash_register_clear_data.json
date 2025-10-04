@@ -1,0 +1,13 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "createadditionallogistics:cash_register"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "createadditionallogistics:cash_register"
+  }
+}

@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    {
+      "item": "minecraft:white_wool"
+    },
+    {
+      "tag": "minecraft:wooden_pressure_plates"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "createadditionallogistics:white_short_seat"
+  }
+}
