@@ -1,8 +1,8 @@
 {
 	"format_version": "1.9.0",
 	"parent": "block/block",
-	"texture_size": [64, 64],
 	"render_type": "minecraft:cutout_mipped",
+	"texture_size": [64, 64],
 	"textures": {
 		"5": "createadditionallogistics:block/cash_register",
 		"particle": "createadditionallogistics:block/cash_register"
@@ -94,16 +94,6 @@
 			}
 		},
 		{
-			"name": "glass",
-			"from": [1, 13, 1],
-			"to": [15, 16, 4],
-			"faces": {
-				"north": {"uv": [1.5, 9, 5, 9.75], "texture": "#5"},
-				"south": {"uv": [5, 9, 8.5, 9.75], "texture": "#5"},
-				"up": {"uv": [12, 9.75, 8.5, 9], "texture": "#5"}
-			}
-		},
-		{
 			"name": "right end",
 			"from": [15, 13, 1],
 			"to": [16, 16, 4],
@@ -113,15 +103,6 @@
 				"south": {"uv": [8.25, 10, 8.5, 10.75], "texture": "#5"},
 				"west": {"uv": [5.75, 10, 6.5, 10.75], "texture": "#5"},
 				"up": {"uv": [8.25, 10, 8.5, 10.75], "texture": "#5", "cullface": "up"}
-			}
-		},
-		{
-			"name": "display",
-			"from": [10, 13, 3],
-			"to": [12, 15, 3],
-			"faces": {
-				"north": {"uv": [6.5, 10, 7, 10.5], "texture": "#5"},
-				"south": {"uv": [6.5, 10, 7, 10.5], "texture": "#5"}
 			}
 		},
 		{
@@ -194,19 +175,19 @@
 			"name": "top display",
 			"origin": [0, 0, 0],
 			"color": 0,
-			"children": [7, 8, 9, 10]
+			"children": [7, 8]
 		},
 		{
 			"name": "crank",
 			"origin": [13.5, 7.75, 9.5],
 			"color": 0,
-			"children": [11, 12]
+			"children": [9, 10]
 		},
 		{
 			"name": "drawer",
 			"origin": [0, 0, 0],
 			"color": 0,
-			"children": [13, 14]
+			"children": [11, 12]
 		}
 	]
 }

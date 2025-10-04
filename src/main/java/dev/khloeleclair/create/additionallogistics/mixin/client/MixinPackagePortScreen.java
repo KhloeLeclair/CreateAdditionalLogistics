@@ -40,7 +40,7 @@ public abstract class MixinPackagePortScreen extends AbstractSimiContainerScreen
             )
     )
     private void CPE$onInitAfterSetNameboxLength(CallbackInfo ci) {
-        addressBox.setMaxLength(50);
+        addressBox.setMaxLength(100);
     }
 
 }

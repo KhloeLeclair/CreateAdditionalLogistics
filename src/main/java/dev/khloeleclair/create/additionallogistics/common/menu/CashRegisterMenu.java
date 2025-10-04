@@ -2,6 +2,7 @@ package dev.khloeleclair.create.additionallogistics.common.menu;
 
 import com.simibubi.create.foundation.gui.menu.MenuBase;
 import dev.khloeleclair.create.additionallogistics.common.blockentities.CashRegisterBlockEntity;
+import dev.khloeleclair.create.additionallogistics.common.registries.CALItems;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALMenuTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -45,6 +46,13 @@ public class CashRegisterMenu extends MenuBase<CashRegisterBlockEntity> {
             return ItemStack.EMPTY;
 
         ItemStack stack = clickedSlot.getItem();
+        if (clickedSlot.container == playerInventory && stack.is(CALItems.SALES_LEDGER)) {
+            int idx = contentHolder.invWrapper.getSlots() - 1;
+            if (contentHolder.invWrapper.getStackInSlot(idx).isEmpty() && moveItemStackTo(stack, idx, idx+1, false)) {
+                return ItemStack.EMPTY;
+            }
+        }
+
         int size = contentHolder.invWrapper.getSlots();
         boolean success;
         if (index < size) {

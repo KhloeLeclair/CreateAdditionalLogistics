@@ -13,10 +13,14 @@
     },
     "G": {
       "item": "create:super_glue"
+    },
+    "M": {
+      "item": "create:precision_mechanism"
     }
   },
   "pattern": [
-    "GBD",
+    "GMD",
+    " B ",
     " C "
   ],
   "result": {

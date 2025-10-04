@@ -1,5 +1,6 @@
 package dev.khloeleclair.create.additionallogistics.common.blockentities;
 
+import com.simibubi.create.content.kinetics.base.IRotate;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
@@ -40,7 +41,7 @@ public class PackageAcceleratorBlockEntity extends KineticBlockEntity {
 
         float speed = Math.abs(getSpeed());
         int ticks = 1;
-        if (speed < 32)
+        if (speed < IRotate.SpeedLevel.MEDIUM.getSpeedValue())
             return;
 
         if (speed >= 256)

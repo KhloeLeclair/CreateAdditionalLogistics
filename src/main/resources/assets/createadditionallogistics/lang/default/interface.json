@@ -1,0 +1,14 @@
+{
+  "createadditionallogistics.sales.sales": "Sales: %s",
+  "createadditionallogistics.sales.entries": "Entries: %s",
+  "createadditionallogistics.sales.date-range": "From %s to %s",
+
+  "createadditionallogistics.package_editor.no_address.title": "No Rules Defined",
+  "createadditionallogistics.package_editor.no_address": "This Package Editor doesn't have any rules. Use a _Sign_ or _Clipboard_ attached to this block to create rules.",
+
+  "createadditionallogistics.package_editor.invalid_pattern.title": "Invalid Rule",
+  "createadditionallogistics.package_editor.invalid_pattern": "One of your rules has a problem:",
+
+  "createadditionallogistics.gauge.promise_limit.none": "Promises are not limited",
+  "createadditionallogistics.gauge.promise_limit": "Promises are limited to"
+}

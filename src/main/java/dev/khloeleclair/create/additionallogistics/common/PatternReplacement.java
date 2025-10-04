@@ -3,19 +3,21 @@ package dev.khloeleclair.create.additionallogistics.common;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
 import net.createmod.catnip.data.Glob;
 import net.createmod.catnip.data.Pair;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-public record PatternReplacement(@NotNull Pattern pattern, @NotNull String replacement, boolean stop) {
+public record PatternReplacement(Pattern pattern, String replacement, boolean stop) {
 
     static final Pattern NON_CAPTURE_GROUPS = Pattern.compile(Pattern.quote("(?:"));
 
-    public static Pattern compile(@NotNull String input, boolean insensitive) {
+    public static Pattern compile(String input, boolean insensitive) {
         String regex;
-        if (input.regionMatches(true, 0, "regex:", 0, 6))
+        if (input.equals("{*}"))
+            regex = "^(.*)";
+        
+        else if (input.regionMatches(true, 0, "regex:", 0, 6))
             regex = input.substring(6);
 
         else {
@@ -30,31 +32,31 @@ public record PatternReplacement(@NotNull Pattern pattern, @NotNull String repla
         return Pattern.compile(regex, insensitive ? Pattern.CASE_INSENSITIVE : 0);
     }
 
-    public static PatternReplacement of(@NotNull String regex) {
+    public static PatternReplacement of(String regex) {
         return of(regex, "", false, false);
     }
 
-    public static PatternReplacement of(@NotNull String regex, String replacement) {
+    public static PatternReplacement of(String regex, @Nullable String replacement) {
         if (replacement == null)
             replacement = "";
         return of(regex, replacement, false, false);
     }
 
-    public static PatternReplacement of(@NotNull String regex, boolean stop) {
+    public static PatternReplacement of(String regex, boolean stop) {
         return of(regex, "", stop, false);
     }
 
-    public static PatternReplacement of(@NotNull String regex, String replacement, boolean stop) {
+    public static PatternReplacement of(String regex, @Nullable String replacement, boolean stop) {
         if (replacement == null)
             replacement = "";
         return of(regex, replacement, stop, false);
     }
 
-    public static PatternReplacement of(@NotNull String regex, boolean stop, boolean insensitive) {
+    public static PatternReplacement of(String regex, boolean stop, boolean insensitive) {
         return of(regex, "", stop, insensitive);
     }
 
-    public static PatternReplacement of(@NotNull String regex, String replacement, boolean stop, boolean insensitive) {
+    public static PatternReplacement of(String regex, @Nullable String replacement, boolean stop, boolean insensitive) {
         if (replacement == null)
             replacement = "";
 
@@ -65,7 +67,7 @@ public record PatternReplacement(@NotNull Pattern pattern, @NotNull String repla
     }
 
     @Nullable
-    public static PatternReplacement tryOf(@NotNull String regex) {
+    public static PatternReplacement tryOf(String regex) {
         try {
             return of(regex);
         } catch(PatternSyntaxException ex) {
@@ -74,7 +76,7 @@ public record PatternReplacement(@NotNull Pattern pattern, @NotNull String repla
     }
 
     @Nullable
-    public static PatternReplacement tryOf(@NotNull String regex, @NotNull String replacement) {
+    public static PatternReplacement tryOf(String regex, @Nullable String replacement) {
         try {
             return of(regex, replacement);
         } catch(PatternSyntaxException ex) {
@@ -84,7 +86,7 @@ public record PatternReplacement(@NotNull Pattern pattern, @NotNull String repla
     }
 
     @Nullable
-    public static PatternReplacement tryOf(@NotNull String regex, boolean stop) {
+    public static PatternReplacement tryOf(String regex, boolean stop) {
         try {
             return of(regex, stop);
         } catch(PatternSyntaxException ex) {
@@ -93,7 +95,7 @@ public record PatternReplacement(@NotNull Pattern pattern, @NotNull String repla
     }
 
     @Nullable
-    public static PatternReplacement tryOf(@NotNull String regex, @NotNull String replacement, boolean stop) {
+    public static PatternReplacement tryOf(String regex, @Nullable String replacement, boolean stop) {
         try {
             return of(regex, replacement, stop);
         } catch(PatternSyntaxException ex) {
@@ -103,7 +105,7 @@ public record PatternReplacement(@NotNull Pattern pattern, @NotNull String repla
     }
 
     @Nullable
-    public static PatternReplacement tryOf(@NotNull String regex, boolean stop, boolean insensitive) {
+    public static PatternReplacement tryOf(String regex, boolean stop, boolean insensitive) {
         try {
             return of(regex, stop, insensitive);
         } catch(PatternSyntaxException ex) {
@@ -112,7 +114,7 @@ public record PatternReplacement(@NotNull Pattern pattern, @NotNull String repla
     }
 
     @Nullable
-    public static PatternReplacement tryOf(@NotNull String regex, @NotNull String replacement, boolean stop, boolean insensitive) {
+    public static PatternReplacement tryOf(String regex, @Nullable String replacement, boolean stop, boolean insensitive) {
         try {
             return of(regex, replacement, stop, insensitive);
         } catch(PatternSyntaxException ex) {

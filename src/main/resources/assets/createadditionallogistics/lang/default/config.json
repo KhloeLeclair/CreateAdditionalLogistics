@@ -1,0 +1,23 @@
+{
+  "createadditionallogistics.configuration.title": "Create: Additional Logistics Configuration",
+  "createadditionallogistics.configuration.section.createadditionallogistics.common.toml": "Common Configuration",
+  "createadditionallogistics.configuration.section.createadditionallogistics.common.toml.title": "Common Configuration",
+  "createadditionallogistics.configuration.section.createadditionallogistics.client.toml": "Client Configuration",
+  "createadditionallogistics.configuration.section.createadditionallogistics.client.toml.title": "Client Configuration",
+
+  "createadditionallogistics.configuration.addresses": "Addresses",
+  "createadditionallogistics.configuration.regexSafety": "RegEx Safety",
+  "createadditionallogistics.configuration.kinetics": "Kinetics",
+  "createadditionallogistics.configuration.packageAccelerator": "Package Accelerator",
+
+  "createadditionallogistics.config.enable-promise-limits": "Enable Promise Limits",
+  "createadditionallogistics.config.protect-seats": "Protect Stock Keeper Seats",
+
+  "createadditionallogistics.config.kinetics.stress-impact": "Stress Impact",
+
+  "createadditionallogistics.config.addresses.allowRegex": "Allow RegEx",
+  "createadditionallogistics.config.addresses.optimize": "Optimize Matching",
+  "createadditionallogistics.config.regex.starHeight": "Maximum Star Height",
+  "createadditionallogistics.config.regex.maxRepetitions": "Maximum Repetitions",
+  "createadditionallogistics.config.regex.allowBackrefs": "Allow Backreferences"
+}

@@ -1,0 +1,7 @@
+{
+  "block.createadditionallogistics.cash_register.tooltip.summary": "An alternative _Stock Ticker_ that records all sales into a _ledger_.",
+  "block.createadditionallogistics.package_editor.tooltip.summary": "Allows you to change a _package's address_ using a list of rules.",
+  "block.createadditionallogistics.package_accelerator.tooltip.summary": "Makes the _Packager_ in front of it faster, at the expense of _stress_.",
+
+  "createadditionallogistics.sales_ledger.tooltip.summary": "A record of sales made at a given _Cash Register_. You can use this to quickly restock any sold items by clicking a _Stock Keeper_ with it."
+}

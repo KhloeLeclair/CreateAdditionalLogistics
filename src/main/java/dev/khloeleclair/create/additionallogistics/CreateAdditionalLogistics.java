@@ -12,6 +12,7 @@ import com.simibubi.create.foundation.item.KineticStats;
 import com.simibubi.create.foundation.item.TooltipModifier;
 import com.tterrag.registrate.util.nullness.NonNullSupplier;
 import dev.khloeleclair.create.additionallogistics.common.Config;
+import dev.khloeleclair.create.additionallogistics.common.DataGen;
 import dev.khloeleclair.create.additionallogistics.common.data.CustomComponents;
 import dev.khloeleclair.create.additionallogistics.common.network.CustomPackets;
 import dev.khloeleclair.create.additionallogistics.common.registries.*;
@@ -22,6 +23,7 @@ import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
+import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
@@ -74,10 +76,13 @@ public class CreateAdditionalLogistics {
         CALEntityTypes.register();
         CALBlockEntityTypes.register();
         CALStress.register();
+        CALPartialModels.register();
 
         CustomComponents.register(modEventBus);
         modEventBus.addListener(CustomPackets::register);
         //modEventBus.addListener(this::populateCreativeTabs);
+
+        modEventBus.addListener(EventPriority.HIGHEST, DataGen::gatherData);
 
         NeoForge.EVENT_BUS.register(this);
 

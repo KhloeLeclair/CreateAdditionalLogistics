@@ -72,7 +72,7 @@ public class CALBlocks {
                                 .save(p, CreateAdditionalLogistics.asResource("crafting/logistics/" + c.getName()));
                     })
                     .item(LogisticallyLinkedBlockItem::new)
-                    .model((c,p) -> p.withExistingParent(c.getName(), p.modLoc("block/cash_register/block")))
+                    .model((c,p) -> p.withExistingParent(c.getName(), p.modLoc("block/cash_register/item")))
                     .build()
                     .register();
 
@@ -88,8 +88,10 @@ public class CALBlocks {
                     .tag(AllTags.AllBlockTags.WRENCH_PICKUP.tag)
                     .recipe((c,p) -> {
                         ShapedRecipeBuilder.shaped(RecipeCategory.MISC, c.get())
-                                .pattern("GBD")
+                                .pattern("GMD")
+                                .pattern(" B ")
                                 .pattern(" C ")
+                                .define('M', AllItems.PRECISION_MECHANISM)
                                 .define('G', AllItems.SUPER_GLUE)
                                 .define('B', AllBlocks.BRASS_CASING)
                                 .define('D', AllBlocks.CARDBOARD_BLOCK)

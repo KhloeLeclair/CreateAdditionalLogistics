@@ -12,19 +12,18 @@ import java.util.stream.Collectors;
 
 public class RegexTokenizer {
 
-    @NotNull
     private final String pattern;
     private int pos = 0;
 
     @Nullable
     private Node parsed;
 
-    public RegexTokenizer(@NotNull String pattern) {
+    public RegexTokenizer(String pattern) {
         this.pattern = Objects.requireNonNull(pattern);
     }
 
     @NotNull
-    public static Node parse(@NotNull String pattern) throws PatternSyntaxException {
+    public static Node parse(String pattern) throws PatternSyntaxException {
         return new RegexTokenizer(pattern).parse();
     }
 
@@ -391,7 +390,7 @@ public class RegexTokenizer {
         }
 
         @Override
-        public @NotNull String toString() {
+        public String toString() {
             return branches.stream().map(Object::toString).collect(Collectors.joining("|"));
         }
     }
@@ -411,7 +410,7 @@ public class RegexTokenizer {
         }
 
         @Override
-        public @NotNull String toString() {
+        public String toString() {
             return type == AnchorType.Start ? "^" : "$";
         }
     }
@@ -422,21 +421,21 @@ public class RegexTokenizer {
 
     public record CharacterLiteralElement(String literal) implements CharacterClassElement {
         @Override
-        public @NotNull String toString() {
+        public String toString() {
             return literal;
         }
     }
 
     public record CharacterRangeElement(String start, String end) implements CharacterClassElement {
         @Override
-        public @NotNull String toString() {
+        public String toString() {
             return start + "-" + end;
         }
     }
 
     public record CharacterClassNode(boolean negated, List<CharacterClassElement> elements) implements CharacterClassElement, Node {
         @Override
-        public @NotNull String toString() {
+        public String toString() {
             return "[" + (negated ? "^" : "") + elements.stream().map(Object::toString).collect(Collectors.joining()) + "]";
         }
     }
@@ -453,7 +452,7 @@ public class RegexTokenizer {
 
     public record EscapeNode(String text) implements Node {
         @Override
-        public @NotNull String toString() {
+        public String toString() {
             return text;
         }
 
@@ -497,20 +496,20 @@ public class RegexTokenizer {
 
     public record GroupNode(Node child, GroupType type, String name) implements Node {
         @Override
-        public @Nullable List<Node> getChildren() {
+        public List<Node> getChildren() {
             return List.of(child);
         }
 
         @Override
-        public @NotNull String toString() {
+        public String toString() {
             String extended = "";
-            return "(" + extended + child.toString() + ")";
+            return "(" + extended + child + ")";
         }
     }
 
     public record LiteralNode(String literal) implements Node {
         @Override
-        public @NotNull String toString() {
+        public String toString() {
             return literal;
         }
     }
@@ -534,12 +533,12 @@ public class RegexTokenizer {
         }
 
         @Override
-        public @Nullable List<Node> getChildren() {
+        public List<Node> getChildren() {
             return List.of(child);
         }
 
         @Override
-        public @NotNull String toString() {
+        public String toString() {
             String q;
             if (min == 0 && max == 1)
                 q = "?";
@@ -560,25 +559,25 @@ public class RegexTokenizer {
                 q = sb.toString();
             }
 
-            return child.toString() + q + (lazy ? "?" : possessive ? "+" : "");
+            return child + q + (lazy ? "?" : possessive ? "+" : "");
         }
     }
 
     public record ReferenceNode(char which) implements Node {
         @Override
-        public @NotNull String toString() {
-            return "\\" + String.valueOf(which);
+        public String toString() {
+            return "\\" + which;
         }
     }
 
     public record SequenceNode(List<Node> children) implements Node {
         @Override
-        public @Nullable List<Node> getChildren() {
+        public List<Node> getChildren() {
             return children;
         }
 
         @Override
-        public @NotNull String toString() {
+        public String toString() {
             return children.stream().map(Object::toString).collect(Collectors.joining(""));
         }
     }

@@ -50,9 +50,12 @@ public class CashRegisterBlockEntity extends StockTickerBlockEntity {
     public final CombinedInvWrapper invWrapper;
     private final ContainerOpenersCounter openersCounter;
 
+    private int saleTicks;
+
     public CashRegisterBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
         ledger = ItemStack.EMPTY;
+        saleTicks = 0;
 
         openersCounter = new ContainerOpenersCounter() {
             @Override
@@ -133,6 +136,10 @@ public class CashRegisterBlockEntity extends StockTickerBlockEntity {
         invWrapper = new CombinedInvWrapper(receivedPayments, ledgerHandler);
     }
 
+    public boolean hadRecentSale() {
+        return saleTicks > 0;
+    }
+
     void updateBlockState(BlockState state, boolean open) {
         if (level != null)
             level.setBlock(worldPosition, state.setValue(CashRegisterBlock.OPEN, open), 3);
@@ -173,10 +180,18 @@ public class CashRegisterBlockEntity extends StockTickerBlockEntity {
     }
 
     @Override
+    public void tick() {
+        super.tick();
+        if (saleTicks > 0)
+            saleTicks--;
+    }
+
+    @Override
     protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
         super.write(tag, registries, clientPacket);
         if (ledger != null && !ledger.isEmpty())
             tag.put("Ledger", ledger.save(registries));
+        tag.putInt("SaleTicks", saleTicks);
     }
 
     @Override
@@ -185,6 +200,7 @@ public class CashRegisterBlockEntity extends StockTickerBlockEntity {
         ledger = ItemStack.EMPTY;
         if (tag.contains("Ledger", CompoundTag.TAG_COMPOUND))
             ledger = ItemStack.parseOptional(registries, tag.getCompound("Ledger"));
+        saleTicks = tag.getInt("SaleTicks");
     }
 
     public static void recordSale(Level level, BlockPos pos, Player player, ItemStack mainHandItem) {
@@ -270,6 +286,7 @@ public class CashRegisterBlockEntity extends StockTickerBlockEntity {
             ledger = CALItems.SALES_LEDGER.asStack();
 
         ledger.set(CustomComponents.SALES_HISTORY, history);
+        saleTicks = 20;
         notifyUpdate();
     }
 

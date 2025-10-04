@@ -127,7 +127,7 @@ public class SalesLedgerScreen extends AbstractSimiScreen {
         var helper = layout.createRowHelper(4);
 
         helper.addChild(new StringWidget(title, font).alignCenter(), 3);
-        helper.addChild(new StringWidget(CALLang.text("WIP").component(), font), 1);
+        helper.addChild(new StringWidget(CALLang.text("(WIP)").style(ChatFormatting.GRAY).component(), font), 1);
         helper.addChild(new SpacerElement(50, 10), 4);
 
         // Sum things up
