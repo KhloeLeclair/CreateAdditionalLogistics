@@ -2,18 +2,23 @@ package dev.khloeleclair.create.additionallogistics.common.blockentities;
 
 import com.simibubi.create.AllDataComponents;
 import com.simibubi.create.api.equipment.goggles.IHaveHoveringInformation;
+import com.simibubi.create.compat.Mods;
+import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
 import com.simibubi.create.content.equipment.clipboard.ClipboardBlockEntity;
 import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.content.logistics.crate.BottomlessItemHandler;
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
 import com.simibubi.create.content.logistics.packager.PackagerItemHandler;
 import com.simibubi.create.content.logistics.packager.PackagingRequest;
+import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.item.TooltipHelper;
 import com.simibubi.create.foundation.utility.CreateLang;
+import dan200.computercraft.api.peripheral.PeripheralCapability;
 import dev.khloeleclair.create.additionallogistics.common.CALLang;
 import dev.khloeleclair.create.additionallogistics.common.Config;
 import dev.khloeleclair.create.additionallogistics.common.PatternReplacement;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALBlockEntityTypes;
+import dev.khloeleclair.create.additionallogistics.compat.computercraft.CALComputerCraftProxy;
 import it.unimi.dsi.fastutil.Pair;
 import net.createmod.catnip.data.Iterate;
 import net.createmod.catnip.lang.FontHelper;
@@ -44,6 +49,9 @@ import java.util.regex.PatternSyntaxException;
 
 public class PackageEditorBlockEntity extends PackagerBlockEntity implements IHaveHoveringInformation {
 
+    @Nullable
+    public AbstractComputerBehaviour computerBehavior;
+
     protected record ReplacementSettings(int maxStarHeight, int maxRepetitions, boolean allowBackrefs) {
         static ReplacementSettings get() {
             return new ReplacementSettings(
@@ -53,6 +61,8 @@ public class PackageEditorBlockEntity extends PackagerBlockEntity implements IHa
             );
         }
     }
+
+    protected boolean hasComputerReplacements;
 
     @Nullable
     protected BlockPos replacementsSource;
@@ -67,6 +77,7 @@ public class PackageEditorBlockEntity extends PackagerBlockEntity implements IHa
 
     public PackageEditorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
+        hasComputerReplacements = false;
     }
 
     public static void registerCapabilities(RegisterCapabilitiesEvent event) {
@@ -75,6 +86,22 @@ public class PackageEditorBlockEntity extends PackagerBlockEntity implements IHa
                 CALBlockEntityTypes.PACKAGE_EDITOR.get(),
                 (be, context) -> be.inventory
         );
+
+        if (Mods.COMPUTERCRAFT.isLoaded()) {
+            event.registerBlockEntity(
+                    PeripheralCapability.get(),
+                    CALBlockEntityTypes.PACKAGE_EDITOR.get(),
+                    (be, context) -> be.computerBehavior.getPeripheralCapability()
+            );
+        }
+    }
+
+    @Override
+    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+        super.addBehaviours(behaviours);
+        // Delete any inherited behavior from the Stock Ticker, and add our own.
+        behaviours.removeIf(x -> x instanceof AbstractComputerBehaviour);
+        behaviours.add(computerBehavior = CALComputerCraftProxy.behavior(this));
     }
 
     @Override
@@ -92,17 +119,25 @@ public class PackageEditorBlockEntity extends PackagerBlockEntity implements IHa
         hasReplacements = tag.getBoolean("HasReplacements");
     }
 
-    public void readdressPackage(ItemStack box) {
+    public String applyRules(String address) {
         var replacements = getReplacements();
-
         if (!replacements.isEmpty()) {
-            String address = PackageItem.getAddress(box);
-            for(var replacement : replacements) {
+            for (var replacement : replacements) {
                 var pair = replacement.replace(address);
                 address = pair.getFirst();
                 if (replacement.stop() && pair.getSecond())
                     break;
             }
+        }
+        return address;
+    }
+
+    public void readdressPackage(ItemStack box) {
+        var replacements = getReplacements();
+
+        if (!replacements.isEmpty()) {
+            String address = PackageItem.getAddress(box);
+            address = applyRules(address);
             if (address.isEmpty())
                 PackageItem.clearAddress(box);
             else
@@ -201,6 +236,12 @@ public class PackageEditorBlockEntity extends PackagerBlockEntity implements IHa
     }
 
     public List<PatternReplacement> getReplacements() {
+        if (hasComputerReplacements) {
+            if (_replacements == null)
+                return List.of();
+            return _replacements;
+        }
+
         if (_replacements == null || !Objects.equals(_replacementSettings, ReplacementSettings.get()))
             updateReplacements();
         return _replacements;
@@ -214,7 +255,26 @@ public class PackageEditorBlockEntity extends PackagerBlockEntity implements IHa
             updateReplacements();
     }
 
+    public void setComputerReplacements(@Nullable List<PatternReplacement> replacements) {
+        if (replacements == null) {
+            if (hasComputerReplacements) {
+                hasComputerReplacements = false;
+                updateReplacements();
+            }
+        } else {
+            parseError = null;
+            hasReplacements = true;
+            hasComputerReplacements = true;
+            replacementsSource = null;
+            _replacements = replacements;
+            sendData();
+        }
+    }
+
     public void updateReplacements() {
+        if (hasComputerReplacements)
+            return;
+
         String lastError = parseError;
         boolean hadReplacements = hasReplacements;
 

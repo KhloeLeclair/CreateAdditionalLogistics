@@ -8,7 +8,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.regex.Pattern;
 import java.util.regex.PatternSyntaxException;
 
-public record PatternReplacement(Pattern pattern, String replacement, boolean stop) {
+public record PatternReplacement(String rawPattern, Pattern pattern, String replacement, boolean stop) {
 
     static final Pattern NON_CAPTURE_GROUPS = Pattern.compile(Pattern.quote("(?:"));
 
@@ -63,7 +63,7 @@ public record PatternReplacement(Pattern pattern, String replacement, boolean st
         var pattern = compile(regex, insensitive);
 
         SafeRegex.assertReplacementSafe(pattern.pattern(), replacement);
-        return new PatternReplacement(pattern, replacement, stop);
+        return new PatternReplacement(regex, pattern, replacement, stop);
     }
 
     @Nullable
@@ -125,6 +125,10 @@ public record PatternReplacement(Pattern pattern, String replacement, boolean st
 
     public String getRegex() {
         return pattern.pattern();
+    }
+
+    public boolean isCaseInsensitive() {
+        return pattern.flags() == Pattern.CASE_INSENSITIVE;
     }
 
     public Pair<String, Boolean> replace(String input) {

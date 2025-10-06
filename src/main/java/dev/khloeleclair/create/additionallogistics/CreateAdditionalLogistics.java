@@ -16,6 +16,7 @@ import dev.khloeleclair.create.additionallogistics.common.DataGen;
 import dev.khloeleclair.create.additionallogistics.common.data.CustomComponents;
 import dev.khloeleclair.create.additionallogistics.common.network.CustomPackets;
 import dev.khloeleclair.create.additionallogistics.common.registries.*;
+import dev.khloeleclair.create.additionallogistics.compat.computercraft.CALComputerCraftProxy;
 import net.createmod.catnip.lang.FontHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
@@ -77,6 +78,8 @@ public class CreateAdditionalLogistics {
         CALBlockEntityTypes.register();
         CALStress.register();
         CALPartialModels.register();
+
+        CALComputerCraftProxy.register();
 
         CustomComponents.register(modEventBus);
         modEventBus.addListener(CustomPackets::register);

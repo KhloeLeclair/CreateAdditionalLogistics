@@ -1,11 +1,17 @@
 package dev.khloeleclair.create.additionallogistics.common.blockentities;
 
 import com.simibubi.create.AllSoundEvents;
+import com.simibubi.create.compat.Mods;
+import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
 import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.packager.InventorySummary;
 import com.simibubi.create.content.logistics.stockTicker.StockTickerBlockEntity;
 import com.simibubi.create.content.logistics.tableCloth.ShoppingListItem;
+import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
+import com.simibubi.create.foundation.item.ItemHelper;
+import com.simibubi.create.foundation.item.SmartInventory;
 import com.simibubi.create.foundation.utility.CreateLang;
+import dan200.computercraft.api.peripheral.PeripheralCapability;
 import dev.khloeleclair.create.additionallogistics.common.CALLang;
 import dev.khloeleclair.create.additionallogistics.common.blocks.CashRegisterBlock;
 import dev.khloeleclair.create.additionallogistics.common.data.CustomComponents;
@@ -13,6 +19,7 @@ import dev.khloeleclair.create.additionallogistics.common.data.SalesHistoryData;
 import dev.khloeleclair.create.additionallogistics.common.menu.CashRegisterMenu;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALBlockEntityTypes;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALItems;
+import dev.khloeleclair.create.additionallogistics.compat.computercraft.CALComputerCraftProxy;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -44,6 +51,9 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 
 public class CashRegisterBlockEntity extends StockTickerBlockEntity {
+
+    @Nullable
+    public AbstractComputerBehaviour computerBehavior;
 
     private ItemStack ledger;
     private final IItemHandlerModifiable ledgerHandler;
@@ -177,6 +187,22 @@ public class CashRegisterBlockEntity extends StockTickerBlockEntity {
                 CALBlockEntityTypes.CASH_REGISTER.get(),
                 (be, context) -> context == Direction.DOWN ? be.receivedPayments : context == Direction.UP ? be.ledgerHandler : be.invWrapper
         );
+
+        if (Mods.COMPUTERCRAFT.isLoaded()) {
+            event.registerBlockEntity(
+                    PeripheralCapability.get(),
+                    CALBlockEntityTypes.CASH_REGISTER.get(),
+                    (be, context) -> be.computerBehavior.getPeripheralCapability()
+            );
+        }
+    }
+
+    @Override
+    public void addBehaviours(List<BlockEntityBehaviour> behaviours) {
+        super.addBehaviours(behaviours);
+        // Delete any inherited behavior from the Stock Ticker, and add our own.
+        behaviours.removeIf(x -> x instanceof AbstractComputerBehaviour);
+        behaviours.add(computerBehavior = CALComputerCraftProxy.behavior(this));
     }
 
     @Override
@@ -184,6 +210,12 @@ public class CashRegisterBlockEntity extends StockTickerBlockEntity {
         super.tick();
         if (saleTicks > 0)
             saleTicks--;
+    }
+
+    @Override
+    public void destroy() {
+        ItemHelper.dropContents(level, worldPosition, ledgerHandler);
+        super.destroy();
     }
 
     @Override
@@ -288,6 +320,14 @@ public class CashRegisterBlockEntity extends StockTickerBlockEntity {
         ledger.set(CustomComponents.SALES_HISTORY, history);
         saleTicks = 20;
         notifyUpdate();
+    }
+
+    public SmartInventory getReceivedPaymentsHandler() {
+        return receivedPayments;
+    }
+
+    public ItemStack getLedger() {
+        return ledger;
     }
 
 
