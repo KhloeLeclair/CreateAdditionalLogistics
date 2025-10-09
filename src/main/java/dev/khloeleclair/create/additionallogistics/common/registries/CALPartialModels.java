@@ -10,6 +10,8 @@ public class CALPartialModels {
     public static final PartialModel CASH_REGISTER_GLASS = block("cash_register/glass");
     public static final PartialModel CASH_REGISTER_SALE_NOTICE = block("cash_register/sale_notice");
 
+    public static final PartialModel SHAFT_OPENING = block("flexible_shaft/opening");
+
     public static void register() { }
 
 }

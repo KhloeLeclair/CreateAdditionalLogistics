@@ -21,7 +21,7 @@ import java.util.*;
 public class FlexibleShaftBlockEntity extends SplitShaftBlockEntity {
 
     @Nullable
-    private Set<BlockPos> connectionCache;
+    private List<BlockPos> connections;
 
     private final byte[] sideActive;
     protected boolean checkInvalid;
@@ -36,12 +36,12 @@ public class FlexibleShaftBlockEntity extends SplitShaftBlockEntity {
     protected void read(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
         super.read(compound, registries, clientPacket);
 
-        connectionCache = null;
+        connections = null;
         if (compound.contains("Connections", CompoundTag.TAG_LONG_ARRAY)) {
             var cache = compound.getLongArray("Connections");
-            connectionCache = new HashSet<>(cache.length);
+            connections = new ArrayList<>(cache.length);
             for(long pos : cache)
-                connectionCache.add(BlockPos.of(pos));
+                connections.add(BlockPos.of(pos));
         }
 
         Arrays.fill(sideActive, (byte)0);
@@ -62,10 +62,10 @@ public class FlexibleShaftBlockEntity extends SplitShaftBlockEntity {
         super.write(compound, registries, clientPacket);
         compound.putByteArray("Sides", sideActive);
 
-        if (connectionCache != null) {
-            var cache = new long[connectionCache.size()];
+        if (connections != null) {
+            var cache = new long[connections.size()];
             int i = 0;
-            for(var entry : connectionCache) {
+            for(var entry : connections) {
                 cache[i] = entry.asLong();
                 i++;
             }
@@ -90,8 +90,8 @@ public class FlexibleShaftBlockEntity extends SplitShaftBlockEntity {
 
     public void removeInvalidConnections() {
         boolean changed = false;
-        if (connectionCache != null) {
-            var iterator = connectionCache.iterator();
+        if (connections != null) {
+            var iterator = connections.iterator();
             while(iterator.hasNext()) {
                 var pos = iterator.next();
                 var relative = worldPosition.offset(pos);
@@ -117,8 +117,8 @@ public class FlexibleShaftBlockEntity extends SplitShaftBlockEntity {
     }
 
     public void notifyConnectedToValidate() {
-        if (connectionCache != null && level != null)
-            for(BlockPos pos : connectionCache) {
+        if (connections != null && level != null)
+            for(BlockPos pos : connections) {
                 BlockPos relative = worldPosition.offset(pos);
                 if (level.isLoaded(relative) && level.getBlockEntity(relative) instanceof FlexibleShaftBlockEntity fsb)
                     fsb.checkInvalid = true;
@@ -185,14 +185,14 @@ public class FlexibleShaftBlockEntity extends SplitShaftBlockEntity {
 
     @Override
     public List<BlockPos> addPropagationLocations(IRotate block, BlockState state, List<BlockPos> neighbours) {
-        if (connectionCache != null)
-            connectionCache.forEach(p -> neighbours.add(worldPosition.offset(p)));
+        if (connections != null)
+            connections.forEach(p -> neighbours.add(worldPosition.offset(p)));
         return super.addPropagationLocations(block, state, neighbours);
     }
 
     @Override
     public float propagateRotationTo(KineticBlockEntity target, BlockState stateFrom, BlockState stateTo, BlockPos diff, boolean connectedViaAxes, boolean connectedViaCogs) {
-        if (target instanceof FlexibleShaftBlockEntity && connectionCache != null && connectionCache.contains(target.getBlockPos().subtract(worldPosition)))
+        if (target instanceof FlexibleShaftBlockEntity && connections != null && connections.contains(target.getBlockPos().subtract(worldPosition)))
             return 1;
 
         return 0;
@@ -203,76 +203,44 @@ public class FlexibleShaftBlockEntity extends SplitShaftBlockEntity {
         return 1f * sideActive[face.ordinal()];
     }
 
-    protected void setConnections(Set<BlockPos> connections) {
-        if (connectionCache == null)
-            connectionCache = new ObjectOpenHashSet<>();
-
-        // Make a localized set.
-        Set<BlockPos> updated = new ObjectOpenHashSet<>(connections.size());
-        for(var pos : connections) {
-            if (pos.equals(worldPosition))
-                continue;
-            updated.add(pos.subtract(worldPosition));
+    protected void setConnections(List<BlockPos> newConnections) {
+        int index = -1;
+        while(index++ < newConnections.size()) {
+            if (worldPosition.equals(newConnections.get(index)))
+                break;
         }
 
-        // Don't update things if the set hasn't changed.
-        if ((connectionCache == null && updated.isEmpty()) || (connectionCache != null && updated.size() == connectionCache.size() && updated.containsAll(connectionCache)))
+        if (index == -1)
+            return;
+
+        int previous = index - 1;
+        int next = index + 1;
+
+        if (connections == null)
+            connections = new ArrayList<>();
+
+        @Nullable BlockPos prevPos = previous == -1 ? null : newConnections.get(previous).subtract(worldPosition);
+        @Nullable BlockPos nextPos = next >= newConnections.size() ? null : newConnections.get(next).subtract(worldPosition);
+
+        int count = (prevPos == null ? 0 : 1) + (nextPos == null ? 0 : 1);
+
+        boolean contains_previous = prevPos == null || connections.contains(prevPos);
+        boolean contains_next = nextPos == null || connections.contains(nextPos);
+
+        // Nothing changed.
+        if (contains_previous && contains_next && connections.size() == count)
             return;
 
         detachKinetics();
-        connectionCache = updated;
-        notifyUpdate();
-        updateSpeed = true;
-    }
 
-    public boolean removeConnections(BlockPos... targets) {
-        if (connectionCache == null)
-            return false;
-
-        boolean updated = false;
-
-        for(var target : targets) {
-            BlockPos offset = target.subtract(worldPosition);
-            if (connectionCache.contains(offset)) {
-                updated = true;
-                break;
-            }
-        }
-
-        if (!updated)
-            return false;
-
-        detachKinetics();
-
-        for(var target : targets) {
-            BlockPos offset = target.subtract(worldPosition);
-            connectionCache.remove(offset);
-        }
+        connections.clear();
+        if (prevPos != null)
+            connections.add(prevPos);
+        if (nextPos != null)
+            connections.add(nextPos);
 
         notifyUpdate();
         updateSpeed = true;
-
-        return true;
-    }
-
-    public boolean addConnections(BlockPos... targets) {
-        if (connectionCache == null)
-            connectionCache = new ObjectOpenHashSet<>();
-
-        boolean added = false;
-        for (var target : targets) {
-            BlockPos offset = target.subtract(worldPosition);
-            if (connectionCache.add(offset))
-                added = true;
-        }
-
-        if (added)
-            notifyUpdate();
-
-        detachKinetics();
-        updateSpeed = true;
-
-        return added;
     }
 
     @Override
@@ -282,7 +250,7 @@ public class FlexibleShaftBlockEntity extends SplitShaftBlockEntity {
         if (dir != null && sideActive[dir.ordinal()] != 0 && otherState.getBlock() instanceof IRotate rot && rot.hasShaftTowards(level, other.getBlockPos(), otherState, dir.getOpposite())) {
             return false;
         }
-        return connectionCache != null && connectionCache.contains(relative);
+        return connections != null && connections.contains(relative);
     }
 
     @Override
@@ -291,9 +259,9 @@ public class FlexibleShaftBlockEntity extends SplitShaftBlockEntity {
         notifyConnectedToValidate();
     }
 
-    public record WalkResult(Set<BlockPos> visited, Set<BlockPos> entityPositions, Set<FlexibleShaftBlockEntity> entities) {
+    public record WalkResult(Set<BlockPos> visited, List<BlockPos> entityPositions, Set<FlexibleShaftBlockEntity> entities) {
 
-        public static WalkResult EMPTY = new WalkResult(Collections.emptySet(), Collections.emptySet(), Collections.emptySet());
+        public static WalkResult EMPTY = new WalkResult(Collections.emptySet(), List.of(), Collections.emptySet());
 
     }
 
@@ -304,7 +272,7 @@ public class FlexibleShaftBlockEntity extends SplitShaftBlockEntity {
             return WalkResult.EMPTY;
 
         Set<BlockPos> visited = new ObjectOpenHashSet<>();
-        Set<BlockPos> entityPositions = new ObjectOpenHashSet<>();
+        List<BlockPos> entityPositions = new ArrayList<>();
         Set<FlexibleShaftBlockEntity> entities = new ObjectOpenHashSet<>();
         List<BlockPos> queue = new LinkedList<>();
 
