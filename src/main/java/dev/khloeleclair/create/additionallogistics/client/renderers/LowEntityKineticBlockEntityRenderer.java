@@ -4,7 +4,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntityRenderer;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
-import dev.khloeleclair.create.additionallogistics.common.blockentities.FlexibleShaftBlockEntity;
+import dev.khloeleclair.create.additionallogistics.common.blockentities.AbstractLowEntityKineticBlockEntity;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALPartialModels;
 import net.createmod.catnip.animation.AnimationTickHolder;
 import net.createmod.catnip.data.Iterate;
@@ -15,13 +15,13 @@ import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.Direction;
 
-public class FlexibleShaftBlockEntityRenderer extends KineticBlockEntityRenderer<FlexibleShaftBlockEntity> {
+public class LowEntityKineticBlockEntityRenderer extends KineticBlockEntityRenderer<AbstractLowEntityKineticBlockEntity> {
 
-    public FlexibleShaftBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
+    public LowEntityKineticBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
         super(context);
     }
 
-    protected void renderOpenings(FlexibleShaftBlockEntity be, PoseStack ms, MultiBufferSource buffer, int light) {
+    protected void renderOpenings(AbstractLowEntityKineticBlockEntity be, PoseStack ms, MultiBufferSource buffer, int light) {
         for(Direction dir : Iterate.directions) {
             float modifier = be.getRotationSpeedModifier(dir);
             if (modifier == 0f)
@@ -33,13 +33,12 @@ public class FlexibleShaftBlockEntityRenderer extends KineticBlockEntityRenderer
     }
 
     @Override
-    protected void renderSafe(FlexibleShaftBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer, int light, int overlay) {
+    protected void renderSafe(AbstractLowEntityKineticBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer, int light, int overlay) {
         if (VisualizationManager.supportsVisualization(be.getLevel())) {
             renderOpenings(be, ms, buffer, light);
             return;
         }
 
-        //final var state = be.getBlockState();
         final var pos = be.getBlockPos();
         final float time = AnimationTickHolder.getRenderTime(be.getLevel());
         final float baseAngle = (time * be.getSpeed() * 3f / 10) % 360;

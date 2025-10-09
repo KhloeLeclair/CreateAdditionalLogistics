@@ -100,7 +100,7 @@ Finally, there are two special behaviors you can manage if you're using a clipbo
    doesn't match any other rules.
 
 
-### Short and Tall Seats
+### Short and Tall Seats (New Block, Basically... Seats?)
 
 Err, seats aren't logistics? Whatever do you mean? You can, erm... sit on them,
 and—okay, fine. These are a bit out of scope for 'Additional Logistics', but
@@ -111,6 +111,28 @@ always at a good height for whatever build you're doing. As such, we've added
 Short Seats and Tall Seats. Short Seats are 2/16ths of a block tall, while Tall Seats
 are 14/16ths of a block tall. (Normal Seats are, of course, 8/16ths or 1/2 of a
 block tall.)
+
+
+### Lazy Shafts (New Block, Basically Shafts)
+
+I know what you're thinking. This isn't logistics either. And Create has had shafts
+for years. Get it together, Khloe. But this is important, I promise. Lazy Shafts
+are my attempt at creating lag friendly shafts. Basically, normal shafts have a
+block entity for each individual block, right? These try to avoid that when possible.
+As long as you have more than two Lazy Shafts in a row, you're going to be coming
+out ahead on block entities. If you use a lot of shafts, and I mean a lot, then
+replacing them with these might help your server performance.
+
+
+### Flexible Lazy Shafts (New Block, Basically Gearboxes + Lazy Shafts + ???)
+
+There are Flexible Lazy Shafts too. These are like Lazy Shafts, but they can connect
+in any direction. Not just that, but they have configurable sides. Just use your
+wrench on a side to expose a shaft. Use your wrench again to reverse the direction.
+
+Just be careful when connecting things. Due to how they're connected in code, sometimes
+Create ends up breaking an inconvenient Flexible Lazy Shaft if there's a problem
+with incompatible rotations.
 
 
 ## Improvements

@@ -1,0 +1,6 @@
+{
+  "parent": "createadditionallogistics:block/flexible_shaft/block_south",
+  "textures": {
+    "frame": "createadditionallogistics:block/lazy_shaft/frame"
+  }
+}

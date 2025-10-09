@@ -1,0 +1,8 @@
+{
+  "parent": "createadditionallogistics:block/flexible_shaft/base",
+  "textures": {
+    "core": "createadditionallogistics:block/lazy_shaft/core",
+    "frame": "createadditionallogistics:block/lazy_shaft/frame",
+    "particle": "createadditionallogistics:block/lazy_shaft/core"
+  }
+}

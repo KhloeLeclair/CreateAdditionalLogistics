@@ -9,7 +9,7 @@
       "item": "create:cogwheel"
     },
     "S": {
-      "item": "create:shaft"
+      "tag": "createadditionallogistics:basic_shafts"
     }
   },
   "pattern": [

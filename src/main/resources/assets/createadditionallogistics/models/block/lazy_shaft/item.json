@@ -3,9 +3,9 @@
 	"parent": "block/block",
 	"render_type": "minecraft:cutout",
 	"textures": {
-		"core": "createadditionallogistics:block/flexible_shaft/core",
-		"particle": "createadditionallogistics:block/flexible_shaft/frame",
-		"frame": "createadditionallogistics:block/flexible_shaft/frame"
+		"core": "createadditionallogistics:block/lazy_shaft/core",
+		"particle": "createadditionallogistics:block/lazy_shaft/frame",
+		"frame": "createadditionallogistics:block/lazy_shaft/frame"
 	},
 	"elements": [
 		{

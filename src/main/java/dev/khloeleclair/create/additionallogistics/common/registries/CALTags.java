@@ -54,7 +54,7 @@ public class CALTags {
         SHORT_SEATS,
         TALL_SEATS,
         FLEXIBLE_SHAFTS,
-
+        BASIC_SHAFTS,
         ;
 
         public final TagKey<Block> tag;
@@ -109,6 +109,7 @@ public class CALTags {
         SHORT_SEATS,
         TALL_SEATS,
         FLEXIBLE_SHAFTS,
+        BASIC_SHAFTS,
         ;
 
         public final TagKey<Item> tag;

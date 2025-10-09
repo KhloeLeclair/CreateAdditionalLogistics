@@ -1,5 +1,6 @@
 {
   "values": [
+    "createadditionallogistics:lazy_shaft",
     "createadditionallogistics:flexible_shaft",
     "createadditionallogistics:white_flexible_shaft",
     "createadditionallogistics:orange_flexible_shaft",

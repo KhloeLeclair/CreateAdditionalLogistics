@@ -1,0 +1,63 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/lazy_shaft"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/lazy_shaft_down"
+      },
+      "when": {
+        "axis": "y",
+        "negative": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/lazy_shaft_up"
+      },
+      "when": {
+        "axis": "y",
+        "positive": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/lazy_shaft_north"
+      },
+      "when": {
+        "axis": "z",
+        "negative": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/lazy_shaft_south"
+      },
+      "when": {
+        "axis": "z",
+        "positive": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/lazy_shaft_west"
+      },
+      "when": {
+        "axis": "x",
+        "negative": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/lazy_shaft_east"
+      },
+      "when": {
+        "axis": "x",
+        "positive": "true"
+      }
+    }
+  ]
+}
