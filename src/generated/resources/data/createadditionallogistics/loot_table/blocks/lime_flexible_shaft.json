@@ -1,0 +1,21 @@
+{
+  "type": "minecraft:block",
+  "pools": [
+    {
+      "bonus_rolls": 0.0,
+      "conditions": [
+        {
+          "condition": "minecraft:survives_explosion"
+        }
+      ],
+      "entries": [
+        {
+          "type": "minecraft:item",
+          "name": "createadditionallogistics:lime_flexible_shaft"
+        }
+      ],
+      "rolls": 1.0
+    }
+  ],
+  "random_sequence": "createadditionallogistics:blocks/lime_flexible_shaft"
+}

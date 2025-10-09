@@ -1,5 +1,22 @@
 {
   "values": [
+    "createadditionallogistics:flexible_shaft",
+    "createadditionallogistics:white_flexible_shaft",
+    "createadditionallogistics:orange_flexible_shaft",
+    "createadditionallogistics:magenta_flexible_shaft",
+    "createadditionallogistics:light_blue_flexible_shaft",
+    "createadditionallogistics:yellow_flexible_shaft",
+    "createadditionallogistics:lime_flexible_shaft",
+    "createadditionallogistics:pink_flexible_shaft",
+    "createadditionallogistics:gray_flexible_shaft",
+    "createadditionallogistics:light_gray_flexible_shaft",
+    "createadditionallogistics:cyan_flexible_shaft",
+    "createadditionallogistics:purple_flexible_shaft",
+    "createadditionallogistics:blue_flexible_shaft",
+    "createadditionallogistics:brown_flexible_shaft",
+    "createadditionallogistics:green_flexible_shaft",
+    "createadditionallogistics:red_flexible_shaft",
+    "createadditionallogistics:black_flexible_shaft",
     "createadditionallogistics:cash_register",
     "createadditionallogistics:package_accelerator",
     "createadditionallogistics:package_editor"

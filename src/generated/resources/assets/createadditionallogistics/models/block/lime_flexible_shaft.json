@@ -1,0 +1,7 @@
+{
+  "parent": "createadditionallogistics:block/flexible_shaft/base",
+  "textures": {
+    "core": "minecraft:block/lime_concrete",
+    "particle": "minecraft:block/lime_concrete"
+  }
+}

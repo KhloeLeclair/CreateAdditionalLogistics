@@ -1,6 +1,5 @@
 package dev.khloeleclair.create.additionallogistics.common.registries;
 
-import com.simibubi.create.AllTags;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
 import net.createmod.catnip.lang.Lang;
 import net.minecraft.core.Registry;
@@ -54,6 +53,7 @@ public class CALTags {
     public enum CALBlockTags {
         SHORT_SEATS,
         TALL_SEATS,
+        FLEXIBLE_SHAFTS,
 
         ;
 
@@ -108,6 +108,7 @@ public class CALTags {
 
         SHORT_SEATS,
         TALL_SEATS,
+        FLEXIBLE_SHAFTS,
         ;
 
         public final TagKey<Item> tag;

@@ -7,25 +7,37 @@ import com.simibubi.create.content.logistics.packager.PackagerGenerator;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBlockItem;
 import com.simibubi.create.foundation.block.DyedBlockList;
 import com.simibubi.create.foundation.data.CreateRegistrate;
+import com.simibubi.create.foundation.data.ModelGen;
 import com.simibubi.create.foundation.data.SharedProperties;
 import com.simibubi.create.foundation.data.TagGen;
 import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.utility.DyeHelper;
+import com.tterrag.registrate.providers.DataGenContext;
+import com.tterrag.registrate.providers.RegistrateBlockstateProvider;
 import com.tterrag.registrate.providers.RegistrateRecipeProvider;
 import com.tterrag.registrate.util.entry.BlockEntry;
+import com.tterrag.registrate.util.nullness.NonNullBiConsumer;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
 import dev.khloeleclair.create.additionallogistics.common.blocks.*;
+import net.createmod.catnip.data.Iterate;
+import net.minecraft.core.Direction;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.MapColor;
+import net.neoforged.neoforge.client.model.generators.ModelFile;
+import net.neoforged.neoforge.client.model.generators.MultiPartBlockStateBuilder;
 import net.neoforged.neoforge.common.Tags;
+import org.jetbrains.annotations.Nullable;
 
 import static com.simibubi.create.api.behaviour.display.DisplaySource.displaySource;
 import static com.simibubi.create.api.behaviour.interaction.MovingInteractionBehaviour.interactionBehaviour;
@@ -39,6 +51,100 @@ public class CALBlocks {
     static {
         REGISTRATE.defaultCreativeTab(AllCreativeModeTabs.BASE_CREATIVE_TAB.getKey());
     }
+
+    // Encased Network
+    private static NonNullBiConsumer<DataGenContext<Block, FlexibleShaftBlock>, RegistrateBlockstateProvider> pipeBlockState(@Nullable String name, @Nullable ResourceLocation texture) {
+        return (c, p) -> {
+            String path = "block/" + (name == null ? c.getName() : name);
+
+            ModelFile model;
+            if (texture == null)
+                model = p.models().getExistingFile(p.modLoc(path + "/base"));
+            else
+                model = p.models()
+                        .withExistingParent(c.getName(), p.modLoc(path + "/base"))
+                        .texture("particle", texture)
+                        .texture("core", texture);
+
+            MultiPartBlockStateBuilder builder = p.getMultipartBuilder(c.get());
+            builder
+                .part()
+                .modelFile(model)
+                .addModel()
+                .end();
+
+            for(Direction dir : Iterate.directions) {
+                int index = dir.ordinal();
+                BooleanProperty property = FlexibleShaftBlock.SIDES[index];
+
+                ModelFile m;
+                //if (texture == null)
+                    m = p.models().getExistingFile(p.modLoc(path + "/block_" + dir.getSerializedName()));
+                /*else
+                    m = p.models()
+                                .withExistingParent(c.getName() + "_" + dir.getSerializedName(), p.modLoc(path + "/block_" + dir.getSerializedName()))
+                                .texture("particle", texture)
+                                .texture("core", texture);*/
+
+                builder
+                    .part()
+                    .modelFile(m)
+                    .addModel()
+                    .condition(property, true)
+                    .end();
+            }
+        };
+    }
+
+    public static final BlockEntry<FlexibleShaftBlock> FLEXIBLE_SHAFT =
+            REGISTRATE.block("flexible_shaft", FlexibleShaftBlock::new)
+                    .initialProperties(SharedProperties::stone)
+                    .properties(p -> p.mapColor(MapColor.PODZOL))
+                    .transform(axeOrPickaxe())
+                    .blockstate(pipeBlockState(null, null))
+                    .tag(CALTags.CALBlockTags.FLEXIBLE_SHAFTS.tag)
+                    .tag(AllTags.AllBlockTags.SAFE_NBT.tag)
+                    .recipe((c, p) -> {
+                        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, c.get(), 4)
+                                .pattern(" S ")
+                                .pattern("CBC")
+                                .pattern(" S ")
+                                .define('S', AllBlocks.SHAFT)
+                                .define('C', AllBlocks.COGWHEEL)
+                                .define('B', AllBlocks.BRASS_CASING)
+                                .unlockedBy("has_brass_casing", RegistrateRecipeProvider.has(AllBlocks.BRASS_CASING))
+                                .save(p, CreateAdditionalLogistics.asResource("crafting/kinetics/" + c.getName()));
+
+                        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, c.get())
+                                .requires(CALTags.CALItemTags.FLEXIBLE_SHAFTS.tag)
+                                .unlockedBy("has_flexible_shaft", RegistrateRecipeProvider.has(CALTags.CALItemTags.FLEXIBLE_SHAFTS.tag))
+                                .save(p, CreateAdditionalLogistics.asResource("crafting/kinetics/" + c.getName() + "_remove_dye"));
+                    })
+                    .item()
+                    .tag(CALTags.CALItemTags.FLEXIBLE_SHAFTS.tag)
+                    .transform(ModelGen.customItemModel())
+                    .register();
+
+
+    public static final DyedBlockList<FlexibleShaftBlock> DYED_FLEXIBLE_SHAFTS = new DyedBlockList<>(color -> {
+        String colorName = color.getSerializedName();
+        return REGISTRATE.block(colorName + "_flexible_shaft", p -> new FlexibleShaftBlock(p, color))
+                .initialProperties(SharedProperties::stone)
+                .properties(p -> p.mapColor(color))
+                .transform(axeOrPickaxe())
+                .blockstate(pipeBlockState("flexible_shaft", ResourceLocation.withDefaultNamespace("block/" + color.getSerializedName() + "_concrete")))
+                .tag(CALTags.CALBlockTags.FLEXIBLE_SHAFTS.tag)
+                .tag(AllTags.AllBlockTags.SAFE_NBT.tag)
+                .recipe((c, p) -> ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, c.get())
+                        .requires(color.getTag())
+                        .requires(CALTags.CALItemTags.FLEXIBLE_SHAFTS.tag)
+                        .unlockedBy("has_flexible_shaft", RegistrateRecipeProvider.has(CALTags.CALItemTags.FLEXIBLE_SHAFTS.tag))
+                        .save(p, CreateAdditionalLogistics.asResource("crafting/kinetics/" + c.getName() + "_from_other_flexible_shaft")))
+                .item()
+                .tag(CALTags.CALItemTags.FLEXIBLE_SHAFTS.tag)
+                .build()
+                .register();
+    });
 
     // Cash Register
     public static final BlockEntry<CashRegisterBlock> CASH_REGISTER =

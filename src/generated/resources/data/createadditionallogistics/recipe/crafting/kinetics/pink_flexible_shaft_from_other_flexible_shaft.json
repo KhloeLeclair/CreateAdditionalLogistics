@@ -1,0 +1,16 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "tag": "c:dyes/pink"
+    },
+    {
+      "tag": "createadditionallogistics:flexible_shafts"
+    }
+  ],
+  "result": {
+    "count": 1,
+    "id": "createadditionallogistics:pink_flexible_shaft"
+  }
+}

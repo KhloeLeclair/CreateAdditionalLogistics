@@ -1,0 +1,21 @@
+{
+  "format_version": "1.9.0",
+  "parent": "block/block",
+  "textures": {
+    "frame": "createadditionallogistics:block/flexible_shaft/frame"
+  },
+  "elements": [
+    {
+      "name": "East",
+      "from": [14, 3, 3],
+      "to": [16, 13, 13],
+      "rotation": {"angle": 0, "axis": "y", "origin": [8, 8, 8]},
+      "faces": {
+        "north": {"uv": [16, 13, 14, 3], "texture": "#frame"},
+        "south": {"uv": [14, 3, 16, 13], "texture": "#frame"},
+        "up": {"uv": [16, 3, 14, 13], "rotation": 180, "texture": "#frame"},
+        "down": {"uv": [16, 3, 14, 13], "rotation": 180, "texture": "#frame"}
+      }
+    }
+  ]
+}

@@ -1,0 +1,57 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/purple_flexible_shaft"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/flexible_shaft/block_down"
+      },
+      "when": {
+        "down": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/flexible_shaft/block_up"
+      },
+      "when": {
+        "up": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/flexible_shaft/block_north"
+      },
+      "when": {
+        "north": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/flexible_shaft/block_south"
+      },
+      "when": {
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/flexible_shaft/block_west"
+      },
+      "when": {
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/flexible_shaft/block_east"
+      },
+      "when": {
+        "east": "true"
+      }
+    }
+  ]
+}

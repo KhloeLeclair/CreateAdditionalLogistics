@@ -6,15 +6,27 @@ import com.simibubi.create.foundation.data.CreateRegistrate;
 import com.tterrag.registrate.util.entry.BlockEntityEntry;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
 import dev.khloeleclair.create.additionallogistics.client.renderers.CashRegisterBlockEntityRenderer;
+import dev.khloeleclair.create.additionallogistics.client.renderers.FlexibleShaftBlockEntityRenderer;
 import dev.khloeleclair.create.additionallogistics.client.renderers.PackageAcceleratorRenderer;
+import dev.khloeleclair.create.additionallogistics.client.visuals.FlexibleShaftVisual;
 import dev.khloeleclair.create.additionallogistics.client.visuals.PackageAcceleratorVisual;
 import dev.khloeleclair.create.additionallogistics.common.blockentities.CashRegisterBlockEntity;
+import dev.khloeleclair.create.additionallogistics.common.blockentities.FlexibleShaftBlockEntity;
 import dev.khloeleclair.create.additionallogistics.common.blockentities.PackageAcceleratorBlockEntity;
 import dev.khloeleclair.create.additionallogistics.common.blockentities.PackageEditorBlockEntity;
 
 public class CALBlockEntityTypes {
 
     private static final CreateRegistrate REGISTRATE = CreateAdditionalLogistics.REGISTRATE.get();
+
+    // Encased Network
+    public static final BlockEntityEntry<FlexibleShaftBlockEntity> FLEXIBLE_SHAFT =
+            REGISTRATE.blockEntity("flexible_shaft", FlexibleShaftBlockEntity::new)
+                    .visual(() -> FlexibleShaftVisual::new)
+                    .validBlocks(CALBlocks.FLEXIBLE_SHAFT)
+                    .validBlocks(CALBlocks.DYED_FLEXIBLE_SHAFTS.toArray())
+                    .renderer(() -> FlexibleShaftBlockEntityRenderer::new)
+                    .register();
 
     // Cash Register
     public static final BlockEntityEntry<CashRegisterBlockEntity> CASH_REGISTER =

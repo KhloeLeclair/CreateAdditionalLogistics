@@ -12,7 +12,8 @@ import com.simibubi.create.foundation.item.KineticStats;
 import com.simibubi.create.foundation.item.TooltipModifier;
 import com.tterrag.registrate.util.nullness.NonNullSupplier;
 import dev.khloeleclair.create.additionallogistics.common.Config;
-import dev.khloeleclair.create.additionallogistics.common.DataGen;
+import dev.khloeleclair.create.additionallogistics.common.datagen.DataGen;
+import dev.khloeleclair.create.additionallogistics.common.blockentities.FlexibleShaftBlockEntity;
 import dev.khloeleclair.create.additionallogistics.common.data.CustomComponents;
 import dev.khloeleclair.create.additionallogistics.common.network.CustomPackets;
 import dev.khloeleclair.create.additionallogistics.common.registries.*;
@@ -88,6 +89,7 @@ public class CreateAdditionalLogistics {
         modEventBus.addListener(EventPriority.HIGHEST, DataGen::gatherData);
 
         NeoForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.addListener(FlexibleShaftBlockEntity::onTick);
 
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
         Config.register(modContainer);

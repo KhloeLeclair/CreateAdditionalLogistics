@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_flexible_shaft": {
+      "conditions": {
+        "items": [
+          {
+            "items": "#createadditionallogistics:flexible_shafts"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "createadditionallogistics:crafting/kinetics/orange_flexible_shaft_from_other_flexible_shaft"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_flexible_shaft"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "createadditionallogistics:crafting/kinetics/orange_flexible_shaft_from_other_flexible_shaft"
+    ]
+  }
+}
