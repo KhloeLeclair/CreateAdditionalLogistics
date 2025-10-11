@@ -204,6 +204,43 @@ the stock ticker. But at least you won't do it by accident.
 
 # Changelog
 
+## 1.2.2
+
+### Added
+
+* Configuration screen when interacting with a Flexible Lazy Shaft with an empty hand.
+
+### Changed
+
+* Draw the configured side of a Flexible Lazy Shaft differently if the rotation is
+  reversed to allow for easy visual identification.
+
+### Fixed
+
+* Continued fix for issue where C:AL Lazy Shafts could result in a server deadlock when
+  making changes to a kinetic network.
+* Recipe for converting Lazy Shafts to regular Shafts having incorrect quantities.
+
+
+## 1.2.1
+
+### Added
+
+* Encased Lazy Shafts
+
+### Fixed
+
+* Issue where C:AL Lazy Shafts could result in a server deadlock when making changes
+  to a kinetic network.
+
+
+## 1.2.0
+
+### Added
+
+* Lazy Shafts and Flexible Lazy Shafts
+
+
 ## 1.1.0
 
 ### Added

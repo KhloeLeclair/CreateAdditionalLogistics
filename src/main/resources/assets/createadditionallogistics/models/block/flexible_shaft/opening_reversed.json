@@ -3,7 +3,7 @@
 	"credit": "Made with Blockbench",
 	"parent": "block/block",
 	"textures": {
-		"opening": "createadditionallogistics:block/flexible_shaft/opening"
+		"opening": "createadditionallogistics:block/flexible_shaft/opening_reversed"
 	},
 	"elements": [
 		{

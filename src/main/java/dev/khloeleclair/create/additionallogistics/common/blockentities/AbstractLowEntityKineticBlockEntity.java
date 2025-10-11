@@ -146,14 +146,6 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
         int previous = index - 1;
         int next = index + 1;
 
-        /*// For the entities at the ends of the list, loop around.
-        if (newConnections.size() > 2) {
-            if (previous == -1)
-                previous = newConnections.size() - 1;
-            if (next >= newConnections.size())
-                next = 0;
-        }*/
-
         if (connections == null)
             connections = new ArrayList<>();
 
@@ -181,7 +173,6 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
         notifyUpdate();
         updateSpeed = true;
     }
-
 
 
     // Discovery / Walking

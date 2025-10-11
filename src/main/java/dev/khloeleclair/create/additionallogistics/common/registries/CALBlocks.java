@@ -9,7 +9,10 @@ import com.simibubi.create.content.logistics.packager.PackagerGenerator;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBlockItem;
 import com.simibubi.create.foundation.block.DyedBlockList;
 import com.simibubi.create.foundation.block.connected.CTSpriteShiftEntry;
-import com.simibubi.create.foundation.data.*;
+import com.simibubi.create.foundation.data.CreateRegistrate;
+import com.simibubi.create.foundation.data.ModelGen;
+import com.simibubi.create.foundation.data.SharedProperties;
+import com.simibubi.create.foundation.data.TagGen;
 import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.utility.DyeHelper;
 import com.tterrag.registrate.builders.BlockBuilder;
@@ -148,14 +151,12 @@ public class CALBlocks {
                     .tag(CALTags.CALBlockTags.BASIC_SHAFTS.tag)
                     .tag(AllTags.AllBlockTags.SAFE_NBT.tag)
                     .recipe((c, p) -> {
-                        ShapedRecipeBuilder.shaped(RecipeCategory.MISC, c.get(), 4)
-                                .pattern("SS")
-                                .pattern("SS")
-                                .define('S', AllBlocks.SHAFT)
+                        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, c.get(), 4)
+                                .requires(AllBlocks.SHAFT, 4)
                                 .unlockedBy("has_shaft", RegistrateRecipeProvider.has(AllBlocks.SHAFT))
-                                .save(p, CreateAdditionalLogistics.asResource("crafting/kinetics/" + c.getName()));
+                                .save(p, CreateAdditionalLogistics.asResource("crafting/kinetics/" + c.getName() + "_from_shaft"));
                         ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, AllBlocks.SHAFT, 4)
-                                .requires(c.get())
+                                .requires(c.get(), 4)
                                 .unlockedBy("has_lazy_shaft", RegistrateRecipeProvider.has(c.get()))
                                 .save(p, CreateAdditionalLogistics.asResource("crafting/kinetics/shaft_from_lazy"));
                     })

@@ -4,6 +4,15 @@
   "ingredients": [
     {
       "item": "createadditionallogistics:lazy_shaft"
+    },
+    {
+      "item": "createadditionallogistics:lazy_shaft"
+    },
+    {
+      "item": "createadditionallogistics:lazy_shaft"
+    },
+    {
+      "item": "createadditionallogistics:lazy_shaft"
     }
   ],
   "result": {

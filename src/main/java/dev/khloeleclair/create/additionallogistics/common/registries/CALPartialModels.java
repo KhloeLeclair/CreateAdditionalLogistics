@@ -11,6 +11,7 @@ public class CALPartialModels {
     public static final PartialModel CASH_REGISTER_SALE_NOTICE = block("cash_register/sale_notice");
 
     public static final PartialModel SHAFT_OPENING = block("flexible_shaft/opening");
+    public static final PartialModel SHAFT_OPENING_REVERSED = block("flexible_shaft/opening_reversed");
 
     public static void register() { }
 

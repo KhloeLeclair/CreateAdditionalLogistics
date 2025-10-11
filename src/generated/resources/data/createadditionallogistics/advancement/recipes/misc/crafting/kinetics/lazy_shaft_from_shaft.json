@@ -13,7 +13,7 @@
     },
     "has_the_recipe": {
       "conditions": {
-        "recipe": "createadditionallogistics:crafting/kinetics/lazy_shaft"
+        "recipe": "createadditionallogistics:crafting/kinetics/lazy_shaft_from_shaft"
       },
       "trigger": "minecraft:recipe_unlocked"
     }
@@ -26,7 +26,7 @@
   ],
   "rewards": {
     "recipes": [
-      "createadditionallogistics:crafting/kinetics/lazy_shaft"
+      "createadditionallogistics:crafting/kinetics/lazy_shaft_from_shaft"
     ]
   }
 }

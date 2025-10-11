@@ -117,8 +117,6 @@ public class LazyShaftBlock extends AbstractLowEntityKineticBlock<LazyShaftBlock
         }
     }
 
-
-
     protected BlockState withSides(LevelAccessor level, BlockPos pos, BlockState state) {
         var axis = state.getValue(AXIS);
 

@@ -5,6 +5,7 @@ import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.foundation.block.ProperWaterloggedBlock;
 import dev.khloeleclair.create.additionallogistics.common.blockentities.AbstractLowEntityKineticBlockEntity;
 import dev.khloeleclair.create.additionallogistics.common.blockentities.FlexibleShaftBlockEntity;
+import dev.khloeleclair.create.additionallogistics.common.network.CustomPackets;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALBlockEntityTypes;
 import dev.khloeleclair.create.additionallogistics.mixin.RotationPropagatorInvoker;
 import net.createmod.catnip.data.Iterate;
@@ -13,6 +14,7 @@ import net.createmod.catnip.placement.PlacementOffset;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
@@ -186,6 +188,42 @@ public class FlexibleShaftBlock extends AbstractLowEntityKineticBlock<FlexibleSh
 
         return fsb.getSide(face) != 0;
     }
+
+    @Override
+    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
+        if (!player.getMainHandItem().isEmpty())
+            return InteractionResult.FAIL;
+
+        if (!level.isClientSide && player instanceof ServerPlayer sp) {
+            CustomPackets.OpenFlexibleShaftScreen.of(pos).send(sp);
+        }
+
+        return InteractionResult.SUCCESS;
+    }
+
+    public void setSide(Level level, BlockPos pos, Direction side, byte value) {
+        if (level.isClientSide || !level.isLoaded(pos))
+            return;
+
+        var state = level.getBlockState(pos);
+        if (!state.getValue(ACTIVE)) {
+            if (value == 0)
+                return;
+
+            level.setBlockAndUpdate(pos, state.setValue(ACTIVE, true));
+            AbstractLowEntityKineticBlockEntity.markDirty(level, pos);
+        }
+
+        if (!(level.getBlockEntity(pos) instanceof FlexibleShaftBlockEntity fsb))
+            return;
+
+        fsb.setSide(side, value);
+
+        // If we don't need a tile entity, remove it.
+        if (! fsb.shouldBeActive())
+            fsb.deactivateSelf();
+    }
+
 
     @Override
     public InteractionResult onWrenched(BlockState state, UseOnContext context) {

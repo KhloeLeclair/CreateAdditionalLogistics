@@ -9,7 +9,8 @@
     "MixinSeatBlock",
     "MixinStockTickerInteractionHandler",
     "MixinSmartBlockEntity",
-    "RotationPropagatorInvoker"
+    "RotationPropagatorInvoker",
+    "MixinRotationPropagator"
   ],
   "client": [
     "client.MixinPackagerRenderer",

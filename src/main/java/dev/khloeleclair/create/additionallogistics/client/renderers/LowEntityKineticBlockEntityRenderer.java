@@ -17,6 +17,8 @@ import net.minecraft.core.Direction;
 
 public class LowEntityKineticBlockEntityRenderer extends KineticBlockEntityRenderer<AbstractLowEntityKineticBlockEntity> {
 
+    public static boolean overrideVisualization;
+
     public LowEntityKineticBlockEntityRenderer(BlockEntityRendererProvider.Context context) {
         super(context);
     }
@@ -27,14 +29,17 @@ public class LowEntityKineticBlockEntityRenderer extends KineticBlockEntityRende
             if (modifier == 0f)
                 continue;
 
-            SuperByteBuffer opening = CachedBuffers.partialFacing(CALPartialModels.SHAFT_OPENING, be.getBlockState(), dir.getOpposite());
+            SuperByteBuffer opening = CachedBuffers.partialFacing(modifier == 1f
+                        ? CALPartialModels.SHAFT_OPENING
+                        : CALPartialModels.SHAFT_OPENING_REVERSED,
+                    be.getBlockState(), dir.getOpposite());
             opening.light(light).renderInto(ms, buffer.getBuffer(RenderType.cutoutMipped()));
         }
     }
 
     @Override
     protected void renderSafe(AbstractLowEntityKineticBlockEntity be, float partialTicks, PoseStack ms, MultiBufferSource buffer, int light, int overlay) {
-        if (VisualizationManager.supportsVisualization(be.getLevel())) {
+        if (!overrideVisualization && VisualizationManager.supportsVisualization(be.getLevel())) {
             renderOpenings(be, ms, buffer, light);
             return;
         }
@@ -55,7 +60,10 @@ public class LowEntityKineticBlockEntityRenderer extends KineticBlockEntityRende
             angle += offset;
             angle = angle / 180 * (float) Math.PI;
 
-            SuperByteBuffer opening = CachedBuffers.partialFacing(CALPartialModels.SHAFT_OPENING, be.getBlockState(), dir.getOpposite());
+            SuperByteBuffer opening = CachedBuffers.partialFacing(modifier == 1f
+                        ? CALPartialModels.SHAFT_OPENING
+                        : CALPartialModels.SHAFT_OPENING_REVERSED,
+                    be.getBlockState(), dir.getOpposite());
             opening.light(light).renderInto(ms, buffer.getBuffer(RenderType.cutoutMipped()));
 
             SuperByteBuffer shaft = CachedBuffers.partialFacing(AllPartialModels.SHAFT_HALF, be.getBlockState(), dir);
