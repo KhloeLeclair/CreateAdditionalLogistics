@@ -3,6 +3,48 @@
     {
       "apply": {
         "model": "createadditionallogistics:block/lazy_shaft"
+      },
+      "when": {
+        "OR": [
+          {
+            "negative": "false"
+          },
+          {
+            "positive": "false"
+          }
+        ]
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/lazy_shaft/connection"
+      },
+      "when": {
+        "axis": "z",
+        "negative": "true",
+        "positive": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/lazy_shaft/connection",
+        "y": 90
+      },
+      "when": {
+        "axis": "x",
+        "negative": "true",
+        "positive": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/lazy_shaft/connection",
+        "x": 90
+      },
+      "when": {
+        "axis": "y",
+        "negative": "true",
+        "positive": "true"
       }
     },
     {
@@ -11,7 +53,8 @@
       },
       "when": {
         "axis": "y",
-        "negative": "true"
+        "negative": "true",
+        "positive": "false"
       }
     },
     {
@@ -20,6 +63,7 @@
       },
       "when": {
         "axis": "y",
+        "negative": "false",
         "positive": "true"
       }
     },
@@ -29,7 +73,8 @@
       },
       "when": {
         "axis": "z",
-        "negative": "true"
+        "negative": "true",
+        "positive": "false"
       }
     },
     {
@@ -38,6 +83,7 @@
       },
       "when": {
         "axis": "z",
+        "negative": "false",
         "positive": "true"
       }
     },
@@ -47,7 +93,8 @@
       },
       "when": {
         "axis": "x",
-        "negative": "true"
+        "negative": "true",
+        "positive": "false"
       }
     },
     {
@@ -56,6 +103,7 @@
       },
       "when": {
         "axis": "x",
+        "negative": "false",
         "positive": "true"
       }
     }

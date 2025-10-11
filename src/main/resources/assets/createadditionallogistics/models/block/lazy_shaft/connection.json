@@ -1,0 +1,35 @@
+{
+	"format_version": "1.9.0",
+	"credit": "Made with Blockbench",
+	"parent": "block/block",
+	"render_type": "minecraft:cutout_mipped",
+	"textures": {
+		"core": "createadditionallogistics:block/lazy_shaft/connected_core",
+		"particle": "createadditionallogistics:block/lazy_shaft/connected_frame",
+		"frame": "createadditionallogistics:block/lazy_shaft/connected_frame"
+	},
+	"elements": [
+		{
+			"name": "edges",
+			"from": [3, 3, 0],
+			"to": [13, 13, 16],
+			"faces": {
+				"east": {"uv": [0, 0, 16, 10], "texture": "#frame"},
+				"west": {"uv": [0, 0, 16, 10], "texture": "#frame"},
+				"up": {"uv": [16, 10, 0, 0], "rotation": 90, "texture": "#frame"},
+				"down": {"uv": [0, 10, 16, 0], "rotation": 90, "texture": "#frame"}
+			}
+		},
+		{
+			"name": "core",
+			"from": [3.001, 3.001, 0],
+			"to": [13, 13, 16],
+			"faces": {
+				"east": {"uv": [0, 0, 16, 10], "texture": "#core"},
+				"west": {"uv": [0, 0, 16, 10], "texture": "#core"},
+				"up": {"uv": [0, 10, 16, 0], "rotation": 90, "texture": "#core"},
+				"down": {"uv": [16, 10, 0, 0], "rotation": 90, "texture": "#core"}
+			}
+		}
+	]
+}

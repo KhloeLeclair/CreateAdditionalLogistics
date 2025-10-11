@@ -1,5 +1,6 @@
 package dev.khloeleclair.create.additionallogistics.common.blocks;
 
+import com.simibubi.create.content.decoration.encasing.EncasableBlock;
 import com.simibubi.create.content.kinetics.base.IRotate;
 import com.simibubi.create.foundation.block.ProperWaterloggedBlock;
 import com.simibubi.create.foundation.placement.PoleHelper;
@@ -39,13 +40,19 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class LazyShaftBlock extends AbstractLowEntityKineticBlock<LazyShaftBlockEntity> implements ProperWaterloggedBlock {
+public class LazyShaftBlock extends AbstractLowEntityKineticBlock<LazyShaftBlockEntity> implements EncasableBlock, ProperWaterloggedBlock {
 
     public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.AXIS;
     public static final BooleanProperty NEGATIVE = BooleanProperty.create("negative");
     public static final BooleanProperty POSITIVE = BooleanProperty.create("positive");
 
     public static final int placementHelperId = PlacementHelpers.register(new PlacementHelper());
+
+    public static final VoxelShape[] CONNECTOR_SHAPES = {
+            Block.box(0, 3, 3, 16, 13, 13), // X
+            Block.box(3, 0, 3, 13, 16, 13), // Y
+            Block.box(3, 3, 0, 13, 13, 16), // Z
+    };
 
     public LazyShaftBlock(Properties properties) {
         super(properties);
@@ -57,14 +64,36 @@ public class LazyShaftBlock extends AbstractLowEntityKineticBlock<LazyShaftBlock
                 .setValue(POSITIVE, false));
     }
 
+    protected BlockState copyValuesForCasing(BlockState from, BlockState to) {
+        if (from.hasProperty(AXIS) && to.hasProperty(AXIS))
+            to = to.setValue(AXIS, from.getValue(AXIS));
+        if (from.hasProperty(POSITIVE) && to.hasProperty(POSITIVE))
+            to = to.setValue(POSITIVE, from.getValue(POSITIVE));
+        if (from.hasProperty(NEGATIVE) && to.hasProperty(NEGATIVE))
+            to = to.setValue(NEGATIVE, from.getValue(NEGATIVE));
+        return to;
+    }
+
+
     @Override
     protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         byte key = 0;
         final var axis = state.getValue(AXIS);
-        if (state.getValue(POSITIVE))
-            key |= (1 << Direction.fromAxisAndDirection(axis, Direction.AxisDirection.POSITIVE).ordinal());
+        final boolean positive = state.getValue(POSITIVE);
+        final boolean negative = state.getValue(NEGATIVE);
 
-        if (state.getValue(NEGATIVE))
+        if (positive && negative) {
+            if (axis == Direction.Axis.X)
+                return CONNECTOR_SHAPES[0];
+            else if (axis == Direction.Axis.Y)
+                return CONNECTOR_SHAPES[1];
+            else
+                return CONNECTOR_SHAPES[2];
+        }
+
+        if (positive)
+            key |= (1 << Direction.fromAxisAndDirection(axis, Direction.AxisDirection.POSITIVE).ordinal());
+        if (negative)
             key |= (1 << Direction.fromAxisAndDirection(axis, Direction.AxisDirection.NEGATIVE).ordinal());
 
         return getShapeWithSides(key);

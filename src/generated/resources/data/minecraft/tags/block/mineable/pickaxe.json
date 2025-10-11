@@ -1,6 +1,11 @@
 {
   "values": [
     "createadditionallogistics:lazy_shaft",
+    "createadditionallogistics:andesite_encased_lazy_shaft",
+    "createadditionallogistics:brass_encased_lazy_shaft",
+    "createadditionallogistics:copper_encased_lazy_shaft",
+    "createadditionallogistics:industrial_iron_encased_lazy_shaft",
+    "createadditionallogistics:weathered_iron_encased_lazy_shaft",
     "createadditionallogistics:flexible_shaft",
     "createadditionallogistics:white_flexible_shaft",
     "createadditionallogistics:orange_flexible_shaft",

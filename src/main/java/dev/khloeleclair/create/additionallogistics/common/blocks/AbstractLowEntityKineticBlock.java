@@ -1,5 +1,6 @@
 package dev.khloeleclair.create.additionallogistics.common.blocks;
 
+import com.simibubi.create.content.decoration.encasing.EncasableBlock;
 import com.simibubi.create.content.kinetics.base.KineticBlock;
 import com.simibubi.create.foundation.block.IBE;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntityTicker;
@@ -96,6 +97,12 @@ public abstract class AbstractLowEntityKineticBlock<T extends AbstractLowEntityK
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
         if (player.isShiftKeyDown() || !player.mayBuild())
             return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+
+        if (this instanceof EncasableBlock encasable) {
+            ItemInteractionResult result = encasable.tryEncase(state, level, pos, stack, player, hand, hitResult);
+            if (result.consumesAction())
+                return result;
+        }
 
         var helper = getPlacementHelper();
         if (helper != null && helper.matchesItem(stack))

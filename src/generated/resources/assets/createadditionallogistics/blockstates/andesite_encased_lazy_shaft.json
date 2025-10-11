@@ -1,0 +1,68 @@
+{
+  "variants": {
+    "axis=x,negative=false,positive=false": {
+      "model": "createadditionallogistics:block/encased_lazy_shaft/block_andesite",
+      "uvlock": true,
+      "x": 90,
+      "y": 90
+    },
+    "axis=x,negative=false,positive=true": {
+      "model": "createadditionallogistics:block/encased_lazy_shaft/block_andesite",
+      "uvlock": true,
+      "x": 90,
+      "y": 90
+    },
+    "axis=x,negative=true,positive=false": {
+      "model": "createadditionallogistics:block/encased_lazy_shaft/block_andesite",
+      "uvlock": true,
+      "x": 90,
+      "y": 90
+    },
+    "axis=x,negative=true,positive=true": {
+      "model": "createadditionallogistics:block/encased_lazy_shaft/block_andesite",
+      "uvlock": true,
+      "x": 90,
+      "y": 90
+    },
+    "axis=y,negative=false,positive=false": {
+      "model": "createadditionallogistics:block/encased_lazy_shaft/block_andesite",
+      "uvlock": true
+    },
+    "axis=y,negative=false,positive=true": {
+      "model": "createadditionallogistics:block/encased_lazy_shaft/block_andesite",
+      "uvlock": true
+    },
+    "axis=y,negative=true,positive=false": {
+      "model": "createadditionallogistics:block/encased_lazy_shaft/block_andesite",
+      "uvlock": true
+    },
+    "axis=y,negative=true,positive=true": {
+      "model": "createadditionallogistics:block/encased_lazy_shaft/block_andesite",
+      "uvlock": true
+    },
+    "axis=z,negative=false,positive=false": {
+      "model": "createadditionallogistics:block/encased_lazy_shaft/block_andesite",
+      "uvlock": true,
+      "x": 90,
+      "y": 180
+    },
+    "axis=z,negative=false,positive=true": {
+      "model": "createadditionallogistics:block/encased_lazy_shaft/block_andesite",
+      "uvlock": true,
+      "x": 90,
+      "y": 180
+    },
+    "axis=z,negative=true,positive=false": {
+      "model": "createadditionallogistics:block/encased_lazy_shaft/block_andesite",
+      "uvlock": true,
+      "x": 90,
+      "y": 180
+    },
+    "axis=z,negative=true,positive=true": {
+      "model": "createadditionallogistics:block/encased_lazy_shaft/block_andesite",
+      "uvlock": true,
+      "x": 90,
+      "y": 180
+    }
+  }
+}

@@ -146,7 +146,6 @@ public class FlexibleShaftBlock extends AbstractLowEntityKineticBlock<FlexibleSh
         }
 
         return state;
-        //return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
     }
 
     /*@Override

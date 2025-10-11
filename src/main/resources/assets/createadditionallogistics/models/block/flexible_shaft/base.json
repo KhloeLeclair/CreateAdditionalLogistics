@@ -1,5 +1,6 @@
 {
 	"format_version": "1.9.0",
+	"credit": "Made with Blockbench",
 	"parent": "block/block",
 	"render_type": "minecraft:cutout_mipped",
 	"textures": {
@@ -22,14 +23,31 @@
 			}
 		},
 		{
-			"name": "core",
-			"from": [2.0125, 2.0125, 2.0125],
-			"to": [13.9875, 13.9875, 13.9875],
+			"name": "core_ns",
+			"from": [4, 3.975, 2],
+			"to": [12.05, 12.025, 14],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 8, 8]},
 			"faces": {
 				"north": {"uv": [4, 4, 12, 12], "texture": "#core"},
+				"south": {"uv": [4, 4, 12, 12], "texture": "#core"}
+			}
+		},
+		{
+			"name": "core_ew",
+			"from": [2, 3.975, 3.975],
+			"to": [14, 12.025, 12.025],
+			"rotation": {"angle": 0, "axis": "y", "origin": [8, 8, 8]},
+			"faces": {
 				"east": {"uv": [4, 4, 12, 12], "texture": "#core"},
-				"south": {"uv": [4, 4, 12, 12], "texture": "#core"},
-				"west": {"uv": [4, 4, 12, 12], "texture": "#core"},
+				"west": {"uv": [4, 4, 12, 12], "texture": "#core"}
+			}
+		},
+		{
+			"name": "core_ud",
+			"from": [3.975, 2, 3.975],
+			"to": [12.025, 14, 12.025],
+			"rotation": {"angle": 0, "axis": "z", "origin": [8, 8, 8]},
+			"faces": {
 				"up": {"uv": [4, 4, 12, 12], "texture": "#core"},
 				"down": {"uv": [4, 4, 12, 12], "texture": "#core"}
 			}

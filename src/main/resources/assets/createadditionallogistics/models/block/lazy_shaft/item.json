@@ -1,38 +1,10 @@
 {
 	"format_version": "1.9.0",
-	"parent": "block/block",
+	"parent": "createadditionallogistics:block/flexible_shaft/base",
 	"render_type": "minecraft:cutout",
 	"textures": {
 		"core": "createadditionallogistics:block/lazy_shaft/core",
 		"particle": "createadditionallogistics:block/lazy_shaft/frame",
 		"frame": "createadditionallogistics:block/lazy_shaft/frame"
-	},
-	"elements": [
-		{
-			"name": "edges",
-			"from": [2, 2, 2],
-			"to": [14, 14, 14],
-			"faces": {
-				"north": {"uv": [2, 2, 14, 14], "texture": "#frame"},
-				"east": {"uv": [2, 2, 14, 14], "texture": "#frame"},
-				"south": {"uv": [2, 2, 14, 14], "texture": "#frame"},
-				"west": {"uv": [2, 2, 14, 14], "texture": "#frame"},
-				"up": {"uv": [2, 2, 14, 14], "texture": "#frame"},
-				"down": {"uv": [2, 2, 14, 14], "texture": "#frame"}
-			}
-		},
-		{
-			"name": "core",
-			"from": [2.0125, 2.0125, 2.0125],
-			"to": [13.9875, 13.9875, 13.9875],
-			"faces": {
-				"north": {"uv": [4, 4, 12, 12], "texture": "#core"},
-				"east": {"uv": [4, 4, 12, 12], "texture": "#core"},
-				"south": {"uv": [4, 4, 12, 12], "texture": "#core"},
-				"west": {"uv": [4, 4, 12, 12], "texture": "#core"},
-				"up": {"uv": [4, 4, 12, 12], "texture": "#core"},
-				"down": {"uv": [4, 4, 12, 12], "texture": "#core"}
-			}
-		}
-	]
+	}
 }

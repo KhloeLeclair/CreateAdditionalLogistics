@@ -30,7 +30,12 @@ public class CALBlockEntityTypes {
     public static final BlockEntityEntry<LazyShaftBlockEntity> LAZY_SHAFT =
             REGISTRATE.blockEntity("lazy_shaft", LazyShaftBlockEntity::new)
                     .visual(() -> ShaftVisual::new)
-                    .validBlocks(CALBlocks.LAZY_SHAFT)
+                    .validBlocks(
+                            CALBlocks.LAZY_SHAFT,
+                            CALBlocks.ANDESITE_ENCASED_LAZY_SHAFT, CALBlocks.BRASS_ENCASED_LAZY_SHAFT,
+                            CALBlocks.COPPER_ENCASED_LAZY_SHAFT, //CALBlocks.RAILWAY_ENCASED_LAZY_SHAFT,
+                            CALBlocks.INDUSTRIAL_IRON_ENCASED_LAZY_SHAFT, CALBlocks.WEATHERED_IRON_ENCASED_LAZY_SHAFT
+                    )
                     .renderer(() -> LowEntityKineticBlockEntityRenderer::new)
                     .register();
 

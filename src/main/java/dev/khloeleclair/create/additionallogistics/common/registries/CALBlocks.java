@@ -3,21 +3,23 @@ package dev.khloeleclair.create.additionallogistics.common.registries;
 import com.simibubi.create.*;
 import com.simibubi.create.content.contraptions.actors.seat.SeatInteractionBehaviour;
 import com.simibubi.create.content.contraptions.actors.seat.SeatMovementBehaviour;
+import com.simibubi.create.content.decoration.encasing.EncasedCTBehaviour;
+import com.simibubi.create.content.decoration.encasing.EncasingRegistry;
 import com.simibubi.create.content.logistics.packager.PackagerGenerator;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBlockItem;
 import com.simibubi.create.foundation.block.DyedBlockList;
-import com.simibubi.create.foundation.data.CreateRegistrate;
-import com.simibubi.create.foundation.data.ModelGen;
-import com.simibubi.create.foundation.data.SharedProperties;
-import com.simibubi.create.foundation.data.TagGen;
+import com.simibubi.create.foundation.block.connected.CTSpriteShiftEntry;
+import com.simibubi.create.foundation.data.*;
 import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.utility.DyeHelper;
+import com.tterrag.registrate.builders.BlockBuilder;
 import com.tterrag.registrate.providers.DataGenContext;
 import com.tterrag.registrate.providers.RegistrateBlockstateProvider;
 import com.tterrag.registrate.providers.RegistrateLangProvider;
 import com.tterrag.registrate.providers.RegistrateRecipeProvider;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import com.tterrag.registrate.util.nullness.NonNullBiConsumer;
+import com.tterrag.registrate.util.nullness.NonNullUnaryOperator;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
 import dev.khloeleclair.create.additionallogistics.common.blocks.*;
 import net.createmod.catnip.data.Iterate;
@@ -26,13 +28,16 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.MapColor;
 import net.neoforged.neoforge.client.model.generators.ModelFile;
@@ -40,9 +45,12 @@ import net.neoforged.neoforge.client.model.generators.MultiPartBlockStateBuilder
 import net.neoforged.neoforge.common.Tags;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.function.Supplier;
+
 import static com.simibubi.create.api.behaviour.display.DisplaySource.displaySource;
 import static com.simibubi.create.api.behaviour.interaction.MovingInteractionBehaviour.interactionBehaviour;
 import static com.simibubi.create.api.behaviour.movement.MovementBehaviour.movementBehaviour;
+import static com.simibubi.create.foundation.data.BlockStateGen.axisBlock;
 import static com.simibubi.create.foundation.data.TagGen.*;
 
 public class CALBlocks {
@@ -70,10 +78,48 @@ public class CALBlocks {
                     .part()
                     .modelFile(model)
                     .addModel()
+                    .useOr()
+                    .condition(LazyShaftBlock.NEGATIVE, false)
+                    .condition(LazyShaftBlock.POSITIVE, false)
+                    .end();
+
+            ModelFile connection = p.models().getExistingFile(p.modLoc(lazyPath + "/connection"));
+
+            builder
+                    .part()
+                    .modelFile(connection)
+                    .addModel()
+                    .condition(LazyShaftBlock.AXIS, Direction.Axis.Z)
+                    .condition(LazyShaftBlock.POSITIVE, true)
+                    .condition(LazyShaftBlock.NEGATIVE, true)
+                    .end();
+
+            builder
+                    .part()
+                    .modelFile(connection)
+                    .rotationY(90)
+                    .addModel()
+                    .condition(LazyShaftBlock.AXIS, Direction.Axis.X)
+                    .condition(LazyShaftBlock.POSITIVE, true)
+                    .condition(LazyShaftBlock.NEGATIVE, true)
+                    .end();
+
+            builder
+                    .part()
+                    .modelFile(connection)
+                    .rotationX(90)
+                    .addModel()
+                    .condition(LazyShaftBlock.AXIS, Direction.Axis.Y)
+                    .condition(LazyShaftBlock.POSITIVE, true)
+                    .condition(LazyShaftBlock.NEGATIVE, true)
                     .end();
 
             for(Direction dir : Iterate.directions) {
                 BooleanProperty prop = dir.getAxisDirection() == Direction.AxisDirection.POSITIVE
+                        ? LazyShaftBlock.POSITIVE
+                        : LazyShaftBlock.NEGATIVE;
+
+                BooleanProperty otherProp = dir.getAxisDirection() == Direction.AxisDirection.NEGATIVE
                         ? LazyShaftBlock.POSITIVE
                         : LazyShaftBlock.NEGATIVE;
 
@@ -87,6 +133,7 @@ public class CALBlocks {
                         .addModel()
                         .condition(LazyShaftBlock.AXIS, dir.getAxis())
                         .condition(prop, true)
+                        .condition(otherProp, false)
                         .end();
             }
         };
@@ -116,6 +163,113 @@ public class CALBlocks {
                     .tag(CALTags.CALItemTags.BASIC_SHAFTS.tag)
                     .transform(ModelGen.customItemModel())
                     .register();
+
+    // Encased Lazy Shafts
+    static {
+        REGISTRATE.defaultCreativeTab((ResourceKey<CreativeModeTab>) null);
+    }
+
+    private static <B extends Block, P> BlockBuilder<B, P> encasedBase(BlockBuilder<B, P> b,
+                                                                                           Supplier<ItemLike> drop) {
+        return b.initialProperties(SharedProperties::stone)
+                .properties(BlockBehaviour.Properties::noOcclusion)
+                .loot((p, lb) -> p.dropOther(lb, drop.get()));
+    }
+
+    public static <B extends EncasedLazyShaftBlock, P> NonNullUnaryOperator<BlockBuilder<B, P>> encasedLazyShaft(
+            String casing, Supplier<CTSpriteShiftEntry> casingShift
+    ) {
+        return encasedLazyShaft(casing, Create.asResource("block/" + casing + "_casing"), Create.asResource("block/" + casing + "_gearbox"), casingShift);
+    }
+
+    public static <B extends EncasedLazyShaftBlock, P> NonNullUnaryOperator<BlockBuilder<B, P>> encasedLazyShaft(
+            String casing, ResourceLocation openingLocation, Supplier<CTSpriteShiftEntry> casingShift
+    ) {
+        return encasedLazyShaft(casing, Create.asResource("block/" + casing + "_casing"), openingLocation, casingShift);
+    }
+
+    public static <B extends EncasedLazyShaftBlock, P> NonNullUnaryOperator<BlockBuilder<B, P>> encasedLazyShaft(
+            String casing, ResourceLocation casingLocation, ResourceLocation openingLocation, Supplier<CTSpriteShiftEntry> casingShift
+    ) {
+        return builder -> encasedBase(builder, CALBlocks.LAZY_SHAFT::get)
+                .onRegister(CreateRegistrate.connectedTextures(() -> new EncasedCTBehaviour(casingShift.get())))
+                .onRegister(CreateRegistrate.casingConnectivity((block, cc) -> cc.make(block, casingShift.get(),
+                        (s, f) -> f.getAxis() != s.getValue(LazyShaftBlock.AXIS))))
+                .blockstate((c, p) -> axisBlock(c, p, blockState -> p.models()
+                        .withExistingParent("block/encased_lazy_shaft/block_" + casing, Create.asResource("block/encased_shaft/block"))
+                            .texture("casing", casingLocation)
+                            .texture("opening", openingLocation)
+                        , true))
+                .item()
+                .model((c,p) ->
+                        p.withExistingParent("block/encased_lazy_shaft/item_" + casing, Create.asResource("block/encased_shaft/item"))
+                            .texture("casing", casingLocation)
+                            .texture("opening", openingLocation))
+                .build();
+
+    }
+
+    public static <B extends EncasedLazyShaftBlock, P> NonNullUnaryOperator<BlockBuilder<B, P>> encasedLazyShaftNotConnected(
+            String casing, ResourceLocation casingLocation, ResourceLocation openingLocation
+    ) {
+        return builder -> encasedBase(builder, CALBlocks.LAZY_SHAFT::get)
+                .blockstate((c, p) -> axisBlock(c, p, blockState -> p.models()
+                                .withExistingParent("block/encased_lazy_shaft/block_" + casing, Create.asResource("block/encased_shaft/block"))
+                                .texture("casing", casingLocation)
+                                .texture("opening", openingLocation)
+                        , true))
+                .item()
+                .model((c,p) ->
+                        p.withExistingParent("block/encased_lazy_shaft/item_" + casing, Create.asResource("block/encased_shaft/item"))
+                            .texture("casing", casingLocation)
+                            .texture("opening", openingLocation))
+                .build();
+
+    }
+
+    public static BlockEntry<EncasedLazyShaftBlock> ANDESITE_ENCASED_LAZY_SHAFT =
+            REGISTRATE.block("andesite_encased_lazy_shaft", p -> new EncasedLazyShaftBlock(p, AllBlocks.ANDESITE_CASING::get))
+                    .properties(p -> p.mapColor(MapColor.PODZOL))
+                    .transform(encasedLazyShaft("andesite", Create.asResource("block/gearbox"), () -> AllSpriteShifts.ANDESITE_CASING))
+                    .transform(EncasingRegistry.addVariantTo(CALBlocks.LAZY_SHAFT))
+                    .transform(axeOrPickaxe())
+                    .register();
+
+    public static BlockEntry<EncasedLazyShaftBlock> BRASS_ENCASED_LAZY_SHAFT =
+            REGISTRATE.block("brass_encased_lazy_shaft", p -> new EncasedLazyShaftBlock(p, AllBlocks.BRASS_CASING::get))
+                    .properties(p -> p.mapColor(MapColor.TERRACOTTA_BROWN))
+                    .transform(encasedLazyShaft("brass", () -> AllSpriteShifts.BRASS_CASING))
+                    .transform(EncasingRegistry.addVariantTo(CALBlocks.LAZY_SHAFT))
+                    .transform(axeOrPickaxe())
+                    .register();
+
+    public static BlockEntry<EncasedLazyShaftBlock> COPPER_ENCASED_LAZY_SHAFT =
+            REGISTRATE.block("copper_encased_lazy_shaft", p -> new EncasedLazyShaftBlock(p, AllBlocks.COPPER_CASING::get))
+                    .properties(p -> p.mapColor(MapColor.TERRACOTTA_LIGHT_GRAY))
+                    .transform(encasedLazyShaft("copper", Create.asResource("block/gearbox"), () -> AllSpriteShifts.COPPER_CASING))
+                    .transform(EncasingRegistry.addVariantTo(CALBlocks.LAZY_SHAFT))
+                    .transform(axeOrPickaxe())
+                    .register();
+
+    public static BlockEntry<EncasedLazyShaftBlock> INDUSTRIAL_IRON_ENCASED_LAZY_SHAFT =
+            REGISTRATE.block("industrial_iron_encased_lazy_shaft", p -> new EncasedLazyShaftBlock(p, AllBlocks.INDUSTRIAL_IRON_BLOCK::get))
+                    .properties(p -> p.mapColor(MapColor.COLOR_GRAY))
+                    .transform(encasedLazyShaftNotConnected("industrial_iron", Create.asResource("block/industrial_iron_block"), Create.asResource("block/gearbox")))
+                    .transform(EncasingRegistry.addVariantTo(CALBlocks.LAZY_SHAFT))
+                    .transform(axeOrPickaxe())
+                    .register();
+
+    public static BlockEntry<EncasedLazyShaftBlock> WEATHERED_IRON_ENCASED_LAZY_SHAFT =
+            REGISTRATE.block("weathered_iron_encased_lazy_shaft", p -> new EncasedLazyShaftBlock(p, AllBlocks.WEATHERED_IRON_BLOCK::get))
+                    .properties(p -> p.mapColor(MapColor.COLOR_GRAY))
+                    .transform(encasedLazyShaftNotConnected("weathered_iron", Create.asResource("block/weathered_iron_block"), Create.asResource("block/gearbox")))
+                    .transform(EncasingRegistry.addVariantTo(CALBlocks.LAZY_SHAFT))
+                    .transform(axeOrPickaxe())
+                    .register();
+
+    static {
+        REGISTRATE.defaultCreativeTab(AllCreativeModeTabs.BASE_CREATIVE_TAB.getKey());
+    }
 
     // Flexible Shafts
     private static NonNullBiConsumer<DataGenContext<Block, FlexibleShaftBlock>, RegistrateBlockstateProvider> pipeBlockState(@Nullable String name, @Nullable ResourceLocation texture) {

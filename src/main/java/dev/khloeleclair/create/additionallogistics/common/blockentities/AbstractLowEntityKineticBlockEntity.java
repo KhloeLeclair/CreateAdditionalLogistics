@@ -8,6 +8,7 @@ import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -22,6 +23,7 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
     @Nullable
     protected List<BlockPos> connections;
     protected boolean checkInvalid;
+    protected boolean lazyDirty;
 
     public AbstractLowEntityKineticBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
         super(typeIn, pos, state);
@@ -31,11 +33,13 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
     protected void read(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
         super.read(compound, registries, clientPacket);
         connections = null;
-        if (compound.contains("Connections", CompoundTag.TAG_LONG_ARRAY)) {
-            var cache = compound.getLongArray("Connections");
+        if (compound.contains("Connected", CompoundTag.TAG_LONG_ARRAY)) {
+            var cache = compound.getLongArray("Connected");
             connections = new ArrayList<>(cache.length);
             for(long pos : cache)
                 connections.add(BlockPos.of(pos));
+        } else if (compound.contains("Connections", CompoundTag.TAG_LONG_ARRAY)) {
+            lazyDirty = true;
         }
     }
 
@@ -49,7 +53,7 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
                 cache[i] = entry.asLong();
                 i++;
             }
-            compound.putLongArray("Connections", cache);
+            compound.putLongArray("Connected", cache);
         }
     }
 
@@ -57,9 +61,15 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
     public void tick() {
         super.tick();
 
-        if (checkInvalid && !level.isClientSide) {
-            checkInvalid = false;
-            removeInvalidConnections();
+        if (!level.isClientSide) {
+            if (lazyDirty) {
+                lazyDirty = false;
+                markDirty(level, worldPosition);
+            }
+            if (checkInvalid) {
+                checkInvalid = false;
+                removeInvalidConnections();
+            }
         }
     }
 
@@ -124,8 +134,8 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
     }
 
     protected void setConnections(List<BlockPos> newConnections) {
-        int index = -1;
-        while(index++ < newConnections.size()) {
+        int index = 0;
+        for(; index < newConnections.size(); index++) {
             if (worldPosition.equals(newConnections.get(index)))
                 break;
         }
@@ -136,13 +146,13 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
         int previous = index - 1;
         int next = index + 1;
 
-        // For the entities at the ends of the list, loop around.
+        /*// For the entities at the ends of the list, loop around.
         if (newConnections.size() > 2) {
             if (previous == -1)
                 previous = newConnections.size() - 1;
             if (next >= newConnections.size())
                 next = 0;
-        }
+        }*/
 
         if (connections == null)
             connections = new ArrayList<>();
@@ -159,6 +169,7 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
         if (contains_previous && contains_next && connections.size() == count)
             return;
 
+        // Something changed. Did the fire nation attack?
         detachKinetics();
 
         connections.clear();
@@ -248,6 +259,9 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
         while(!dirty.isEmpty()) {
             LevelBlockPos pos = dirty.removeFirst();
             var result = walkBlocks(pos.level, pos.pos);
+
+            // Sort the position list to keep things stable.
+            result.entityPositions.sort(Vec3i::compareTo);
 
             // Update every entity.
             for(var entity: result.entities)

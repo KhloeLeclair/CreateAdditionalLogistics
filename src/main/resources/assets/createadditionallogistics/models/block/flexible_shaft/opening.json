@@ -1,14 +1,16 @@
 {
 	"format_version": "1.9.0",
+	"credit": "Made with Blockbench",
 	"parent": "block/block",
 	"textures": {
-		"opening": "createadditionallogistics:block/flexible_shaft/opening"
+		"opening": "createadditionallogistics:block/flexible_shaft/opening",
+		"particle": "createadditionallogistics:block/flexible_shaft/core"
 	},
 	"elements": [
 		{
 			"name": "opening",
-			"from": [2, 2, 2],
-			"to": [14, 14, 3],
+			"from": [2, 2, 1.975],
+			"to": [14, 14, 1.975],
 			"faces": {
 				"north": {"uv": [2, 2, 14, 14], "texture": "#opening"}
 			}
