@@ -61,7 +61,7 @@ public class CashRegisterScreen extends AbstractSimiContainerScreen<CashRegister
 
         guiGraphics.drawString(font, title, Math.round(x + background.getWidth() / 2f - font.width(title) / 2f), y + 6, 0x442000, false);
 
-        GuiGameElement.of(icon).<GuiGameElement.GuiRenderBuilder>at(x + background.getWidth() + 16, y + background.getHeight() - 16, 0)
+        GuiGameElement.of(icon, menu.contentHolder).<GuiGameElement.GuiRenderBuilder>at(x + background.getWidth() + 16, y + background.getHeight() - 16, 100)
                 .scale(32)
                 .rotate(30, 45, 0)
                 .lighting(ILightingSettings.DEFAULT_3D)

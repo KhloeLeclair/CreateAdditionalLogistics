@@ -3,12 +3,11 @@ package dev.khloeleclair.create.additionallogistics.common.registries;
 import com.simibubi.create.*;
 import com.simibubi.create.content.contraptions.actors.seat.SeatInteractionBehaviour;
 import com.simibubi.create.content.contraptions.actors.seat.SeatMovementBehaviour;
-import com.simibubi.create.content.decoration.encasing.EncasedCTBehaviour;
+import com.simibubi.create.content.decoration.encasing.EncasedBlock;
 import com.simibubi.create.content.decoration.encasing.EncasingRegistry;
 import com.simibubi.create.content.logistics.packager.PackagerGenerator;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBlockItem;
 import com.simibubi.create.foundation.block.DyedBlockList;
-import com.simibubi.create.foundation.block.connected.CTSpriteShiftEntry;
 import com.simibubi.create.foundation.data.CreateRegistrate;
 import com.simibubi.create.foundation.data.ModelGen;
 import com.simibubi.create.foundation.data.SharedProperties;
@@ -16,17 +15,14 @@ import com.simibubi.create.foundation.data.TagGen;
 import com.simibubi.create.foundation.item.ItemDescription;
 import com.simibubi.create.foundation.utility.DyeHelper;
 import com.tterrag.registrate.builders.BlockBuilder;
-import com.tterrag.registrate.providers.DataGenContext;
-import com.tterrag.registrate.providers.RegistrateBlockstateProvider;
 import com.tterrag.registrate.providers.RegistrateLangProvider;
 import com.tterrag.registrate.providers.RegistrateRecipeProvider;
 import com.tterrag.registrate.util.entry.BlockEntry;
-import com.tterrag.registrate.util.nullness.NonNullBiConsumer;
-import com.tterrag.registrate.util.nullness.NonNullUnaryOperator;
+import com.tterrag.registrate.util.nullness.NonNullFunction;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
 import dev.khloeleclair.create.additionallogistics.common.blocks.*;
-import net.createmod.catnip.data.Iterate;
-import net.minecraft.core.Direction;
+import dev.khloeleclair.create.additionallogistics.common.datagen.CALBlockStateGen;
+import dev.khloeleclair.create.additionallogistics.common.items.LazyCogwheelBlockItem;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
@@ -37,23 +33,14 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.MapColor;
-import net.neoforged.neoforge.client.model.generators.ModelFile;
-import net.neoforged.neoforge.client.model.generators.MultiPartBlockStateBuilder;
 import net.neoforged.neoforge.common.Tags;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.function.Supplier;
 
 import static com.simibubi.create.api.behaviour.display.DisplaySource.displaySource;
 import static com.simibubi.create.api.behaviour.interaction.MovingInteractionBehaviour.interactionBehaviour;
 import static com.simibubi.create.api.behaviour.movement.MovementBehaviour.movementBehaviour;
-import static com.simibubi.create.foundation.data.BlockStateGen.axisBlock;
 import static com.simibubi.create.foundation.data.TagGen.*;
 
 public class CALBlocks {
@@ -65,89 +52,13 @@ public class CALBlocks {
     }
 
     // Lazy Shafts
-    private static NonNullBiConsumer<DataGenContext<Block, LazyShaftBlock>, RegistrateBlockstateProvider> lazyShaftBlockState() {
-        return (c, p) -> {
-            String path = "block/flexible_shaft";
-            String lazyPath = "block/" + c.getName();
-
-            ModelFile model = p.models()
-                    .withExistingParent(c.getName(), p.modLoc(path + "/base"))
-                    .texture("frame", p.modLoc(lazyPath + "/frame"))
-                    .texture("particle", p.modLoc(lazyPath + "/core"))
-                    .texture("core", p.modLoc(lazyPath + "/core"));
-
-            MultiPartBlockStateBuilder builder = p.getMultipartBuilder(c.get());
-            builder
-                    .part()
-                    .modelFile(model)
-                    .addModel()
-                    .useOr()
-                    .condition(LazyShaftBlock.NEGATIVE, false)
-                    .condition(LazyShaftBlock.POSITIVE, false)
-                    .end();
-
-            ModelFile connection = p.models().getExistingFile(p.modLoc(lazyPath + "/connection"));
-
-            builder
-                    .part()
-                    .modelFile(connection)
-                    .addModel()
-                    .condition(LazyShaftBlock.AXIS, Direction.Axis.Z)
-                    .condition(LazyShaftBlock.POSITIVE, true)
-                    .condition(LazyShaftBlock.NEGATIVE, true)
-                    .end();
-
-            builder
-                    .part()
-                    .modelFile(connection)
-                    .rotationY(90)
-                    .addModel()
-                    .condition(LazyShaftBlock.AXIS, Direction.Axis.X)
-                    .condition(LazyShaftBlock.POSITIVE, true)
-                    .condition(LazyShaftBlock.NEGATIVE, true)
-                    .end();
-
-            builder
-                    .part()
-                    .modelFile(connection)
-                    .rotationX(90)
-                    .addModel()
-                    .condition(LazyShaftBlock.AXIS, Direction.Axis.Y)
-                    .condition(LazyShaftBlock.POSITIVE, true)
-                    .condition(LazyShaftBlock.NEGATIVE, true)
-                    .end();
-
-            for(Direction dir : Iterate.directions) {
-                BooleanProperty prop = dir.getAxisDirection() == Direction.AxisDirection.POSITIVE
-                        ? LazyShaftBlock.POSITIVE
-                        : LazyShaftBlock.NEGATIVE;
-
-                BooleanProperty otherProp = dir.getAxisDirection() == Direction.AxisDirection.NEGATIVE
-                        ? LazyShaftBlock.POSITIVE
-                        : LazyShaftBlock.NEGATIVE;
-
-                ModelFile m = p.models()
-                                .withExistingParent(c.getName() + "_" + dir.getSerializedName(), p.modLoc(path + "/block_" + dir.getSerializedName()))
-                                .texture("frame", p.modLoc(lazyPath + "/frame"));
-
-                builder
-                        .part()
-                        .modelFile(m)
-                        .addModel()
-                        .condition(LazyShaftBlock.AXIS, dir.getAxis())
-                        .condition(prop, true)
-                        .condition(otherProp, false)
-                        .end();
-            }
-        };
-    }
-
     public static final BlockEntry<LazyShaftBlock> LAZY_SHAFT =
             REGISTRATE.block("lazy_shaft", LazyShaftBlock::new)
                     .initialProperties(SharedProperties::stone)
                     .properties(p -> p.mapColor(MapColor.PODZOL))
                     .transform(axeOrPickaxe())
-                    .blockstate(lazyShaftBlockState())
+                    .blockstate(CALBlockStateGen.lazyShaftBlockState())
+                    .tag(CALTags.CALBlockTags.LAZY.tag)
                     .tag(CALTags.CALBlockTags.BASIC_SHAFTS.tag)
                     .tag(AllTags.AllBlockTags.SAFE_NBT.tag)
                     .recipe((c, p) -> {
@@ -161,6 +72,7 @@ public class CALBlocks {
                                 .save(p, CreateAdditionalLogistics.asResource("crafting/kinetics/shaft_from_lazy"));
                     })
                     .item()
+                    .tag(CALTags.CALItemTags.LAZY.tag)
                     .tag(CALTags.CALItemTags.BASIC_SHAFTS.tag)
                     .transform(ModelGen.customItemModel())
                     .register();
@@ -170,151 +82,108 @@ public class CALBlocks {
         REGISTRATE.defaultCreativeTab((ResourceKey<CreativeModeTab>) null);
     }
 
-    private static <B extends Block, P> BlockBuilder<B, P> encasedBase(BlockBuilder<B, P> b,
-                                                                                           Supplier<ItemLike> drop) {
-        return b.initialProperties(SharedProperties::stone)
-                .properties(BlockBehaviour.Properties::noOcclusion)
-                .loot((p, lb) -> p.dropOther(lb, drop.get()));
-    }
-
-    public static <B extends EncasedLazyShaftBlock, P> NonNullUnaryOperator<BlockBuilder<B, P>> encasedLazyShaft(
-            String casing, Supplier<CTSpriteShiftEntry> casingShift
-    ) {
-        return encasedLazyShaft(casing, Create.asResource("block/" + casing + "_casing"), Create.asResource("block/" + casing + "_gearbox"), casingShift);
-    }
-
-    public static <B extends EncasedLazyShaftBlock, P> NonNullUnaryOperator<BlockBuilder<B, P>> encasedLazyShaft(
-            String casing, ResourceLocation openingLocation, Supplier<CTSpriteShiftEntry> casingShift
-    ) {
-        return encasedLazyShaft(casing, Create.asResource("block/" + casing + "_casing"), openingLocation, casingShift);
-    }
-
-    public static <B extends EncasedLazyShaftBlock, P> NonNullUnaryOperator<BlockBuilder<B, P>> encasedLazyShaft(
-            String casing, ResourceLocation casingLocation, ResourceLocation openingLocation, Supplier<CTSpriteShiftEntry> casingShift
-    ) {
-        return builder -> encasedBase(builder, CALBlocks.LAZY_SHAFT::get)
-                .onRegister(CreateRegistrate.connectedTextures(() -> new EncasedCTBehaviour(casingShift.get())))
-                .onRegister(CreateRegistrate.casingConnectivity((block, cc) -> cc.make(block, casingShift.get(),
-                        (s, f) -> f.getAxis() != s.getValue(LazyShaftBlock.AXIS))))
-                .blockstate((c, p) -> axisBlock(c, p, blockState -> p.models()
-                        .withExistingParent("block/encased_lazy_shaft/block_" + casing, Create.asResource("block/encased_shaft/block"))
-                            .texture("casing", casingLocation)
-                            .texture("opening", openingLocation)
-                        , true))
+    public static <T extends Block & EncasedBlock, P> NonNullFunction<BlockBuilder<T, P>, BlockBuilder<T, P>> encasedLazyShaft() {
+        return t -> t.transform(EncasingRegistry.addVariantTo(CALBlocks.LAZY_SHAFT))
+                .transform(axeOrPickaxe())
+                .tag(CALTags.CALBlockTags.LAZY.tag)
+                .tag(CALTags.CALBlockTags.BASIC_SHAFTS.tag)
                 .item()
-                .model((c,p) ->
-                        p.withExistingParent("block/encased_lazy_shaft/item_" + casing, Create.asResource("block/encased_shaft/item"))
-                            .texture("casing", casingLocation)
-                            .texture("opening", openingLocation))
+                .model((c, p) -> p.withExistingParent(c.getName(), p.modLoc("block/lazy_shaft/item")))
                 .build();
-
-    }
-
-    public static <B extends EncasedLazyShaftBlock, P> NonNullUnaryOperator<BlockBuilder<B, P>> encasedLazyShaftNotConnected(
-            String casing, ResourceLocation casingLocation, ResourceLocation openingLocation
-    ) {
-        return builder -> encasedBase(builder, CALBlocks.LAZY_SHAFT::get)
-                .blockstate((c, p) -> axisBlock(c, p, blockState -> p.models()
-                                .withExistingParent("block/encased_lazy_shaft/block_" + casing, Create.asResource("block/encased_shaft/block"))
-                                .texture("casing", casingLocation)
-                                .texture("opening", openingLocation)
-                        , true))
-                .item()
-                .model((c,p) ->
-                        p.withExistingParent("block/encased_lazy_shaft/item_" + casing, Create.asResource("block/encased_shaft/item"))
-                            .texture("casing", casingLocation)
-                            .texture("opening", openingLocation))
-                .build();
-
     }
 
     public static BlockEntry<EncasedLazyShaftBlock> ANDESITE_ENCASED_LAZY_SHAFT =
             REGISTRATE.block("andesite_encased_lazy_shaft", p -> new EncasedLazyShaftBlock(p, AllBlocks.ANDESITE_CASING::get))
                     .properties(p -> p.mapColor(MapColor.PODZOL))
-                    .transform(encasedLazyShaft("andesite", Create.asResource("block/gearbox"), () -> AllSpriteShifts.ANDESITE_CASING))
-                    .transform(EncasingRegistry.addVariantTo(CALBlocks.LAZY_SHAFT))
-                    .transform(axeOrPickaxe())
+                    .transform(CALBlockStateGen.encasedLazyShaft("andesite", Create.asResource("block/gearbox"), () -> AllSpriteShifts.ANDESITE_CASING))
+                    .transform(encasedLazyShaft())
                     .register();
 
     public static BlockEntry<EncasedLazyShaftBlock> BRASS_ENCASED_LAZY_SHAFT =
             REGISTRATE.block("brass_encased_lazy_shaft", p -> new EncasedLazyShaftBlock(p, AllBlocks.BRASS_CASING::get))
                     .properties(p -> p.mapColor(MapColor.TERRACOTTA_BROWN))
-                    .transform(encasedLazyShaft("brass", () -> AllSpriteShifts.BRASS_CASING))
-                    .transform(EncasingRegistry.addVariantTo(CALBlocks.LAZY_SHAFT))
-                    .transform(axeOrPickaxe())
+                    .transform(CALBlockStateGen.encasedLazyShaft("brass", () -> AllSpriteShifts.BRASS_CASING))
+                    .transform(encasedLazyShaft())
                     .register();
 
     public static BlockEntry<EncasedLazyShaftBlock> COPPER_ENCASED_LAZY_SHAFT =
             REGISTRATE.block("copper_encased_lazy_shaft", p -> new EncasedLazyShaftBlock(p, AllBlocks.COPPER_CASING::get))
                     .properties(p -> p.mapColor(MapColor.TERRACOTTA_LIGHT_GRAY))
-                    .transform(encasedLazyShaft("copper", Create.asResource("block/gearbox"), () -> AllSpriteShifts.COPPER_CASING))
-                    .transform(EncasingRegistry.addVariantTo(CALBlocks.LAZY_SHAFT))
-                    .transform(axeOrPickaxe())
+                    .transform(CALBlockStateGen.encasedLazyShaft("copper", Create.asResource("block/gearbox"), () -> AllSpriteShifts.COPPER_CASING))
+                    .transform(encasedLazyShaft())
                     .register();
 
     public static BlockEntry<EncasedLazyShaftBlock> INDUSTRIAL_IRON_ENCASED_LAZY_SHAFT =
-            REGISTRATE.block("industrial_iron_encased_lazy_shaft", p -> new EncasedLazyShaftBlock(p, AllBlocks.INDUSTRIAL_IRON_BLOCK::get))
+            REGISTRATE.block("industrial_iron_encased_lazy_shaft", p -> new EncasedLazyShaftBlock(p, AllBlocks.INDUSTRIAL_IRON_BLOCK))
                     .properties(p -> p.mapColor(MapColor.COLOR_GRAY))
-                    .transform(encasedLazyShaftNotConnected("industrial_iron", Create.asResource("block/industrial_iron_block"), Create.asResource("block/gearbox")))
-                    .transform(EncasingRegistry.addVariantTo(CALBlocks.LAZY_SHAFT))
-                    .transform(axeOrPickaxe())
+                    .transform(CALBlockStateGen.encasedLazyShaftNotConnected("industrial_iron", Create.asResource("block/industrial_iron_block"), Create.asResource("block/gearbox")))
+                    .transform(encasedLazyShaft())
                     .register();
 
     public static BlockEntry<EncasedLazyShaftBlock> WEATHERED_IRON_ENCASED_LAZY_SHAFT =
-            REGISTRATE.block("weathered_iron_encased_lazy_shaft", p -> new EncasedLazyShaftBlock(p, AllBlocks.WEATHERED_IRON_BLOCK::get))
+            REGISTRATE.block("weathered_iron_encased_lazy_shaft", p -> new EncasedLazyShaftBlock(p, AllBlocks.WEATHERED_IRON_BLOCK))
                     .properties(p -> p.mapColor(MapColor.COLOR_GRAY))
-                    .transform(encasedLazyShaftNotConnected("weathered_iron", Create.asResource("block/weathered_iron_block"), Create.asResource("block/gearbox")))
-                    .transform(EncasingRegistry.addVariantTo(CALBlocks.LAZY_SHAFT))
-                    .transform(axeOrPickaxe())
+                    .transform(CALBlockStateGen.encasedLazyShaftNotConnected("weathered_iron", Create.asResource("block/weathered_iron_block"), Create.asResource("block/gearbox")))
+                    .transform(encasedLazyShaft())
                     .register();
 
     static {
         REGISTRATE.defaultCreativeTab(AllCreativeModeTabs.BASE_CREATIVE_TAB.getKey());
     }
 
+    // Lazy CogWheel
+    public static final BlockEntry<LazyCogWheelBlock> LAZY_COGWHEEL =
+            REGISTRATE.block("lazy_cogwheel", LazyCogWheelBlock::small)
+                    .initialProperties(SharedProperties::stone)
+                    .properties(p -> p.sound(SoundType.WOOD).mapColor(MapColor.DIRT))
+                    .transform(axeOrPickaxe())
+                    .blockstate(CALBlockStateGen.lazyCog())
+                    .tag(CALTags.CALBlockTags.LAZY.tag)
+                    .tag(CALTags.CALBlockTags.LAZY_COGS.tag)
+                    .recipe((c, p) -> {
+                        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, c.get(), 4)
+                                .requires(AllBlocks.COGWHEEL, 4)
+                                .unlockedBy("has_cogwheel", RegistrateRecipeProvider.has(AllBlocks.COGWHEEL))
+                                .save(p, CreateAdditionalLogistics.asResource("crafting/kinetics/" + c.getName() + "_from_cogwheel"));
+                        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, AllBlocks.COGWHEEL, 4)
+                                .requires(c.get(), 4)
+                                .unlockedBy("has_lazy_cog", RegistrateRecipeProvider.has(c.get()))
+                                .save(p, CreateAdditionalLogistics.asResource("crafting/kinetics/cogwheel_from_lazy"));
+                    })
+                    .item(LazyCogwheelBlockItem::new)
+                    .tag(CALTags.CALItemTags.LAZY.tag)
+                    .tag(CALTags.CALItemTags.LAZY_COGS.tag)
+                    .model((c,p) -> p.withExistingParent(c.getName(), p.modLoc("block/lazy_cog/item_small")))
+                    .build()
+                    .register();
+
+    public static final BlockEntry<LazyCogWheelBlock> LAZY_LARGE_COGWHEEL =
+            REGISTRATE.block("lazy_large_cogwheel", LazyCogWheelBlock::large)
+                    .initialProperties(SharedProperties::stone)
+                    .properties(p -> p.sound(SoundType.WOOD).mapColor(MapColor.DIRT))
+                    .transform(axeOrPickaxe())
+                    .blockstate(CALBlockStateGen.lazyCog())
+                    .tag(CALTags.CALBlockTags.LAZY.tag)
+                    .tag(CALTags.CALBlockTags.LAZY_LARGE_COGS.tag)
+                    .recipe((c, p) -> {
+                        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, c.get(), 4)
+                                .requires(AllBlocks.LARGE_COGWHEEL, 4)
+                                .unlockedBy("has_large_cogwheel", RegistrateRecipeProvider.has(AllBlocks.LARGE_COGWHEEL))
+                                .save(p, CreateAdditionalLogistics.asResource("crafting/kinetics/" + c.getName() + "_from_large_cogwheel"));
+                        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, AllBlocks.LARGE_COGWHEEL, 4)
+                                .requires(c.get(), 4)
+                                .unlockedBy("has_lazy_large_cog", RegistrateRecipeProvider.has(c.get()))
+                                .save(p, CreateAdditionalLogistics.asResource("crafting/kinetics/large_cogwheel_from_lazy"));
+                    })
+                    .item(LazyCogwheelBlockItem::new)
+                    .tag(CALTags.CALItemTags.LAZY.tag)
+                    .tag(CALTags.CALItemTags.LAZY_LARGE_COGS.tag)
+                    .onRegisterAfter(Registries.ITEM, v -> ItemDescription.useKey(v, "block.createadditionallogistics.lazy_cogwheel"))
+                    .model((c,p) -> p.withExistingParent(c.getName(), p.modLoc("block/lazy_cog/item_large")))
+                    .build()
+                    .register();
+
     // Flexible Shafts
-    private static NonNullBiConsumer<DataGenContext<Block, FlexibleShaftBlock>, RegistrateBlockstateProvider> pipeBlockState(@Nullable String name, @Nullable ResourceLocation texture) {
-        return (c, p) -> {
-            String path = "block/" + (name == null ? c.getName() : name);
-
-            ModelFile model;
-            if (texture == null)
-                model = p.models().getExistingFile(p.modLoc(path + "/base"));
-            else
-                model = p.models()
-                        .withExistingParent(c.getName(), p.modLoc(path + "/base"))
-                        .texture("particle", texture)
-                        .texture("core", texture);
-
-            MultiPartBlockStateBuilder builder = p.getMultipartBuilder(c.get());
-            builder
-                .part()
-                .modelFile(model)
-                .addModel()
-                .end();
-
-            for(Direction dir : Iterate.directions) {
-                int index = dir.ordinal();
-                BooleanProperty property = FlexibleShaftBlock.SIDES[index];
-
-                ModelFile m;
-                //if (texture == null)
-                    m = p.models().getExistingFile(p.modLoc(path + "/block_" + dir.getSerializedName()));
-                /*else
-                    m = p.models()
-                                .withExistingParent(c.getName() + "_" + dir.getSerializedName(), p.modLoc(path + "/block_" + dir.getSerializedName()))
-                                .texture("particle", texture)
-                                .texture("core", texture);*/
-
-                builder
-                    .part()
-                    .modelFile(m)
-                    .addModel()
-                    .condition(property, true)
-                    .end();
-            }
-        };
-    }
 
     public static final BlockEntry<FlexibleShaftBlock> FLEXIBLE_SHAFT =
             REGISTRATE.block("flexible_shaft", FlexibleShaftBlock::new)
@@ -322,7 +191,8 @@ public class CALBlocks {
                     .properties(p -> p.mapColor(MapColor.PODZOL))
                     .transform(axeOrPickaxe())
                     .lang("Flexible Lazy Shaft")
-                    .blockstate(pipeBlockState(null, null))
+                    .blockstate(CALBlockStateGen.flexibleShaft(null, null))
+                    .tag(CALTags.CALBlockTags.LAZY.tag)
                     .tag(CALTags.CALBlockTags.FLEXIBLE_SHAFTS.tag)
                     .tag(AllTags.AllBlockTags.SAFE_NBT.tag)
                     .recipe((c, p) -> {
@@ -342,6 +212,7 @@ public class CALBlocks {
                                 .save(p, CreateAdditionalLogistics.asResource("crafting/kinetics/" + c.getName() + "_remove_dye"));
                     })
                     .item()
+                    .tag(CALTags.CALItemTags.LAZY.tag)
                     .tag(CALTags.CALItemTags.FLEXIBLE_SHAFTS.tag)
                     .transform(ModelGen.customItemModel())
                     .register();
@@ -354,7 +225,8 @@ public class CALBlocks {
                 .properties(p -> p.mapColor(color))
                 .transform(axeOrPickaxe())
                 .lang(RegistrateLangProvider.toEnglishName(colorName + "_flexible_lazy_shaft"))
-                .blockstate(pipeBlockState("flexible_shaft", ResourceLocation.withDefaultNamespace("block/" + color.getSerializedName() + "_concrete")))
+                .blockstate(CALBlockStateGen.flexibleShaft("flexible_shaft", ResourceLocation.withDefaultNamespace("block/" + color.getSerializedName() + "_concrete")))
+                .tag(CALTags.CALBlockTags.LAZY.tag)
                 .tag(CALTags.CALBlockTags.FLEXIBLE_SHAFTS.tag)
                 .tag(AllTags.AllBlockTags.SAFE_NBT.tag)
                 .recipe((c, p) -> ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, c.get())
@@ -364,6 +236,7 @@ public class CALBlocks {
                         .save(p, CreateAdditionalLogistics.asResource("crafting/kinetics/" + c.getName() + "_from_other_flexible_shaft")))
                 .onRegisterAfter(Registries.ITEM, v -> ItemDescription.useKey(v, "block.createadditionallogistics.flexible_shaft"))
                 .item()
+                .tag(CALTags.CALItemTags.LAZY.tag)
                 .tag(CALTags.CALItemTags.FLEXIBLE_SHAFTS.tag)
                 .tab(AllCreativeModeTabs.BASE_CREATIVE_TAB.getKey(), (c,p) -> p.accept(c.get(), CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY))
                 .build()

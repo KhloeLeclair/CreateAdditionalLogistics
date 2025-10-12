@@ -4,7 +4,9 @@
   "block.createadditionallogistics.package_accelerator.tooltip.summary": "Makes the _Packager_ in front of it faster, at the expense of _stress_.",
 
   "block.createadditionallogistics.lazy_shaft.tooltip.summary": "Lazy Shafts are similar to Shafts, but they're more efficient if you need _more than two in a row_.",
-  "block.createadditionallogistics.flexible_shaft.tooltip.summary": "Flexible Lazy Shafts are like _Lazy Shafts_, but they can connect from any block in any direction. Just _right-click_ on one to toggle that side's output.",
+  "block.createadditionallogistics.flexible_shaft.tooltip.summary": "Flexible Lazy Shafts are like _Lazy Shafts_, but they can connect from any block in any direction. Just _right-click_ on one with a wrench to toggle that side's output.",
+
+  "block.createadditionallogistics.lazy_cogwheel.tooltip.summary": "Lazy Cogwheels work exactly like normal cogs, but they can be more efficient if used together with _Lazy Shafts_ as long as there's at least two or more lazy shafts.",
 
   "createadditionallogistics.sales_ledger.tooltip.summary": "A record of sales made at a given _Cash Register_. You can use this to quickly restock any sold items by clicking a _Stock Keeper_ with it."
 }

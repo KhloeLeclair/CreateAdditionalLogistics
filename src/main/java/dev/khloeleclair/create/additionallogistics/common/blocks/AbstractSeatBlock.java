@@ -17,6 +17,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.util.FakePlayer;
+import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractSeatBlock extends SeatBlock {
 
@@ -26,7 +27,7 @@ public abstract class AbstractSeatBlock extends SeatBlock {
 
     protected abstract BlockState getColoredState(DyeColor color);
 
-    protected abstract Vec3 getSeatPosition(Level level, BlockPos pos);
+    public abstract Vec3 getSeatPosition(@Nullable Level level, BlockPos pos);
 
     @Override
     protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {

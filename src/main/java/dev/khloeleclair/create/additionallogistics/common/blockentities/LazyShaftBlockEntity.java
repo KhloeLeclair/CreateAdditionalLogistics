@@ -1,6 +1,6 @@
 package dev.khloeleclair.create.additionallogistics.common.blockentities;
 
-import dev.khloeleclair.create.additionallogistics.common.blocks.LazyShaftBlock;
+import dev.khloeleclair.create.additionallogistics.common.blocks.AbstractLazyShaftBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -19,9 +19,9 @@ public class LazyShaftBlockEntity extends AbstractLowEntityKineticBlockEntity {
 
     @Override
     public float getRotationSpeedModifier(Direction face) {
-        if (face.getAxis() == getBlockState().getValue(LazyShaftBlock.AXIS))
-            return 1;
-        return 0;
+        if (face.getAxis() == getBlockState().getValue(AbstractLazyShaftBlock.AXIS))
+            return 1f;
+        return 0f;
     }
 
 }

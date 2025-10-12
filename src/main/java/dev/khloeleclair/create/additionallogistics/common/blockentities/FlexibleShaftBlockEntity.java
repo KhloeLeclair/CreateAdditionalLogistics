@@ -104,6 +104,7 @@ public class FlexibleShaftBlockEntity extends AbstractLowEntityKineticBlockEntit
     public void deactivateSelf() {
         notifyConnectedToValidate();
         level.setBlockAndUpdate(worldPosition, getBlockState().setValue(FlexibleShaftBlock.ACTIVE, false));
+        AbstractLowEntityKineticBlockEntity.markDirty(level, worldPosition);
     }
 
     public boolean hasConnection(Direction side) {

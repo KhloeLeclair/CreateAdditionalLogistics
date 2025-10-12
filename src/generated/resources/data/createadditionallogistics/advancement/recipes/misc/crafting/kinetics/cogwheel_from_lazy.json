@@ -1,0 +1,32 @@
+{
+  "parent": "minecraft:recipes/root",
+  "criteria": {
+    "has_lazy_cog": {
+      "conditions": {
+        "items": [
+          {
+            "items": "createadditionallogistics:lazy_cogwheel"
+          }
+        ]
+      },
+      "trigger": "minecraft:inventory_changed"
+    },
+    "has_the_recipe": {
+      "conditions": {
+        "recipe": "createadditionallogistics:crafting/kinetics/cogwheel_from_lazy"
+      },
+      "trigger": "minecraft:recipe_unlocked"
+    }
+  },
+  "requirements": [
+    [
+      "has_the_recipe",
+      "has_lazy_cog"
+    ]
+  ],
+  "rewards": {
+    "recipes": [
+      "createadditionallogistics:crafting/kinetics/cogwheel_from_lazy"
+    ]
+  }
+}

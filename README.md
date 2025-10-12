@@ -204,6 +204,33 @@ the stock ticker. But at least you won't do it by accident.
 
 # Changelog
 
+## 1.2.3
+
+### Added
+
+* Lazy Cogs, which work together with Lazy Shafts.
+
+### Changed
+
+* Added a `lazy` tag for blocks/items that are part of the lazy network system.
+* Viewing a Lazy Shaft or Flexible Shaft will now show an Overstressed
+  warning correctly even if the block in question does not have a block entity.
+* Further optimizations to how lazy networks interact with Create's networks.
+* Adjust the model for Lazy and Flexible Shafts to hopefully fix z-fighting
+  for some users.
+
+### Fixed
+
+* Cash Registers not working with Blaze Burners as stock keepers.
+* Position of entities on Short and Tall Seats when those seats are part of
+  a contraption.
+* Issue where lazy networks wouldn't update when a block entity is removed due
+  to all of a Flexible Shaft's faces being disabled.
+* Rendering of the Cash Register in the Cash Register's menu.
+* Issue where the server could crash after a tick if a lazy network block is 
+  removed in a weird way.
+
+
 ## 1.2.2
 
 ### Added

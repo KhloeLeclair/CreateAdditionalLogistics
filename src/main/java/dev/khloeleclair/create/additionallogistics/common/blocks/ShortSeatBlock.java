@@ -13,6 +13,7 @@ import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.EntityCollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import org.jetbrains.annotations.Nullable;
 
 public class ShortSeatBlock extends AbstractSeatBlock {
 
@@ -28,7 +29,7 @@ public class ShortSeatBlock extends AbstractSeatBlock {
     }
 
     @Override
-    protected Vec3 getSeatPosition(Level level, BlockPos pos) {
+    public Vec3 getSeatPosition(@Nullable Level level, BlockPos pos) {
         return Vec3.upFromBottomCenterOf(pos, 0.125);
     }
 

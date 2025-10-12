@@ -3,6 +3,7 @@ package dev.khloeleclair.create.additionallogistics.client.renderers;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.simibubi.create.AllPartialModels;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntityRenderer;
+import com.simibubi.create.content.kinetics.simpleRelays.ICogWheel;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
 import dev.khloeleclair.create.additionallogistics.common.blockentities.AbstractLowEntityKineticBlockEntity;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALPartialModels;
@@ -14,6 +15,7 @@ import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.RenderType;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
 import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 
 public class LowEntityKineticBlockEntityRenderer extends KineticBlockEntityRenderer<AbstractLowEntityKineticBlockEntity> {
 
@@ -48,6 +50,24 @@ public class LowEntityKineticBlockEntityRenderer extends KineticBlockEntityRende
         final float time = AnimationTickHolder.getRenderTime(be.getLevel());
         final float baseAngle = (time * be.getSpeed() * 3f / 10) % 360;
 
+        final var state = be.getBlockState();
+        if (state.getBlock() instanceof ICogWheel cog && state.hasProperty(BlockStateProperties.AXIS)) {
+            final var axis = state.getValue(BlockStateProperties.AXIS);
+            final boolean large = cog.isLargeCog();
+
+            SuperByteBuffer cogmodel = CachedBuffers.partialFacingVertical(large
+                    ? AllPartialModels.SHAFTLESS_LARGE_COGWHEEL
+                    : AllPartialModels.SHAFTLESS_COGWHEEL, state, Direction.fromAxisAndDirection(axis, Direction.AxisDirection.POSITIVE));
+
+            renderRotatingBuffer(be, cogmodel, ms, buffer.getBuffer(RenderType.solid()), light);
+
+            /*float angle = large ? 0 //BracketedKineticBlockEntityRenderer.getAngleForLargeCogShaft(be, axis)
+                    : getAngleForBe(be, pos, axis);
+
+            kineticRotationTransform(cogmodel, be, cog.getRotationAxis(state), angle, light);
+            cogmodel.light(light).renderInto(ms, buffer.getBuffer(RenderType.solid()));*/
+        }
+
         for(Direction dir : Iterate.directions) {
             float modifier = be.getRotationSpeedModifier(dir);
             if (modifier == 0f)
@@ -63,7 +83,7 @@ public class LowEntityKineticBlockEntityRenderer extends KineticBlockEntityRende
             SuperByteBuffer opening = CachedBuffers.partialFacing(modifier == 1f
                         ? CALPartialModels.SHAFT_OPENING
                         : CALPartialModels.SHAFT_OPENING_REVERSED,
-                    be.getBlockState(), dir.getOpposite());
+                    state, dir.getOpposite());
             opening.light(light).renderInto(ms, buffer.getBuffer(RenderType.cutoutMipped()));
 
             SuperByteBuffer shaft = CachedBuffers.partialFacing(AllPartialModels.SHAFT_HALF, be.getBlockState(), dir);

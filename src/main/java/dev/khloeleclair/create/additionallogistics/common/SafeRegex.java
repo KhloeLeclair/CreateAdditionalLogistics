@@ -3,10 +3,10 @@ package dev.khloeleclair.create.additionallogistics.common;
 import com.google.common.base.Ascii;
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.simibubi.create.content.contraptions.actors.seat.SeatBlock;
 import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import net.createmod.catnip.data.Glob;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
 import java.util.Set;
@@ -31,17 +31,19 @@ public class SafeRegex {
             .build();
 
 
-    private record CachedGlobResult(String regex, PatternSyntaxException error) {}
+    private record CachedGlobResult(@Nullable String regex, @Nullable PatternSyntaxException error) {}
 
-    private record CachedReplacementResult(PatternSyntaxException error) {
+    private record CachedReplacementResult(@Nullable PatternSyntaxException error) {
         boolean isError() { return this.error != null; }
     }
 
     public static final class CachedRegexResult {
+        @Nullable
         public final Pattern pattern;
         public final int starHeight;
         public final int repetitions;
         public final boolean hasBackref;
+        @Nullable
         public final PatternSyntaxException error;
 
         CachedRegexResult(Pattern pattern, int starHeight, int repetitions, boolean hasBackref) {

@@ -1,0 +1,38 @@
+{
+	"format_version": "1.9.0",
+	"credit": "Made with Blockbench",
+	"parent": "block/block",
+	"render_type": "minecraft:cutout_mipped",
+	"textures": {
+		"particle": "createadditionallogistics:block/lazy_cog/frame",
+		"frame": "createadditionallogistics:block/lazy_cog/frame"
+	},
+	"elements": [
+		{
+			"name": "edges_n",
+			"from": [2, 2, 2],
+			"to": [14, 14, 6],
+			"faces": {
+				"north": {"uv": [0, 0, 12, 12], "texture": "#frame"},
+				"east": {"uv": [16, 0, 12, 12], "texture": "#frame"},
+				"south": {"uv": [0, 0, 12, 12], "texture": "#frame"},
+				"west": {"uv": [12, 0, 16, 12], "texture": "#frame"},
+				"up": {"uv": [0, 12, 12, 16], "texture": "#frame"},
+				"down": {"uv": [0, 16, 12, 12], "texture": "#frame"}
+			}
+		},
+		{
+			"name": "edges_s",
+			"from": [2, 2, 10],
+			"to": [14, 14, 14],
+			"faces": {
+				"north": {"uv": [0, 0, 12, 12], "texture": "#frame"},
+				"east": {"uv": [12, 12, 16, 0], "texture": "#frame"},
+				"south": {"uv": [0, 0, 12, 12], "texture": "#frame"},
+				"west": {"uv": [16, 12, 12, 0], "texture": "#frame"},
+				"up": {"uv": [12, 16, 0, 12], "texture": "#frame"},
+				"down": {"uv": [12, 12, 0, 16], "texture": "#frame"}
+			}
+		}
+	]
+}

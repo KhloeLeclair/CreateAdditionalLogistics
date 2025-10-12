@@ -53,8 +53,11 @@ public class CALTags {
     public enum CALBlockTags {
         SHORT_SEATS,
         TALL_SEATS,
+        LAZY,
         FLEXIBLE_SHAFTS,
         BASIC_SHAFTS,
+        LAZY_COGS,
+        LAZY_LARGE_COGS,
         ;
 
         public final TagKey<Block> tag;
@@ -108,8 +111,11 @@ public class CALTags {
 
         SHORT_SEATS,
         TALL_SEATS,
+        LAZY,
         FLEXIBLE_SHAFTS,
         BASIC_SHAFTS,
+        LAZY_COGS,
+        LAZY_LARGE_COGS,
         ;
 
         public final TagKey<Item> tag;

@@ -10,6 +10,7 @@ import dev.khloeleclair.create.additionallogistics.client.renderers.CashRegister
 import dev.khloeleclair.create.additionallogistics.client.renderers.LowEntityKineticBlockEntityRenderer;
 import dev.khloeleclair.create.additionallogistics.client.renderers.PackageAcceleratorRenderer;
 import dev.khloeleclair.create.additionallogistics.client.visuals.FlexibleShaftVisual;
+import dev.khloeleclair.create.additionallogistics.client.visuals.LazyCogVisual;
 import dev.khloeleclair.create.additionallogistics.client.visuals.PackageAcceleratorVisual;
 import dev.khloeleclair.create.additionallogistics.common.blockentities.*;
 
@@ -39,6 +40,20 @@ public class CALBlockEntityTypes {
                     .renderer(() -> LowEntityKineticBlockEntityRenderer::new)
                     .register();
 
+    // Lazy CogWheel
+    public static final BlockEntityEntry<LazyCogWheelBlockEntity> LAZY_COGWHEEL =
+            REGISTRATE.blockEntity("lazy_cogwheel", LazyCogWheelBlockEntity::new)
+                    .visual(() -> LazyCogVisual::small)
+                    .validBlocks(CALBlocks.LAZY_COGWHEEL)
+                    .renderer(() -> LowEntityKineticBlockEntityRenderer::new)
+                    .register();
+
+    public static final BlockEntityEntry<LazyCogWheelBlockEntity> LAZY_LARGE_COGWHEEL =
+            REGISTRATE.blockEntity("lazy_large_cogwheel", LazyCogWheelBlockEntity::new)
+                    .visual(() -> LazyCogVisual::large)
+                    .validBlocks(CALBlocks.LAZY_LARGE_COGWHEEL)
+                    .renderer(() -> LowEntityKineticBlockEntityRenderer::new)
+                    .register();
 
     // Cash Register
     public static final BlockEntityEntry<CashRegisterBlockEntity> CASH_REGISTER =

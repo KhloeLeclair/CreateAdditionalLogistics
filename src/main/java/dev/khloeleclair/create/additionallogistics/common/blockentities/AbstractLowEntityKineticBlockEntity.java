@@ -2,7 +2,9 @@ package dev.khloeleclair.create.additionallogistics.common.blockentities;
 
 import com.simibubi.create.content.kinetics.base.IRotate;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
+import com.simibubi.create.content.kinetics.simpleRelays.ICogWheel;
 import com.simibubi.create.content.kinetics.transmission.SplitShaftBlockEntity;
+import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
 import dev.khloeleclair.create.additionallogistics.common.blocks.AbstractLowEntityKineticBlock;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.core.BlockPos;
@@ -22,6 +24,10 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
 
     @Nullable
     protected List<BlockPos> connections;
+
+    @Nullable
+    private List<BlockPos> pendingConnections;
+
     protected boolean checkInvalid;
     protected boolean lazyDirty;
 
@@ -116,7 +122,16 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
     public List<BlockPos> addPropagationLocations(IRotate block, BlockState state, List<BlockPos> neighbours) {
         if (connections != null)
             connections.forEach(p -> neighbours.add(worldPosition.offset(p)));
-        return super.addPropagationLocations(block, state, neighbours);
+
+        if (!ICogWheel.isLargeCog(state))
+            return super.addPropagationLocations(block, state, neighbours);
+
+        BlockPos.betweenClosedStream(new BlockPos(-1, -1, -1), new BlockPos(1, 1, 1))
+                .forEach(offset -> {
+                    if (offset.distSqr(BlockPos.ZERO) == 2)
+                        neighbours.add(worldPosition.offset(offset));
+                });
+        return neighbours;
     }
 
     @Override
@@ -133,15 +148,15 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
         return connections != null && connections.contains(relative);
     }
 
-    protected void setConnections(List<BlockPos> newConnections) {
+    protected boolean setConnections(List<BlockPos> newConnections) {
         int index = 0;
-        for(; index < newConnections.size(); index++) {
+        for (; index < newConnections.size(); index++) {
             if (worldPosition.equals(newConnections.get(index)))
                 break;
         }
 
         if (index >= newConnections.size())
-            return;
+            return false;
 
         int previous = index - 1;
         int next = index + 1;
@@ -159,16 +174,26 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
 
         // Nothing changed.
         if (contains_previous && contains_next && connections.size() == count)
-            return;
+            return false;
 
         // Something changed. Did the fire nation attack?
         detachKinetics();
 
-        connections.clear();
+        pendingConnections = new ArrayList<>();
         if (prevPos != null)
-            connections.add(prevPos);
+            pendingConnections.add(prevPos);
         if (nextPos != null)
-            connections.add(nextPos);
+            pendingConnections.add(nextPos);
+
+        return true;
+    }
+
+    protected void finalizeConnections() {
+        if (pendingConnections == null)
+            return;
+
+        connections = pendingConnections;
+        pendingConnections = null;
 
         notifyUpdate();
         updateSpeed = true;
@@ -177,27 +202,31 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
 
     // Discovery / Walking
 
-    public record WalkResult(Set<BlockPos> visited, List<BlockPos> entityPositions, Set<AbstractLowEntityKineticBlockEntity> entities) {
+    public record WalkResult(Set<BlockPos> visited, TreeMap<BlockPos, AbstractLowEntityKineticBlockEntity> entities) {
 
-        public static WalkResult EMPTY = new WalkResult(Collections.emptySet(), List.of(), Collections.emptySet());
+        public static WalkResult EMPTY = new WalkResult(Collections.emptySet(), new TreeMap<>());
 
     }
 
-    /// Discover all connected flexible shaft blocks and entities.
     public static WalkResult walkBlocks(Level level, BlockPos pos) {
+        return walkBlocks(level, pos, Integer.MAX_VALUE);
+    }
+
+    /// Discover all connected flexible shaft blocks and entities.
+    public static WalkResult walkBlocks(Level level, BlockPos pos, int limit) {
         var state = level.getBlockState(pos);
         if (!(state.getBlock() instanceof AbstractLowEntityKineticBlock<?> block))
             return WalkResult.EMPTY;
 
         Set<BlockPos> visited = new ObjectOpenHashSet<>();
-        List<BlockPos> entityPositions = new ArrayList<>();
-        Set<AbstractLowEntityKineticBlockEntity> entities = new ObjectOpenHashSet<>();
+        TreeMap<BlockPos, AbstractLowEntityKineticBlockEntity> entities = new TreeMap<>(Vec3i::compareTo);
         List<BlockPos> queue = new LinkedList<>();
 
         visited.add(pos);
         if (level.getBlockEntity(pos) instanceof AbstractLowEntityKineticBlockEntity lek) {
-            entityPositions.add(pos);
-            entities.add(lek);
+            entities.put(pos, lek);
+            if (entities.size() >= limit)
+                return new WalkResult(visited, entities);
         }
 
         addToDirtyList(level, pos, state, block, visited, queue);
@@ -208,8 +237,9 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
                 var qstate = level.getBlockState(qpos);
                 if (qstate.getBlock() instanceof AbstractLowEntityKineticBlock<?> qblock) {
                     if (level.getBlockEntity(qpos) instanceof AbstractLowEntityKineticBlockEntity qlek) {
-                        entityPositions.add(qpos);
-                        entities.add(qlek);
+                        entities.put(qpos, qlek);
+                        if (entities.size() >= limit)
+                            return new WalkResult(visited, entities);
                     }
 
                     addToDirtyList(level, qpos, qstate, qblock, visited, queue);
@@ -217,13 +247,13 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
             }
         }
 
-        return new WalkResult(visited, entityPositions, entities);
+        return new WalkResult(visited, entities);
     }
 
     private static void addToDirtyList(Level world, BlockPos pos, BlockState state, AbstractLowEntityKineticBlock<?> block, Set<BlockPos> visited, List<BlockPos> queue) {
         for (Direction direction : Direction.values()) {
             BlockPos p = pos.relative(direction);
-            if (!visited.contains(p) && world.isLoaded(p) && block.connectsTo(world, pos, state, direction, p, world.getBlockState(p)) && !queue.contains(p)) {
+            if (!visited.contains(p) && world.isLoaded(p) && block.connectsTo(world, pos, state, direction, p, world.getBlockState(p))) {
                 visited.add(p);
                 queue.add(p);
             }
@@ -247,20 +277,33 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
         LinkedList<LevelBlockPos> dirty = new LinkedList<>(dirtyPositions);
         dirtyPositions.clear();
 
+        List<AbstractLowEntityKineticBlockEntity> toFinalize = new ArrayList<>();
+
         while(!dirty.isEmpty()) {
             LevelBlockPos pos = dirty.removeFirst();
             var result = walkBlocks(pos.level, pos.pos);
 
-            // Sort the position list to keep things stable.
-            result.entityPositions.sort(Vec3i::compareTo);
+            CreateAdditionalLogistics.LOGGER.debug("Updating dirty lazy network from {}, found {} connected lazy blocks with {} entities.", pos.pos, result.visited.size(), result.entities.size());
 
-            // Update every entity.
-            for(var entity: result.entities)
-                entity.setConnections(result.entityPositions);
+            if (!result.entities.isEmpty()) {
+                // Make a list.
+                List<BlockPos> entityPositions = result.entities.navigableKeySet().stream().toList();
+
+                // Update every entity.
+                for (var entity : result.entities.values()) {
+                    if (entity.setConnections(entityPositions))
+                        toFinalize.add(entity);
+                }
+            }
 
             // Ensure we don't walk any of these positions twice.
-            dirty.removeIf(x -> result.visited.contains(x.pos));
+            if (!result.visited.isEmpty())
+                dirty.removeIf(x -> result.visited.contains(x.pos));
         }
+
+        // Finish changing connections on any updated entities.
+        for(var entity : toFinalize)
+            entity.finalizeConnections();
     }
 
     public static void onTick(ServerTickEvent.Post event) {

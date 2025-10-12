@@ -1,5 +1,6 @@
 package dev.khloeleclair.create.additionallogistics.common.blocks;
 
+import com.simibubi.create.api.equipment.goggles.IProxyHoveringInformation;
 import com.simibubi.create.content.decoration.encasing.EncasableBlock;
 import com.simibubi.create.content.kinetics.base.KineticBlock;
 import com.simibubi.create.foundation.block.IBE;
@@ -32,7 +33,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;
 
-public abstract class AbstractLowEntityKineticBlock<T extends AbstractLowEntityKineticBlockEntity> extends KineticBlock implements IBE<T> {
+public abstract class AbstractLowEntityKineticBlock<T extends AbstractLowEntityKineticBlockEntity> extends KineticBlock implements IBE<T>, IProxyHoveringInformation {
 
     public static final VoxelShape SHAPE = Block.box(2, 2, 2, 14, 14, 14);
 
@@ -81,6 +82,26 @@ public abstract class AbstractLowEntityKineticBlock<T extends AbstractLowEntityK
 
     public AbstractLowEntityKineticBlock(Properties properties) {
         super(properties);
+    }
+
+    @Nullable
+    private static AbstractLowEntityKineticBlockEntity.WalkResult informationWalkResult;
+
+    @Override
+    public BlockPos getInformationSource(Level level, BlockPos pos, BlockState state) {
+        if (!level.isClientSide)
+            return pos;
+
+        if (state.getBlock() instanceof AbstractLowEntityKineticBlock<?> b && b.isActive(state))
+            return pos;
+
+        if (informationWalkResult == null || !informationWalkResult.visited().contains(pos))
+            informationWalkResult = AbstractLowEntityKineticBlockEntity.walkBlocks(level, pos, 1);
+
+        if (!informationWalkResult.entities().isEmpty())
+            return informationWalkResult.entities().firstKey();
+
+        return pos;
     }
 
     @Override

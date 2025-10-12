@@ -1,6 +1,8 @@
 package dev.khloeleclair.create.additionallogistics.common.entities;
 
+import com.simibubi.create.content.contraptions.AbstractContraptionEntity;
 import com.simibubi.create.content.contraptions.actors.seat.SeatEntity;
+import dev.khloeleclair.create.additionallogistics.common.blocks.AbstractSeatBlock;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALEntityTypes;
 import net.minecraft.client.renderer.culling.Frustum;
 import net.minecraft.client.renderer.entity.EntityRenderer;
@@ -36,6 +38,28 @@ public class CustomSeatEntity extends SeatEntity {
 
         pCallback.accept(pEntity, getX(), heightOffset + getCustomEntitySeatOffset(pEntity), getZ());
     }
+
+    public static double getCustomEntitySeatOffset(Entity passenger) {
+        double result = SeatEntity.getCustomEntitySeatOffset(passenger);
+
+        if (!(passenger.getVehicle() instanceof AbstractContraptionEntity contraptionEntity))
+            return result;
+
+        var contraption = contraptionEntity.getContraption();
+        if (!contraptionEntity.hasPassenger(passenger))
+            return result;
+
+        var seatPos = contraption.getSeatOf(passenger.getUUID());
+        var state = contraption.getBlocks().get(seatPos).state();
+
+        if (state.getBlock() instanceof AbstractSeatBlock seat) {
+            var offset = seat.getSeatPosition(null, BlockPos.ZERO);
+            result += offset.y - 0.5;
+        }
+
+        return result;
+    }
+
 
     @OnlyIn(Dist.CLIENT)
     public static class Render extends EntityRenderer<CustomSeatEntity> {
