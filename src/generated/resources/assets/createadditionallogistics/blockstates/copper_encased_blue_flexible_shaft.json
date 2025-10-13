@@ -1,0 +1,57 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/copper_encased_blue_flexible_shaft"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/encased_flexible_shaft_copper_casing_down"
+      },
+      "when": {
+        "down": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/encased_flexible_shaft_copper_casing_up"
+      },
+      "when": {
+        "up": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/encased_flexible_shaft_copper_casing_north"
+      },
+      "when": {
+        "north": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/encased_flexible_shaft_copper_casing_south"
+      },
+      "when": {
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/encased_flexible_shaft_copper_casing_west"
+      },
+      "when": {
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/encased_flexible_shaft_copper_casing_east"
+      },
+      "when": {
+        "east": "true"
+      }
+    }
+  ]
+}

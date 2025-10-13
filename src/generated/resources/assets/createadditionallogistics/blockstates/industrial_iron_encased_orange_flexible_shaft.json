@@ -1,0 +1,57 @@
+{
+  "multipart": [
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/industrial_iron_encased_orange_flexible_shaft"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/encased_flexible_shaft_industrial_iron_block_down"
+      },
+      "when": {
+        "down": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/encased_flexible_shaft_industrial_iron_block_up"
+      },
+      "when": {
+        "up": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/encased_flexible_shaft_industrial_iron_block_north"
+      },
+      "when": {
+        "north": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/encased_flexible_shaft_industrial_iron_block_south"
+      },
+      "when": {
+        "south": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/encased_flexible_shaft_industrial_iron_block_west"
+      },
+      "when": {
+        "west": "true"
+      }
+    },
+    {
+      "apply": {
+        "model": "createadditionallogistics:block/encased_flexible_shaft_industrial_iron_block_east"
+      },
+      "when": {
+        "east": "true"
+      }
+    }
+  ]
+}

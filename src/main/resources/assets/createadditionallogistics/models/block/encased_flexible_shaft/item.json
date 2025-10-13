@@ -1,0 +1,5 @@
+{
+	"format_version": "1.9.0",
+	"parent": "createadditionallogistics:block/flexible_shaft/base",
+	"render_type": "minecraft:cutout"
+}

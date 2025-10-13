@@ -13,6 +13,9 @@ public class CALPartialModels {
     public static final PartialModel SHAFT_OPENING = block("flexible_shaft/opening");
     public static final PartialModel SHAFT_OPENING_REVERSED = block("flexible_shaft/opening_reversed");
 
+    public static final PartialModel ENCASED_SHAFT_OPENING = block("encased_flexible_shaft/opening");
+    public static final PartialModel ENCASED_SHAFT_OPENING_REVERSED = block("encased_flexible_shaft/opening_reversed");
+
     public static void register() { }
 
 }

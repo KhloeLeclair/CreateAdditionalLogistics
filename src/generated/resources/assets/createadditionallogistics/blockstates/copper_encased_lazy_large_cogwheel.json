@@ -1,0 +1,56 @@
+{
+  "variants": {
+    "axis=x,negative=false,positive=false": {
+      "model": "createadditionallogistics:block/copper_encased_lazy_large_cogwheel_top_bottom",
+      "x": 90,
+      "y": 90
+    },
+    "axis=x,negative=false,positive=true": {
+      "model": "createadditionallogistics:block/copper_encased_lazy_large_cogwheel_bottom",
+      "x": 90,
+      "y": 90
+    },
+    "axis=x,negative=true,positive=false": {
+      "model": "createadditionallogistics:block/copper_encased_lazy_large_cogwheel_top",
+      "x": 90,
+      "y": 90
+    },
+    "axis=x,negative=true,positive=true": {
+      "model": "createadditionallogistics:block/copper_encased_lazy_large_cogwheel",
+      "x": 90,
+      "y": 90
+    },
+    "axis=y,negative=false,positive=false": {
+      "model": "createadditionallogistics:block/copper_encased_lazy_large_cogwheel_top_bottom"
+    },
+    "axis=y,negative=false,positive=true": {
+      "model": "createadditionallogistics:block/copper_encased_lazy_large_cogwheel_bottom"
+    },
+    "axis=y,negative=true,positive=false": {
+      "model": "createadditionallogistics:block/copper_encased_lazy_large_cogwheel_top"
+    },
+    "axis=y,negative=true,positive=true": {
+      "model": "createadditionallogistics:block/copper_encased_lazy_large_cogwheel"
+    },
+    "axis=z,negative=false,positive=false": {
+      "model": "createadditionallogistics:block/copper_encased_lazy_large_cogwheel_top_bottom",
+      "x": 90,
+      "y": 180
+    },
+    "axis=z,negative=false,positive=true": {
+      "model": "createadditionallogistics:block/copper_encased_lazy_large_cogwheel_bottom",
+      "x": 90,
+      "y": 180
+    },
+    "axis=z,negative=true,positive=false": {
+      "model": "createadditionallogistics:block/copper_encased_lazy_large_cogwheel_top",
+      "x": 90,
+      "y": 180
+    },
+    "axis=z,negative=true,positive=true": {
+      "model": "createadditionallogistics:block/copper_encased_lazy_large_cogwheel",
+      "x": 90,
+      "y": 180
+    }
+  }
+}

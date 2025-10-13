@@ -1,5 +1,6 @@
 package dev.khloeleclair.create.additionallogistics.common.blockentities;
 
+import com.simibubi.create.content.decoration.encasing.EncasedBlock;
 import com.simibubi.create.content.kinetics.base.IRotate;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import dev.khloeleclair.create.additionallogistics.common.blocks.FlexibleShaftBlock;
@@ -149,6 +150,15 @@ public class FlexibleShaftBlockEntity extends AbstractLowEntityKineticBlockEntit
         }
 
         sideActive[index] = value;
+
+        var state = getBlockState();
+        if (state.getBlock() instanceof EncasedBlock) {
+            final boolean side_state = value == 0;
+
+            if (state.getValue(FlexibleShaftBlock.SIDES[index]) != side_state) {
+                level.setBlockAndUpdate(worldPosition, state.setValue(FlexibleShaftBlock.SIDES[index], side_state));
+            }
+        }
 
         updateSpeed = true;
         notifyUpdate();

@@ -1,6 +1,7 @@
 package dev.khloeleclair.create.additionallogistics.common.blocks;
 
 import com.simibubi.create.content.decoration.encasing.EncasableBlock;
+import com.simibubi.create.content.decoration.encasing.EncasedBlock;
 import com.simibubi.create.content.kinetics.base.IRotate;
 import com.simibubi.create.foundation.block.ProperWaterloggedBlock;
 import dev.khloeleclair.create.additionallogistics.common.blockentities.AbstractLowEntityKineticBlockEntity;
@@ -20,6 +21,7 @@ import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
@@ -34,14 +36,19 @@ public abstract class AbstractLazyShaftBlock<T extends AbstractLowEntityKineticB
     public AbstractLazyShaftBlock(Properties properties) {
         super(properties);
 
-        registerDefaultState(defaultBlockState()
-                .setValue(WATERLOGGED, false)
+        var state = defaultBlockState();
+        if (state.hasProperty(WATERLOGGED))
+            state = state.setValue(WATERLOGGED, false);
+
+        registerDefaultState(state
                 .setValue(AXIS, Direction.Axis.Y)
                 .setValue(NEGATIVE, false)
                 .setValue(POSITIVE, false));
     }
 
     protected BlockState copyValuesForCasing(BlockState from, BlockState to) {
+        if (from.hasProperty(WATERLOGGED) && to.hasProperty(WATERLOGGED))
+            to = to.setValue(WATERLOGGED, from.getValue(WATERLOGGED));
         if (from.hasProperty(AXIS) && to.hasProperty(AXIS))
             to = to.setValue(AXIS, from.getValue(AXIS));
         if (from.hasProperty(POSITIVE) && to.hasProperty(POSITIVE))
@@ -49,6 +56,38 @@ public abstract class AbstractLazyShaftBlock<T extends AbstractLowEntityKineticB
         if (from.hasProperty(NEGATIVE) && to.hasProperty(NEGATIVE))
             to = to.setValue(NEGATIVE, from.getValue(NEGATIVE));
         return to;
+    }
+
+    @Override
+    public FluidState fluidState(BlockState state) {
+        if (!state.hasProperty(WATERLOGGED))
+            return Fluids.EMPTY.defaultFluidState();
+
+        return ProperWaterloggedBlock.super.fluidState(state);
+    }
+
+    @Override
+    public void updateWater(LevelAccessor level, BlockState state, BlockPos pos) {
+        if (state.hasProperty(WATERLOGGED))
+            ProperWaterloggedBlock.super.updateWater(level, state, pos);
+    }
+
+    @Override
+    public BlockState withWater(BlockState placementState, BlockPlaceContext ctx) {
+        if (placementState.hasProperty(WATERLOGGED))
+            return ProperWaterloggedBlock.super.withWater(placementState, ctx);
+        return placementState;
+    }
+
+    @Override
+    protected boolean areStatesKineticallyEquivalent(BlockState oldState, BlockState newState) {
+        if (!(oldState.getBlock() instanceof AbstractLazyShaftBlock<?>) || !(newState.getBlock() instanceof AbstractLazyShaftBlock<?>))
+            return false;
+
+        if (!oldState.hasProperty(AXIS) || !newState.hasProperty(AXIS))
+            return false;
+
+        return oldState.getValue(AXIS) == newState.getValue(AXIS);
     }
 
     @Override
@@ -99,7 +138,9 @@ public abstract class AbstractLazyShaftBlock<T extends AbstractLowEntityKineticB
     @Override
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
-        builder.add(AXIS, POSITIVE, NEGATIVE, WATERLOGGED);
+        builder.add(AXIS, POSITIVE, NEGATIVE);
+        if (!(this instanceof EncasedBlock))
+            builder.add(WATERLOGGED);
     }
 
     @Nullable

@@ -17,7 +17,8 @@
     "client.MixinPackagerRenderer",
     "client.MixinPackagePortScreen",
     "client.MixinFactoryPanelScreen",
-    "client.MixinStockKeeperRequestScreen"
+    "client.MixinStockKeeperRequestScreen",
+    "client.MixinVisualizationManager"
   ],
   "injectors": {
     "defaultRequire": 1

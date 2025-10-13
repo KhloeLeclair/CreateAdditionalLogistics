@@ -1,0 +1,6 @@
+{
+  "parent": "createadditionallogistics:block/encased_flexible_shaft/block_north",
+  "textures": {
+    "frame": "create:block/andesite_casing"
+  }
+}

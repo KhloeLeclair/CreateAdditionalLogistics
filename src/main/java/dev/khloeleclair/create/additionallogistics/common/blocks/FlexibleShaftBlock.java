@@ -1,5 +1,7 @@
 package dev.khloeleclair.create.additionallogistics.common.blocks;
 
+import com.simibubi.create.content.decoration.encasing.EncasableBlock;
+import com.simibubi.create.content.decoration.encasing.EncasedBlock;
 import com.simibubi.create.content.kinetics.base.IRotate;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.foundation.block.ProperWaterloggedBlock;
@@ -33,6 +35,7 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.material.FluidState;
+import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
@@ -41,7 +44,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.List;
 import java.util.function.Predicate;
 
-public class FlexibleShaftBlock extends AbstractLowEntityKineticBlock<FlexibleShaftBlockEntity> implements ProperWaterloggedBlock {
+public class FlexibleShaftBlock extends AbstractLowEntityKineticBlock<FlexibleShaftBlockEntity> implements EncasableBlock, ProperWaterloggedBlock {
 
     public static final BooleanProperty[] SIDES = {
             BooleanProperty.create("down"),
@@ -67,9 +70,11 @@ public class FlexibleShaftBlock extends AbstractLowEntityKineticBlock<FlexibleSh
         super(properties);
         this.color = color;
 
-        BlockState state = getStateDefinition().any()
-                .setValue(ACTIVE, false)
-                .setValue(WATERLOGGED, false);
+        var state = defaultBlockState()
+                .setValue(ACTIVE, false);
+
+        if (state.hasProperty(WATERLOGGED))
+            state = state.setValue(WATERLOGGED, false);
 
         for(var side : SIDES)
             state = state.setValue(side, false);
@@ -81,7 +86,30 @@ public class FlexibleShaftBlock extends AbstractLowEntityKineticBlock<FlexibleSh
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
         builder.add(SIDES);
-        builder.add(ACTIVE, WATERLOGGED);
+        builder.add(ACTIVE);
+        if (!(this instanceof EncasedBlock))
+            builder.add(WATERLOGGED);
+    }
+
+    @Override
+    public FluidState fluidState(BlockState state) {
+        if (!state.hasProperty(WATERLOGGED))
+            return Fluids.EMPTY.defaultFluidState();
+
+        return ProperWaterloggedBlock.super.fluidState(state);
+    }
+
+    @Override
+    public void updateWater(LevelAccessor level, BlockState state, BlockPos pos) {
+        if (state.hasProperty(WATERLOGGED))
+            ProperWaterloggedBlock.super.updateWater(level, state, pos);
+    }
+
+    @Override
+    public BlockState withWater(BlockState placementState, BlockPlaceContext ctx) {
+        if (placementState.hasProperty(WATERLOGGED))
+            return ProperWaterloggedBlock.super.withWater(placementState, ctx);
+        return placementState;
     }
 
     @Override
@@ -99,12 +127,8 @@ public class FlexibleShaftBlock extends AbstractLowEntityKineticBlock<FlexibleSh
         return fluidState(state);
     }
 
-    @Override
-    public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
-        final var level = context.getLevel();
-        final var pos = context.getClickedPos();
-
-        BlockState state = super.getStateForPlacement(context);
+    protected BlockState getConnectedState(Level level, BlockPos pos, BlockState initialState) {
+        var state = initialState;
 
         for(Direction dir : Iterate.directions) {
             int index = dir.ordinal();
@@ -115,6 +139,16 @@ public class FlexibleShaftBlock extends AbstractLowEntityKineticBlock<FlexibleSh
             boolean connects = connectsTo(level, pos, state, dir, dpos, dstate);
             state = state.setValue(SIDES[index], connects);
         }
+
+        return state;
+    }
+
+    @Override
+    public @Nullable BlockState getStateForPlacement(BlockPlaceContext context) {
+        final var level = context.getLevel();
+        final var pos = context.getClickedPos();
+
+        BlockState state = getConnectedState(level, pos, super.getStateForPlacement(context));
 
         return withWater(state, context);
     }
@@ -232,8 +266,10 @@ public class FlexibleShaftBlock extends AbstractLowEntityKineticBlock<FlexibleSh
             return InteractionResult.SUCCESS;
 
         final var side = context.getClickedFace();
-        if (state.getValue(SIDES[side.ordinal()]))
-            return InteractionResult.SUCCESS;
+        if (state.getValue(SIDES[side.ordinal()])) {
+            if (!(this instanceof EncasedBlock))
+                return InteractionResult.SUCCESS;
+        }
 
         final BlockPos pos = context.getClickedPos();
 

@@ -1,0 +1,6 @@
+{
+  "parent": "createadditionallogistics:block/encased_flexible_shaft/block_east",
+  "textures": {
+    "frame": "create:block/copper_casing"
+  }
+}

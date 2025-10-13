@@ -1,0 +1,6 @@
+{
+  "parent": "createadditionallogistics:block/encased_flexible_shaft/block_up",
+  "textures": {
+    "frame": "create:block/industrial_iron_block"
+  }
+}

@@ -1,0 +1,24 @@
+{
+	"format_version": "1.9.0",
+	"credit": "Made with Blockbench",
+	"parent": "block/block",
+	"textures": {
+		"frame": "createadditionallogistics:block/brass_gearbox"
+	},
+	"elements": [
+		{
+			"name": "Down",
+			"from": [0, -0.025, 0],
+			"to": [16, 0.975, 16],
+			"rotation": {"angle": 0, "axis": "x", "origin": [8, 8, 8]},
+			"faces": {
+				"north": {"uv": [0, 1, 16, 0], "texture": "#frame"},
+				"east": {"uv": [0, 16, 1, 0], "rotation": 90, "texture": "#frame"},
+				"south": {"uv": [0, 16, 16, 15], "rotation": 180, "texture": "#frame"},
+				"west": {"uv": [15, 0, 16, 16], "rotation": 270, "texture": "#frame"},
+				"up": {"uv": [0, 0, 16, 16], "texture": "#frame"},
+				"down": {"uv": [0, 0, 16, 16], "texture": "#frame"}
+			}
+		}
+	]
+}

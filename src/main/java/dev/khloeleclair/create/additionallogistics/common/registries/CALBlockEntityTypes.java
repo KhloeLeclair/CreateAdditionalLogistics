@@ -22,8 +22,18 @@ public class CALBlockEntityTypes {
     public static final BlockEntityEntry<FlexibleShaftBlockEntity> FLEXIBLE_SHAFT =
             REGISTRATE.blockEntity("flexible_shaft", FlexibleShaftBlockEntity::new)
                     .visual(() -> FlexibleShaftVisual::new)
-                    .validBlocks(CALBlocks.FLEXIBLE_SHAFT)
+                    .validBlocks(
+                            CALBlocks.FLEXIBLE_SHAFT,
+                            CALBlocks.ANDESITE_ENCASED_FLEXIBLE_SHAFT, CALBlocks.BRASS_ENCASED_FLEXIBLE_SHAFT,
+                            CALBlocks.COPPER_ENCASED_FLEXIBLE_SHAFT,
+                            CALBlocks.INDUSTRIAL_IRON_ENCASED_FLEXIBLE_SHAFT, CALBlocks.WEATHERED_IRON_ENCASED_FLEXIBLE_SHAFT
+                    )
                     .validBlocks(CALBlocks.DYED_FLEXIBLE_SHAFTS.toArray())
+                    .validBlocks(CALBlocks.DYED_ANDESITE_ENCASED_FLEXIBLE_SHAFTS.toArray())
+                    .validBlocks(CALBlocks.DYED_BRASS_ENCASED_FLEXIBLE_SHAFTS.toArray())
+                    .validBlocks(CALBlocks.DYED_COPPER_ENCASED_FLEXIBLE_SHAFTS.toArray())
+                    .validBlocks(CALBlocks.DYED_INDUSTRIAL_IRON_ENCASED_FLEXIBLE_SHAFTS.toArray())
+                    .validBlocks(CALBlocks.DYED_WEATHERED_IRON_ENCASED_FLEXIBLE_SHAFTS.toArray())
                     .renderer(() -> LowEntityKineticBlockEntityRenderer::new)
                     .register();
 
@@ -34,7 +44,7 @@ public class CALBlockEntityTypes {
                     .validBlocks(
                             CALBlocks.LAZY_SHAFT,
                             CALBlocks.ANDESITE_ENCASED_LAZY_SHAFT, CALBlocks.BRASS_ENCASED_LAZY_SHAFT,
-                            CALBlocks.COPPER_ENCASED_LAZY_SHAFT, //CALBlocks.RAILWAY_ENCASED_LAZY_SHAFT,
+                            CALBlocks.COPPER_ENCASED_LAZY_SHAFT,
                             CALBlocks.INDUSTRIAL_IRON_ENCASED_LAZY_SHAFT, CALBlocks.WEATHERED_IRON_ENCASED_LAZY_SHAFT
                     )
                     .renderer(() -> LowEntityKineticBlockEntityRenderer::new)
@@ -44,14 +54,24 @@ public class CALBlockEntityTypes {
     public static final BlockEntityEntry<LazyCogWheelBlockEntity> LAZY_COGWHEEL =
             REGISTRATE.blockEntity("lazy_cogwheel", LazyCogWheelBlockEntity::new)
                     .visual(() -> LazyCogVisual::small)
-                    .validBlocks(CALBlocks.LAZY_COGWHEEL)
+                    .validBlocks(
+                            CALBlocks.LAZY_COGWHEEL,
+                            CALBlocks.ANDESITE_ENCASED_LAZY_COGWHEEL, CALBlocks.BRASS_ENCASED_LAZY_COGWHEEL,
+                            CALBlocks.COPPER_ENCASED_LAZY_COGWHEEL,
+                            CALBlocks.INDUSTRIAL_IRON_ENCASED_LAZY_COGWHEEL, CALBlocks.WEATHERED_IRON_ENCASED_LAZY_COGWHEEL
+                    )
                     .renderer(() -> LowEntityKineticBlockEntityRenderer::new)
                     .register();
 
     public static final BlockEntityEntry<LazyCogWheelBlockEntity> LAZY_LARGE_COGWHEEL =
             REGISTRATE.blockEntity("lazy_large_cogwheel", LazyCogWheelBlockEntity::new)
                     .visual(() -> LazyCogVisual::large)
-                    .validBlocks(CALBlocks.LAZY_LARGE_COGWHEEL)
+                    .validBlocks(
+                            CALBlocks.LAZY_LARGE_COGWHEEL,
+                            CALBlocks.ANDESITE_ENCASED_LAZY_LARGE_COGWHEEL, CALBlocks.BRASS_ENCASED_LAZY_LARGE_COGWHEEL,
+                            CALBlocks.COPPER_ENCASED_LAZY_LARGE_COGWHEEL,
+                            CALBlocks.INDUSTRIAL_IRON_ENCASED_LAZY_LARGE_COGWHEEL, CALBlocks.WEATHERED_IRON_ENCASED_LAZY_LARGE_COGWHEEL
+                    )
                     .renderer(() -> LowEntityKineticBlockEntityRenderer::new)
                     .register();
 

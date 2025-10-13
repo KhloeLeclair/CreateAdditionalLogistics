@@ -1,5 +1,10 @@
 {
   "values": [
-    "createadditionallogistics:lazy_large_cogwheel"
+    "createadditionallogistics:lazy_large_cogwheel",
+    "createadditionallogistics:andesite_encased_lazy_large_cogwheel",
+    "createadditionallogistics:brass_encased_lazy_large_cogwheel",
+    "createadditionallogistics:copper_encased_lazy_large_cogwheel",
+    "createadditionallogistics:industrial_iron_encased_lazy_large_cogwheel",
+    "createadditionallogistics:weathered_iron_encased_lazy_large_cogwheel"
   ]
 }

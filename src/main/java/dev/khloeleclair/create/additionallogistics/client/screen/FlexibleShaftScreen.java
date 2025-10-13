@@ -2,6 +2,7 @@ package dev.khloeleclair.create.additionallogistics.client.screen;
 
 import dev.khloeleclair.create.additionallogistics.client.widgets.BlockPreviewWidget;
 import dev.khloeleclair.create.additionallogistics.common.blockentities.FlexibleShaftBlockEntity;
+import dev.khloeleclair.create.additionallogistics.common.blocks.EncasedFlexibleShaftBlock;
 import dev.khloeleclair.create.additionallogistics.common.blocks.FlexibleShaftBlock;
 import dev.khloeleclair.create.additionallogistics.common.network.CustomPackets;
 import net.createmod.catnip.gui.AbstractSimiScreen;
@@ -52,6 +53,9 @@ public class FlexibleShaftScreen extends AbstractSimiScreen {
             var state = level.getBlockState(pos);
             if (!(state.getBlock() instanceof FlexibleShaftBlock))
                 return false;
+
+            if (state.getBlock() instanceof EncasedFlexibleShaftBlock fsb)
+                return !fsb.connectsTo(level, pos, state, dir);
 
             var prop = FlexibleShaftBlock.SIDES[dir.ordinal()];
             return ! state.getValue(prop);

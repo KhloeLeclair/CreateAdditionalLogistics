@@ -1,0 +1,6 @@
+{
+  "parent": "createadditionallogistics:block/encased_flexible_shaft/block_west",
+  "textures": {
+    "frame": "create:block/weathered_iron_block"
+  }
+}

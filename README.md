@@ -204,6 +204,20 @@ the stock ticker. But at least you won't do it by accident.
 
 # Changelog
 
+## 1.2.5
+
+### Added
+
+* Lazy Cogs and Flexible Shafts can be encased. 
+
+### Fixed
+
+* Issue where encasing or removing the casing from a Lazy Shaft
+  would cause the Lazy Shaft to enter an invalid state.
+* Issue where block entities with Flywheel visuals would not render
+  correctly in the Flexible Shaft UI.
+
+
 ## 1.2.4
 
 ### Fixed

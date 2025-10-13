@@ -89,7 +89,6 @@ public class BlockPreviewWidget extends AbstractWidget {
     public BlockPreviewWidget(int x, int y, int width, int height, BlockPos position) {
         super(x, y, width, height, Component.empty());
 
-        this.canSelectDirection = canSelectDirection;
         this.position = position;
         worldOrigin = new Vector3f(position.getX() + 0.5f, position.getY() + 0.5f, position.getZ() + 0.5f);
 
@@ -226,65 +225,65 @@ public class BlockPreviewWidget extends AbstractWidget {
 
         LowEntityKineticBlockEntityRenderer.overrideVisualization = true;
 
-        guiGraphics.enableScissor(x, y, x + width, y + height);
-        /*RenderSystem.disableDepthTest();
-        guiGraphics.fill(x, y, x + width, y + height, 0xFF000000);
-        RenderSystem.enableDepthTest();*/
+        try {
+            guiGraphics.enableScissor(x, y, x + width, y + height);
 
-        // Calculate widget center
-        int centerX = getX() + (width / 2);
-        int centerY = getY() + (height / 2);
-        // Calculate mouse offset from center and scale to the block space
-        float diffX = (mouseX - centerX) / scale;
-        float diffY = (mouseY - centerY) / scale;
+            // Calculate widget center
+            int centerX = getX() + (width / 2);
+            int centerY = getY() + (height / 2);
+            // Calculate mouse offset from center and scale to the block space
+            float diffX = (mouseX - centerX) / scale;
+            float diffY = (mouseY - centerY) / scale;
 
-        Quaternionf rotPitch = Axis.XN.rotationDegrees(pitch);
-        Quaternionf rotYaw = Axis.YP.rotationDegrees(yaw);
+            Quaternionf rotPitch = Axis.XN.rotationDegrees(pitch);
+            Quaternionf rotYaw = Axis.YP.rotationDegrees(yaw);
 
-        // Build block transformation matrix
-        // Rotate 180 around Z, otherwise the block is upside down
-        Quaternionf blockTransform = new Quaternionf(ROT_180_Z);
-        // Rotate around X (pitch) in negative direction
-        blockTransform.mul(rotPitch);
-        // Rotate around Y (yaw)
-        blockTransform.mul(rotYaw);
+            // Build block transformation matrix
+            // Rotate 180 around Z, otherwise the block is upside down
+            Quaternionf blockTransform = new Quaternionf(ROT_180_Z);
+            // Rotate around X (pitch) in negative direction
+            blockTransform.mul(rotPitch);
+            // Rotate around Y (yaw)
+            blockTransform.mul(rotYaw);
 
-        // Draw block
-        renderWorld(guiGraphics, centerX, centerY, blockTransform, partialTick);
+            // Draw block
+            renderWorld(guiGraphics, centerX, centerY, blockTransform, partialTick);
 
-        // Build ray transformation matrix
-        // Rotate 180 around Z, otherwise the block is upside down
-        Matrix4f rayTransform = new Matrix4f();
-        rayTransform.set(ROT_180_Z);
-        // Rotate around Y (yaw)
-        rayTransform.rotate(rotYaw);
-        // Rotate around X (pitch) in negative direction
-        rayTransform.rotate(rotPitch);
+            // Build ray transformation matrix
+            // Rotate 180 around Z, otherwise the block is upside down
+            Matrix4f rayTransform = new Matrix4f();
+            rayTransform.set(ROT_180_Z);
+            // Rotate around Y (yaw)
+            rayTransform.rotate(rotYaw);
+            // Rotate around X (pitch) in negative direction
+            rayTransform.rotate(rotPitch);
 
-        // Ray-cast hit on block shape
-        Map<BlockHitResult, BlockPos> hits = new HashMap<>();
+            // Ray-cast hit on block shape
+            Map<BlockHitResult, BlockPos> hits = new HashMap<>();
 
-        BlockState state = MINECRAFT.level.getBlockState(position);
-        BlockHitResult hit = raycast(position, state, diffX, diffY, rayTransform);
-        if (hit != null && hit.getType() != HitResult.Type.MISS) {
-            if (canSelectDirection == null || canSelectDirection.test(hit.getDirection()))
-                hits.put(hit, position);
+            BlockState state = MINECRAFT.level.getBlockState(position);
+            BlockHitResult hit = raycast(position, state, diffX, diffY, rayTransform);
+            if (hit != null && hit.getType() != HitResult.Type.MISS) {
+                if (canSelectDirection == null || canSelectDirection.test(hit.getDirection()))
+                    hits.put(hit, position);
+            }
+
+            Vec3 eyePosition = transform(RAY_START, rayTransform).add(worldOrigin.x, worldOrigin.y, worldOrigin.z);
+            selection = hits.entrySet()
+                    .stream()
+                    .min(Comparator.comparingDouble(entry -> entry.getValue().distToCenterSqr(eyePosition))) // find
+                    // closest
+                    // to eye
+                    .map(closest -> new SelectedFace(closest.getValue(), closest.getKey().getDirection()));
+
+            renderSelection(guiGraphics, centerX, centerY, blockTransform);
+            //renderOverlay(guiGraphics);
+
+            guiGraphics.disableScissor();
+
+        } finally {
+            LowEntityKineticBlockEntityRenderer.overrideVisualization = false;
         }
-
-        Vec3 eyePosition = transform(RAY_START, rayTransform).add(worldOrigin.x, worldOrigin.y, worldOrigin.z);
-        selection = hits.entrySet()
-                .stream()
-                .min(Comparator.comparingDouble(entry -> entry.getValue().distToCenterSqr(eyePosition))) // find
-                // closest
-                // to eye
-                .map(closest -> new SelectedFace(closest.getValue(), closest.getKey().getDirection()));
-
-        renderSelection(guiGraphics, centerX, centerY, blockTransform);
-        //renderOverlay(guiGraphics);
-
-        guiGraphics.disableScissor();
-
-        LowEntityKineticBlockEntityRenderer.overrideVisualization = false;
 
     }
 

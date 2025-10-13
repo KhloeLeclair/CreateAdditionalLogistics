@@ -1,0 +1,7 @@
+{
+  "parent": "createadditionallogistics:block/encased_flexible_shaft/base",
+  "textures": {
+    "core": "minecraft:block/purple_concrete",
+    "particle": "minecraft:block/purple_concrete"
+  }
+}

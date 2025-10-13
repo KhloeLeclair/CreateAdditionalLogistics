@@ -10,6 +10,7 @@ import dev.engine_room.flywheel.lib.instance.AbstractInstance;
 import dev.engine_room.flywheel.lib.instance.FlatLit;
 import dev.engine_room.flywheel.lib.model.Models;
 import dev.khloeleclair.create.additionallogistics.common.blockentities.FlexibleShaftBlockEntity;
+import dev.khloeleclair.create.additionallogistics.common.blocks.EncasedFlexibleShaftBlock;
 import net.createmod.catnip.data.Iterate;
 import net.minecraft.core.Direction;
 import org.jetbrains.annotations.Nullable;
@@ -66,7 +67,12 @@ public class FlexibleShaftVisual extends KineticBlockEntityVisual<FlexibleShaftB
 
     @Override
     public void updateLight(float partialTick) {
-        relight(keys.values().toArray(FlatLit[]::new));
+        if (blockState.getBlock() instanceof EncasedFlexibleShaftBlock) {
+            for(var entry : keys.entrySet())
+                relight(pos.relative(entry.getKey()), entry.getValue());
+
+        } else
+            relight(keys.values().toArray(FlatLit[]::new));
     }
 
     @Override

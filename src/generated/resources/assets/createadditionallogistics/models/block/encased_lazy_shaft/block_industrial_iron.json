@@ -2,6 +2,6 @@
   "parent": "create:block/encased_shaft/block",
   "textures": {
     "casing": "create:block/industrial_iron_block",
-    "opening": "create:block/gearbox"
+    "opening": "createadditionallogistics:block/industrial_iron_gearbox"
   }
 }

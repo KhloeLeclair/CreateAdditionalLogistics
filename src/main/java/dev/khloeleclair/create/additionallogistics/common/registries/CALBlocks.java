@@ -20,9 +20,11 @@ import com.tterrag.registrate.providers.RegistrateRecipeProvider;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import com.tterrag.registrate.util.nullness.NonNullFunction;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
+import dev.khloeleclair.create.additionallogistics.client.ct.EncasedLazyCogCTBehavior;
 import dev.khloeleclair.create.additionallogistics.common.blocks.*;
 import dev.khloeleclair.create.additionallogistics.common.datagen.CALBlockStateGen;
 import dev.khloeleclair.create.additionallogistics.common.items.LazyCogwheelBlockItem;
+import net.createmod.catnip.data.Couple;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
@@ -37,6 +39,7 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.material.MapColor;
 import net.neoforged.neoforge.common.Tags;
+import org.jetbrains.annotations.Nullable;
 
 import static com.simibubi.create.api.behaviour.display.DisplaySource.displaySource;
 import static com.simibubi.create.api.behaviour.interaction.MovingInteractionBehaviour.interactionBehaviour;
@@ -109,21 +112,21 @@ public class CALBlocks {
     public static BlockEntry<EncasedLazyShaftBlock> COPPER_ENCASED_LAZY_SHAFT =
             REGISTRATE.block("copper_encased_lazy_shaft", p -> new EncasedLazyShaftBlock(p, AllBlocks.COPPER_CASING::get))
                     .properties(p -> p.mapColor(MapColor.TERRACOTTA_LIGHT_GRAY))
-                    .transform(CALBlockStateGen.encasedLazyShaft("copper", Create.asResource("block/gearbox"), () -> AllSpriteShifts.COPPER_CASING))
+                    .transform(CALBlockStateGen.encasedLazyShaft("copper", CreateAdditionalLogistics.asResource("block/copper_gearbox"), () -> AllSpriteShifts.COPPER_CASING))
                     .transform(encasedLazyShaft())
                     .register();
 
     public static BlockEntry<EncasedLazyShaftBlock> INDUSTRIAL_IRON_ENCASED_LAZY_SHAFT =
             REGISTRATE.block("industrial_iron_encased_lazy_shaft", p -> new EncasedLazyShaftBlock(p, AllBlocks.INDUSTRIAL_IRON_BLOCK))
                     .properties(p -> p.mapColor(MapColor.COLOR_GRAY))
-                    .transform(CALBlockStateGen.encasedLazyShaftNotConnected("industrial_iron", Create.asResource("block/industrial_iron_block"), Create.asResource("block/gearbox")))
+                    .transform(CALBlockStateGen.encasedLazyShaftNotConnected("industrial_iron", Create.asResource("block/industrial_iron_block"), CreateAdditionalLogistics.asResource("block/industrial_iron_gearbox")))
                     .transform(encasedLazyShaft())
                     .register();
 
     public static BlockEntry<EncasedLazyShaftBlock> WEATHERED_IRON_ENCASED_LAZY_SHAFT =
             REGISTRATE.block("weathered_iron_encased_lazy_shaft", p -> new EncasedLazyShaftBlock(p, AllBlocks.WEATHERED_IRON_BLOCK))
                     .properties(p -> p.mapColor(MapColor.COLOR_GRAY))
-                    .transform(CALBlockStateGen.encasedLazyShaftNotConnected("weathered_iron", Create.asResource("block/weathered_iron_block"), Create.asResource("block/gearbox")))
+                    .transform(CALBlockStateGen.encasedLazyShaftNotConnected("weathered_iron", Create.asResource("block/weathered_iron_block"), CreateAdditionalLogistics.asResource("block/weathered_iron_gearbox")))
                     .transform(encasedLazyShaft())
                     .register();
 
@@ -182,6 +185,113 @@ public class CALBlocks {
                     .model((c,p) -> p.withExistingParent(c.getName(), p.modLoc("block/lazy_cog/item_large")))
                     .build()
                     .register();
+
+    // Encased Lazy CogWheels
+    static {
+        REGISTRATE.defaultCreativeTab((ResourceKey<CreativeModeTab>) null);
+    }
+
+    public static <T extends Block & EncasedBlock, P> NonNullFunction<BlockBuilder<T, P>, BlockBuilder<T, P>> encasedLazyCog(boolean large) {
+        return t -> t.transform(EncasingRegistry.addVariantTo(large ? CALBlocks.LAZY_LARGE_COGWHEEL : CALBlocks.LAZY_COGWHEEL))
+                .transform(axeOrPickaxe())
+                .tag(CALTags.CALBlockTags.LAZY.tag)
+                .tag(large ? CALTags.CALBlockTags.LAZY_LARGE_COGS.tag : CALTags.CALBlockTags.LAZY_COGS.tag)
+                .item()
+                .model((c, p) -> p.withExistingParent(c.getName(), p.modLoc("block/lazy_cog/item_" + (large ? "large" : "small"))))
+                .build();
+    }
+
+    public static BlockEntry<EncasedLazyCogWheelBlock> ANDESITE_ENCASED_LAZY_COGWHEEL =
+            REGISTRATE.block("andesite_encased_lazy_cogwheel", p -> EncasedLazyCogWheelBlock.small(p, AllBlocks.ANDESITE_CASING::get))
+                    .properties(p -> p.mapColor(MapColor.PODZOL))
+                    .transform(CALBlockStateGen.encasedLazyCogwheel("andesite", () -> AllSpriteShifts.ANDESITE_CASING))
+                    .onRegister(CreateRegistrate.connectedTextures(() -> new EncasedLazyCogCTBehavior(AllSpriteShifts.ANDESITE_CASING,
+                            Couple.create(AllSpriteShifts.ANDESITE_ENCASED_COGWHEEL_SIDE,
+                                    AllSpriteShifts.ANDESITE_ENCASED_COGWHEEL_OTHERSIDE))))
+                    .transform(encasedLazyCog(false))
+                    .register();
+
+    public static BlockEntry<EncasedLazyCogWheelBlock> ANDESITE_ENCASED_LAZY_LARGE_COGWHEEL =
+            REGISTRATE.block("andesite_encased_lazy_large_cogwheel", p -> EncasedLazyCogWheelBlock.large(p, AllBlocks.ANDESITE_CASING::get))
+                    .properties(p -> p.mapColor(MapColor.PODZOL))
+                    .transform(CALBlockStateGen.encasedLazyLargeCogwheel("andesite", () -> AllSpriteShifts.ANDESITE_CASING))
+                    .onRegister(CreateRegistrate.connectedTextures(() -> new EncasedLazyCogCTBehavior(AllSpriteShifts.ANDESITE_CASING,
+                            Couple.create(AllSpriteShifts.ANDESITE_ENCASED_COGWHEEL_SIDE,
+                                    AllSpriteShifts.ANDESITE_ENCASED_COGWHEEL_OTHERSIDE))))
+                    .transform(encasedLazyCog(true))
+                    .register();
+
+    public static BlockEntry<EncasedLazyCogWheelBlock> BRASS_ENCASED_LAZY_COGWHEEL =
+            REGISTRATE.block("brass_encased_lazy_cogwheel", p -> EncasedLazyCogWheelBlock.small(p, AllBlocks.BRASS_CASING::get))
+                    .properties(p -> p.mapColor(MapColor.TERRACOTTA_BROWN))
+                    .transform(CALBlockStateGen.encasedLazyCogwheel("brass", () -> AllSpriteShifts.BRASS_CASING))
+                    .onRegister(CreateRegistrate.connectedTextures(() -> new EncasedLazyCogCTBehavior(AllSpriteShifts.BRASS_CASING,
+                            Couple.create(AllSpriteShifts.BRASS_ENCASED_COGWHEEL_SIDE,
+                                    AllSpriteShifts.BRASS_ENCASED_COGWHEEL_OTHERSIDE))))
+                    .transform(encasedLazyCog(false))
+                    .register();
+
+    public static BlockEntry<EncasedLazyCogWheelBlock> BRASS_ENCASED_LAZY_LARGE_COGWHEEL =
+            REGISTRATE.block("brass_encased_lazy_large_cogwheel", p -> EncasedLazyCogWheelBlock.large(p, AllBlocks.BRASS_CASING::get))
+                    .properties(p -> p.mapColor(MapColor.TERRACOTTA_BROWN))
+                    .transform(CALBlockStateGen.encasedLazyLargeCogwheel("brass", () -> AllSpriteShifts.BRASS_CASING))
+                    .onRegister(CreateRegistrate.connectedTextures(() -> new EncasedLazyCogCTBehavior(AllSpriteShifts.BRASS_CASING,
+                            Couple.create(AllSpriteShifts.BRASS_ENCASED_COGWHEEL_SIDE,
+                                    AllSpriteShifts.BRASS_ENCASED_COGWHEEL_OTHERSIDE))))
+                    .transform(encasedLazyCog(true))
+                    .register();
+
+    public static BlockEntry<EncasedLazyCogWheelBlock> COPPER_ENCASED_LAZY_COGWHEEL =
+            REGISTRATE.block("copper_encased_lazy_cogwheel", p -> EncasedLazyCogWheelBlock.small(p, AllBlocks.COPPER_CASING::get))
+                    .properties(p -> p.mapColor(MapColor.TERRACOTTA_LIGHT_GRAY))
+                    .transform(CALBlockStateGen.encasedLazyCogwheel("copper", () -> AllSpriteShifts.COPPER_CASING))
+                    .onRegister(CreateRegistrate.connectedTextures(() -> new EncasedLazyCogCTBehavior(AllSpriteShifts.COPPER_CASING,
+                            Couple.create(CALSpriteShifts.COPPER_ENCASED_COGWHEEL_SIDE,
+                                    CALSpriteShifts.COPPER_ENCASED_COGWHEEL_OTHERSIDE))))
+                    .transform(encasedLazyCog(false))
+                    .register();
+
+    public static BlockEntry<EncasedLazyCogWheelBlock> COPPER_ENCASED_LAZY_LARGE_COGWHEEL =
+            REGISTRATE.block("copper_encased_lazy_large_cogwheel", p -> EncasedLazyCogWheelBlock.large(p, AllBlocks.COPPER_CASING::get))
+                    .properties(p -> p.mapColor(MapColor.TERRACOTTA_LIGHT_GRAY))
+                    .transform(CALBlockStateGen.encasedLazyLargeCogwheel("copper", () -> AllSpriteShifts.COPPER_CASING))
+                    .onRegister(CreateRegistrate.connectedTextures(() -> new EncasedLazyCogCTBehavior(AllSpriteShifts.COPPER_CASING,
+                            Couple.create(CALSpriteShifts.COPPER_ENCASED_COGWHEEL_SIDE,
+                                    CALSpriteShifts.COPPER_ENCASED_COGWHEEL_OTHERSIDE))))
+                    .transform(encasedLazyCog(true))
+                    .register();
+
+    public static BlockEntry<EncasedLazyCogWheelBlock> INDUSTRIAL_IRON_ENCASED_LAZY_COGWHEEL =
+            REGISTRATE.block("industrial_iron_encased_lazy_cogwheel", p -> EncasedLazyCogWheelBlock.small(p, AllBlocks.INDUSTRIAL_IRON_BLOCK))
+                    .properties(p -> p.mapColor(MapColor.COLOR_GRAY))
+                    .transform(CALBlockStateGen.encasedLazyCogwheel("industrial_iron", null))
+                    .transform(encasedLazyCog(false))
+                    .register();
+
+    public static BlockEntry<EncasedLazyCogWheelBlock> INDUSTRIAL_IRON_ENCASED_LAZY_LARGE_COGWHEEL =
+            REGISTRATE.block("industrial_iron_encased_lazy_large_cogwheel", p -> EncasedLazyCogWheelBlock.large(p, AllBlocks.INDUSTRIAL_IRON_BLOCK))
+                    .properties(p -> p.mapColor(MapColor.COLOR_GRAY))
+                    .transform(CALBlockStateGen.encasedLazyLargeCogwheel("industrial_iron", null))
+                    .transform(encasedLazyCog(true))
+                    .register();
+
+    public static BlockEntry<EncasedLazyCogWheelBlock> WEATHERED_IRON_ENCASED_LAZY_COGWHEEL =
+            REGISTRATE.block("weathered_iron_encased_lazy_cogwheel", p -> EncasedLazyCogWheelBlock.small(p, AllBlocks.WEATHERED_IRON_BLOCK))
+                    .properties(p -> p.mapColor(MapColor.COLOR_GRAY))
+                    .transform(CALBlockStateGen.encasedLazyCogwheel("weathered_iron", null))
+                    .transform(encasedLazyCog(false))
+                    .register();
+
+    public static BlockEntry<EncasedLazyCogWheelBlock> WEATHERED_IRON_ENCASED_LAZY_LARGE_COGWHEEL =
+            REGISTRATE.block("weathered_iron_encased_lazy_large_cogwheel", p -> EncasedLazyCogWheelBlock.large(p, AllBlocks.WEATHERED_IRON_BLOCK))
+                    .properties(p -> p.mapColor(MapColor.COLOR_GRAY))
+                    .transform(CALBlockStateGen.encasedLazyLargeCogwheel("weathered_iron", null))
+                    .transform(encasedLazyCog(true))
+                    .register();
+
+    static {
+        REGISTRATE.defaultCreativeTab(AllCreativeModeTabs.BASE_CREATIVE_TAB.getKey());
+    }
 
     // Flexible Shafts
 
@@ -242,6 +352,120 @@ public class CALBlocks {
                 .build()
                 .register();
     });
+
+    // Encased Flexible Shafts
+
+    static {
+        REGISTRATE.defaultCreativeTab((ResourceKey<CreativeModeTab>) null);
+    }
+
+    public static <T extends EncasedFlexibleShaftBlock, P> NonNullFunction<BlockBuilder<T, P>, BlockBuilder<T, P>> encasedFlexibleShaft() {
+        return encasedFlexibleShaft(null);
+    }
+
+    public static <T extends EncasedFlexibleShaftBlock, P> NonNullFunction<BlockBuilder<T, P>, BlockBuilder<T, P>> encasedFlexibleShaft(@Nullable DyeColor color) {
+        return t -> t.transform(EncasingRegistry.addVariantTo(color == null ? CALBlocks.FLEXIBLE_SHAFT : CALBlocks.DYED_FLEXIBLE_SHAFTS.get(color)))
+                .transform(axeOrPickaxe())
+                .tag(CALTags.CALBlockTags.LAZY.tag)
+                .tag(CALTags.CALBlockTags.FLEXIBLE_SHAFTS.tag)
+                .item()
+                .model((c, p) -> p.withExistingParent(c.getName(), p.modLoc("block/flexible_shaft/item")))
+                .build();
+    }
+
+    public static final BlockEntry<EncasedFlexibleShaftBlock> ANDESITE_ENCASED_FLEXIBLE_SHAFT =
+            REGISTRATE.block("andesite_encased_flexible_shaft", p -> new EncasedFlexibleShaftBlock(p, AllBlocks.ANDESITE_CASING::get))
+                    .initialProperties(SharedProperties::stone)
+                    .properties(p -> p.mapColor(MapColor.PODZOL))
+                    .transform(CALBlockStateGen.encasedFlexibleShaft("andesite_casing", () -> AllSpriteShifts.ANDESITE_CASING))
+                    .transform(encasedFlexibleShaft())
+                    .register();
+
+    public static final DyedBlockList<EncasedFlexibleShaftBlock> DYED_ANDESITE_ENCASED_FLEXIBLE_SHAFTS = new DyedBlockList<>(color -> {
+        String colorName = color.getSerializedName();
+        return REGISTRATE.block("andesite_encased_" + colorName + "_flexible_shaft", p -> new EncasedFlexibleShaftBlock(p, color, AllBlocks.ANDESITE_CASING::get))
+                .initialProperties(SharedProperties::stone)
+                .properties(p -> p.mapColor(color))
+                .transform(CALBlockStateGen.encasedFlexibleShaft("andesite_casing", color, () -> AllSpriteShifts.ANDESITE_CASING))
+                .transform(encasedFlexibleShaft(color))
+                .register();
+    });
+
+    public static final BlockEntry<EncasedFlexibleShaftBlock> BRASS_ENCASED_FLEXIBLE_SHAFT =
+            REGISTRATE.block("brass_encased_flexible_shaft", p -> new EncasedFlexibleShaftBlock(p, AllBlocks.BRASS_CASING::get))
+                    .initialProperties(SharedProperties::stone)
+                    .properties(p -> p.mapColor(MapColor.TERRACOTTA_BROWN))
+                    .transform(CALBlockStateGen.encasedFlexibleShaft("brass_casing", () -> AllSpriteShifts.BRASS_CASING))
+                    .transform(encasedFlexibleShaft())
+                    .register();
+
+    public static final DyedBlockList<EncasedFlexibleShaftBlock> DYED_BRASS_ENCASED_FLEXIBLE_SHAFTS = new DyedBlockList<>(color -> {
+        String colorName = color.getSerializedName();
+        return REGISTRATE.block("brass_encased_" + colorName + "_flexible_shaft", p -> new EncasedFlexibleShaftBlock(p, color, AllBlocks.BRASS_CASING::get))
+                .initialProperties(SharedProperties::stone)
+                .properties(p -> p.mapColor(color))
+                .transform(CALBlockStateGen.encasedFlexibleShaft("brass_casing", color, () -> AllSpriteShifts.BRASS_CASING))
+                .transform(encasedFlexibleShaft(color))
+                .register();
+    });
+
+    public static final BlockEntry<EncasedFlexibleShaftBlock> COPPER_ENCASED_FLEXIBLE_SHAFT =
+            REGISTRATE.block("copper_encased_flexible_shaft", p -> new EncasedFlexibleShaftBlock(p, AllBlocks.COPPER_CASING::get))
+                    .initialProperties(SharedProperties::stone)
+                    .properties(p -> p.mapColor(MapColor.TERRACOTTA_LIGHT_GRAY))
+                    .transform(CALBlockStateGen.encasedFlexibleShaft("copper_casing", () -> AllSpriteShifts.COPPER_CASING))
+                    .transform(encasedFlexibleShaft())
+                    .register();
+
+    public static final DyedBlockList<EncasedFlexibleShaftBlock> DYED_COPPER_ENCASED_FLEXIBLE_SHAFTS = new DyedBlockList<>(color -> {
+        String colorName = color.getSerializedName();
+        return REGISTRATE.block("copper_encased_" + colorName + "_flexible_shaft", p -> new EncasedFlexibleShaftBlock(p, color, AllBlocks.COPPER_CASING::get))
+                .initialProperties(SharedProperties::stone)
+                .properties(p -> p.mapColor(color))
+                .transform(CALBlockStateGen.encasedFlexibleShaft("copper_casing", color, () -> AllSpriteShifts.COPPER_CASING))
+                .transform(encasedFlexibleShaft(color))
+                .register();
+    });
+
+    public static final BlockEntry<EncasedFlexibleShaftBlock> INDUSTRIAL_IRON_ENCASED_FLEXIBLE_SHAFT =
+            REGISTRATE.block("industrial_iron_encased_flexible_shaft", p -> new EncasedFlexibleShaftBlock(p, AllBlocks.INDUSTRIAL_IRON_BLOCK::get))
+                    .initialProperties(SharedProperties::stone)
+                    .properties(p -> p.mapColor(MapColor.COLOR_GRAY))
+                    .transform(CALBlockStateGen.encasedFlexibleShaft("industrial_iron_block", null))
+                    .transform(encasedFlexibleShaft())
+                    .register();
+
+    public static final DyedBlockList<EncasedFlexibleShaftBlock> DYED_INDUSTRIAL_IRON_ENCASED_FLEXIBLE_SHAFTS = new DyedBlockList<>(color -> {
+        String colorName = color.getSerializedName();
+        return REGISTRATE.block("industrial_iron_encased_" + colorName + "_flexible_shaft", p -> new EncasedFlexibleShaftBlock(p, color, AllBlocks.INDUSTRIAL_IRON_BLOCK::get))
+                .initialProperties(SharedProperties::stone)
+                .properties(p -> p.mapColor(color))
+                .transform(CALBlockStateGen.encasedFlexibleShaft("industrial_iron_block", color, null))
+                .transform(encasedFlexibleShaft(color))
+                .register();
+    });
+
+    public static final BlockEntry<EncasedFlexibleShaftBlock> WEATHERED_IRON_ENCASED_FLEXIBLE_SHAFT =
+            REGISTRATE.block("weathered_iron_encased_flexible_shaft", p -> new EncasedFlexibleShaftBlock(p, AllBlocks.WEATHERED_IRON_BLOCK::get))
+                    .initialProperties(SharedProperties::stone)
+                    .properties(p -> p.mapColor(MapColor.COLOR_GRAY))
+                    .transform(CALBlockStateGen.encasedFlexibleShaft("weathered_iron_block", null))
+                    .transform(encasedFlexibleShaft())
+                    .register();
+
+    public static final DyedBlockList<EncasedFlexibleShaftBlock> DYED_WEATHERED_IRON_ENCASED_FLEXIBLE_SHAFTS = new DyedBlockList<>(color -> {
+        String colorName = color.getSerializedName();
+        return REGISTRATE.block("weathered_iron_encased_" + colorName + "_flexible_shaft", p -> new EncasedFlexibleShaftBlock(p, color, AllBlocks.WEATHERED_IRON_BLOCK::get))
+                .initialProperties(SharedProperties::stone)
+                .properties(p -> p.mapColor(color))
+                .transform(CALBlockStateGen.encasedFlexibleShaft("weathered_iron_block", color, null))
+                .transform(encasedFlexibleShaft(color))
+                .register();
+    });
+
+    static {
+        REGISTRATE.defaultCreativeTab(AllCreativeModeTabs.BASE_CREATIVE_TAB.getKey());
+    }
 
     // Cash Register
     public static final BlockEntry<CashRegisterBlock> CASH_REGISTER =

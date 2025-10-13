@@ -48,13 +48,6 @@ public abstract class AbstractLowEntityKineticBlock<T extends AbstractLowEntityK
 
     protected static final Map<Byte, VoxelShape> SHAPE_CACHE = new Byte2ObjectOpenHashMap<>();
 
-    protected VoxelShape getShapeWithSides(Direction... sides) {
-        byte key = 0;
-        for (var side : sides)
-            key |= (1 << side.ordinal());
-        return getShapeWithSides(key);
-    }
-
     protected VoxelShape getShapeWithSides(byte key) {
         VoxelShape cached;
 
@@ -93,7 +86,13 @@ public abstract class AbstractLowEntityKineticBlock<T extends AbstractLowEntityK
 
     @Override
     public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
-        super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
+        // We need to avoid calling super.onRemove if we're encasing/unencasing to avoid resetting our block entity.
+        boolean call_super = true;
+        if (pNewState.getBlock() instanceof AbstractLowEntityKineticBlock<?> lek && lek.getBlockEntityType() == getBlockEntityType())
+            call_super = false;
+
+        if (call_super)
+            super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
         if (pLevel.isClientSide)
             clearInformationWalkCache();
     }

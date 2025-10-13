@@ -10,11 +10,14 @@ import com.tterrag.registrate.providers.DataGenContext;
 import com.tterrag.registrate.providers.RegistrateBlockstateProvider;
 import com.tterrag.registrate.util.nullness.NonNullBiConsumer;
 import com.tterrag.registrate.util.nullness.NonNullUnaryOperator;
+import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
 import dev.khloeleclair.create.additionallogistics.common.blocks.*;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALBlocks;
 import net.createmod.catnip.data.Iterate;
+import net.minecraft.client.renderer.RenderType;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -28,6 +31,88 @@ import java.util.function.Supplier;
 import static com.simibubi.create.foundation.data.BlockStateGen.axisBlock;
 
 public class CALBlockStateGen {
+
+    public static <B extends EncasedFlexibleShaftBlock, P> NonNullUnaryOperator<BlockBuilder<B, P>> encasedFlexibleShaft(
+            String casing,
+            DyeColor color,
+            @Nullable Supplier<CTSpriteShiftEntry> casingShift
+    ) {
+        return encasedFlexibleShaft(
+                () -> CALBlocks.DYED_FLEXIBLE_SHAFTS.get(color),
+                casing,
+                ResourceLocation.withDefaultNamespace("block/" + color.getSerializedName() + "_concrete"),
+                casingShift
+        );
+    }
+
+    public static <B extends EncasedFlexibleShaftBlock, P> NonNullUnaryOperator<BlockBuilder<B, P>> encasedFlexibleShaft(
+            String casing,
+            @Nullable Supplier<CTSpriteShiftEntry> casingShift
+    ) {
+        return encasedFlexibleShaft(CALBlocks.FLEXIBLE_SHAFT::get, casing, null, casingShift);
+    }
+
+    public static <B extends EncasedFlexibleShaftBlock, P> NonNullUnaryOperator<BlockBuilder<B, P>> encasedFlexibleShaft(
+        Supplier<ItemLike> drop,
+        String casing,
+        @Nullable ResourceLocation coreTexture,
+        @Nullable Supplier<CTSpriteShiftEntry> casingShift
+    ) {
+
+        return b -> {
+            b.loot((p, lb) -> p.dropOther(lb, drop.get()));
+            b.blockstate(encasedFlexibleShaftBlockState(casing, coreTexture));
+
+            if (casingShift != null) {
+                b.onRegister(CreateRegistrate.connectedTextures(() -> new EncasedCTBehaviour(casingShift.get())));
+                b.onRegister(CreateRegistrate.casingConnectivity((block, cc) -> cc.make(block, casingShift.get(),
+                        (s, f) -> s.getValue(FlexibleShaftBlock.SIDES[f.ordinal()]))));
+            }
+
+            return b;
+        };
+    }
+
+    private static <B extends EncasedFlexibleShaftBlock> NonNullBiConsumer<DataGenContext<Block, B>, RegistrateBlockstateProvider> encasedFlexibleShaftBlockState(
+            String casing,
+            @Nullable ResourceLocation coreTexture
+    ) {
+        return (c, p) -> {
+            String path = "block/encased_flexible_shaft";
+
+            ModelFile model;
+            if (coreTexture == null)
+                model = p.models().getExistingFile(p.modLoc(path + "/base"));
+            else
+                model = p.models()
+                        .withExistingParent(c.getName(), p.modLoc(path + "/base"))
+                        .texture("particle", coreTexture)
+                        .texture("core", coreTexture);
+
+            MultiPartBlockStateBuilder builder = p.getMultipartBuilder(c.get());
+            builder
+                    .part()
+                    .modelFile(model)
+                    .addModel()
+                    .end();
+
+            for(Direction dir : Iterate.directions) {
+                int index = dir.ordinal();
+                BooleanProperty property = FlexibleShaftBlock.SIDES[index];
+
+                ModelFile m = p.models()
+                        .withExistingParent("encased_flexible_shaft_" + casing + "_" + dir.getSerializedName(), p.modLoc(path + "/block_" + dir.getSerializedName()))
+                        .texture("frame", Create.asResource("block/" + casing));
+
+                builder
+                        .part()
+                        .modelFile(m)
+                        .addModel()
+                        .condition(property, true)
+                        .end();
+            }
+        };
+    }
 
     public static NonNullBiConsumer<DataGenContext<Block, FlexibleShaftBlock>, RegistrateBlockstateProvider> flexibleShaft(@Nullable String name, @Nullable ResourceLocation texture) {
         return (c, p) -> {
@@ -257,5 +342,73 @@ public class CALBlockStateGen {
                 .build();
 
     }
+
+    public static <B extends EncasedLazyCogWheelBlock, P> NonNullUnaryOperator<BlockBuilder<B, P>> encasedLazyCogwheel(
+            String casing, @Nullable Supplier<CTSpriteShiftEntry> casingShift) {
+        return b -> encasedLazyCogwheelBase(b, casing, casingShift, CALBlocks.LAZY_COGWHEEL::get, false);
+    }
+
+    public static <B extends EncasedLazyCogWheelBlock, P> NonNullUnaryOperator<BlockBuilder<B, P>> encasedLazyLargeCogwheel(
+            String casing, @Nullable Supplier<CTSpriteShiftEntry> casingShift) {
+        return b -> encasedLazyCogwheelBase(b, casing, casingShift, CALBlocks.LAZY_LARGE_COGWHEEL::get, true);
+    }
+
+    private static <B extends EncasedLazyCogWheelBlock, P> BlockBuilder<B, P> encasedLazyCogwheelBase(BlockBuilder<B, P> b,
+                                                                                              String casing, @Nullable Supplier<CTSpriteShiftEntry> casingShift, Supplier<ItemLike> drop, boolean large) {
+        boolean side_is_create = casing.equals("andesite") || casing.equals("brass");
+        String encasedSuffix = "_encased_cogwheel_side" + (large ? "_connected" : "");
+        String blockFolder = large ? "encased_large_cogwheel" : "encased_cogwheel";
+        ResourceLocation wood;
+        ResourceLocation gearbox;
+        String casing_postfix;
+
+        if (casing.equals("brass")) {
+            wood = strippedLog("dark_oak");
+            casing_postfix = "_casing";
+            gearbox = Create.asResource("block/brass_gearbox");
+        } else if (casing.equals("copper")) {
+            wood = CreateAdditionalLogistics.asResource("block/copper_gearbox");
+            casing_postfix = "_casing";
+            gearbox = CreateAdditionalLogistics.asResource("block/copper_gearbox");
+        } else if (casing.equals("industrial_iron")) {
+            wood = Create.asResource("block/industrial_iron_block");
+            casing_postfix = "_block";
+            gearbox = CreateAdditionalLogistics.asResource("block/industrial_iron_gearbox");
+        } else if (casing.equals("weathered_iron")) {
+            wood = Create.asResource("block/weathered_iron_block");
+            casing_postfix = "_block";
+            gearbox = CreateAdditionalLogistics.asResource("block/weathered_iron_gearbox");
+        } else {
+            wood = strippedLog("spruce");
+            casing_postfix = "_casing";
+            gearbox = Create.asResource("block/gearbox");
+        }
+
+        return encasedBase(b, drop).addLayer(() -> RenderType::cutoutMipped)
+                .onRegister(thing -> {
+                    if (casingShift != null)
+                        CreateRegistrate.casingConnectivity((block, cc) -> cc.make(block, casingShift.get(),
+                                (s, f) -> f.getAxis() == s.getValue(AbstractLazyShaftBlock.AXIS)
+                                        && s.getValue(f.getAxisDirection() == Direction.AxisDirection.POSITIVE ? AbstractLazyShaftBlock.POSITIVE
+                                        : AbstractLazyShaftBlock.NEGATIVE))).accept(thing);
+                })
+                .blockstate((c, p) -> axisBlock(c, p, blockState -> {
+                    String suffix = (blockState.getValue(AbstractLazyShaftBlock.POSITIVE) ? "" : "_top")
+                            + (blockState.getValue(AbstractLazyShaftBlock.NEGATIVE) ? "" : "_bottom");
+                    String modelName = c.getName() + suffix;
+                    return p.models()
+                            .withExistingParent(modelName, Create.asResource("block/" + blockFolder + "/block" + suffix))
+                            .texture("casing", Create.asResource("block/" + casing + casing_postfix))
+                            .texture("particle", Create.asResource("block/" + casing + casing_postfix))
+                            .texture("4", gearbox)
+                            .texture("1", wood)
+                            .texture("side", side_is_create ? Create.asResource("block/" + casing + encasedSuffix) : CreateAdditionalLogistics.asResource("block/" + casing + encasedSuffix));
+                }, false));
+    }
+
+    private static ResourceLocation strippedLog(String wood) {
+        return ResourceLocation.withDefaultNamespace("block/stripped_" + wood + "_log_top");
+    }
+
 
 }
