@@ -4,14 +4,15 @@ import com.simibubi.create.content.kinetics.base.IRotate;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.content.kinetics.simpleRelays.ICogWheel;
 import com.simibubi.create.content.kinetics.transmission.SplitShaftBlockEntity;
-import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
 import dev.khloeleclair.create.additionallogistics.common.blocks.AbstractLowEntityKineticBlock;
+import dev.khloeleclair.create.additionallogistics.common.network.CustomPackets;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -121,7 +122,17 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
     @Override
     public List<BlockPos> addPropagationLocations(IRotate block, BlockState state, List<BlockPos> neighbours) {
         if (connections != null)
-            connections.forEach(p -> neighbours.add(worldPosition.offset(p)));
+            connections.forEach(p -> {
+                // Because the native propagation code adds immediately adjacent positions, we need to check
+                // that any neighbor we add isn't already in the list. Which is annoying, since it's a linked
+                // list, but it should only have at most 6 entries before it gets to us so just... deal with it.
+
+                // If not for this, we'd potentially be adding duplicate entries to the list and causing
+                // unnecessary work up to a potential infinite loop.
+                var pos = worldPosition.offset(p);
+                if (!neighbours.contains(pos))
+                    neighbours.add(pos);
+            });
 
         if (!ICogWheel.isLargeCog(state))
             return super.addPropagationLocations(block, state, neighbours);
@@ -144,17 +155,22 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
 
     @Override
     public boolean isCustomConnection(KineticBlockEntity other, BlockState state, BlockState otherState) {
+        // Unlike in addPropagationLocations, we don't have any special logic for adjacent blocks here.
+        // It isn't required.
         BlockPos relative = other.getBlockPos().subtract(worldPosition);
         return connections != null && connections.contains(relative);
     }
 
     protected boolean setConnections(List<BlockPos> newConnections) {
+        // Find our index in the list of connections, so that we can pick out the block entities
+        // directly before and after us.
         int index = 0;
         for (; index < newConnections.size(); index++) {
             if (worldPosition.equals(newConnections.get(index)))
                 break;
         }
 
+        // If we aren't in the list somehow, something went wrong. Abort.
         if (index >= newConnections.size())
             return false;
 
@@ -172,13 +188,17 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
         boolean contains_previous = prevPos == null || connections.contains(prevPos);
         boolean contains_next = nextPos == null || connections.contains(nextPos);
 
-        // Nothing changed.
+        // If our connections aren't changing, we don't need to do anything and we can stop now.
         if (contains_previous && contains_next && connections.size() == count)
             return false;
 
-        // Something changed. Did the fire nation attack?
+        //CreateAdditionalLogistics.LOGGER.debug("Changed connections for {} -- {}, {}", worldPosition, prevPos, nextPos);
+
+        // Something did change, so we need to detach from the kinetic network.
         detachKinetics();
 
+        // Make a new list of our new connections, and save it as pending for now. We won't swap in the new
+        // list until after all our entities go through this step.
         pendingConnections = new ArrayList<>();
         if (prevPos != null)
             pendingConnections.add(prevPos);
@@ -188,6 +208,7 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
         return true;
     }
 
+    /// Finalize the connection update process started with a call to setConnections.
     protected void finalizeConnections() {
         if (pendingConnections == null)
             return;
@@ -195,7 +216,9 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
         connections = pendingConnections;
         pendingConnections = null;
 
+        // Notify things that our state changed so that changes are saved / synced as appropriate.
         notifyUpdate();
+        // And set a flag so we reconnect to kinetics next tick.
         updateSpeed = true;
     }
 
@@ -267,8 +290,10 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
     /// Mark a position dirty. Dirty positions are saved in a list and processed at the
     /// end of each tick, to ensure checks aren't performed more than once.
     public static void markDirty(Level level, BlockPos pos) {
-        if (level.isClientSide)
+        if (level.isClientSide) {
+            AbstractLowEntityKineticBlock.clearInformationWalkCache();
             return;
+        }
 
         dirtyPositions.add(new LevelBlockPos(level, pos));
     }
@@ -278,18 +303,22 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
         dirtyPositions.clear();
 
         List<AbstractLowEntityKineticBlockEntity> toFinalize = new ArrayList<>();
+        Set<ServerLevel> levels = new ObjectOpenHashSet<>();
 
         while(!dirty.isEmpty()) {
             LevelBlockPos pos = dirty.removeFirst();
             var result = walkBlocks(pos.level, pos.pos);
+            if (pos.level instanceof ServerLevel sl)
+                levels.add(sl);
 
-            CreateAdditionalLogistics.LOGGER.debug("Updating dirty lazy network from {}, found {} connected lazy blocks with {} entities.", pos.pos, result.visited.size(), result.entities.size());
+            //CreateAdditionalLogistics.LOGGER.debug("Updating dirty lazy network from {}, found {} connected lazy blocks with {} entities.", pos.pos, result.visited.size(), result.entities.size());
 
             if (!result.entities.isEmpty()) {
                 // Make a list.
                 List<BlockPos> entityPositions = result.entities.navigableKeySet().stream().toList();
 
-                // Update every entity.
+                // Update every entity. This calls detachKinetics on relevant entities, and returns
+                // true so we can collect them to call finalize on after we're done.
                 for (var entity : result.entities.values()) {
                     if (entity.setConnections(entityPositions))
                         toFinalize.add(entity);
@@ -304,6 +333,9 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
         // Finish changing connections on any updated entities.
         for(var entity : toFinalize)
             entity.finalizeConnections();
+
+        for(var level : levels)
+            CustomPackets.ServerToClientEvent.CLEAR_INFORMATION.send(level);
     }
 
     public static void onTick(ServerTickEvent.Post event) {

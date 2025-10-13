@@ -204,6 +204,18 @@ the stock ticker. But at least you won't do it by accident.
 
 # Changelog
 
+## 1.2.4
+
+### Fixed
+
+* Issue where block entities may incorrectly render the base block model in the 
+  Flexible Shaft configuration UI.
+* Issue where lazy network blocks may report their neighbors twice, causing Create's
+  kinetic propagation system to have issues.
+* Lazy network blocks without a block entity displaying incorrect Overstressed data
+  after a block is added or removed due to client-side caching.
+
+
 ## 1.2.3
 
 ### Added

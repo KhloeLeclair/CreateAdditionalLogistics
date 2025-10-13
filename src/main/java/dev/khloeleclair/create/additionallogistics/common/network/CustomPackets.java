@@ -8,6 +8,7 @@ import dev.khloeleclair.create.additionallogistics.client.screen.FlexibleShaftSc
 import dev.khloeleclair.create.additionallogistics.client.screen.SalesLedgerScreen;
 import dev.khloeleclair.create.additionallogistics.common.IPromiseLimit;
 import dev.khloeleclair.create.additionallogistics.common.blockentities.FlexibleShaftBlockEntity;
+import dev.khloeleclair.create.additionallogistics.common.blocks.AbstractLazyShaftBlock;
 import dev.khloeleclair.create.additionallogistics.common.blocks.FlexibleShaftBlock;
 import dev.khloeleclair.create.additionallogistics.common.data.CustomComponents;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALItems;
@@ -21,6 +22,7 @@ import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.codec.ByteBufCodecs;
 import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.api.distmarker.Dist;
@@ -39,7 +41,7 @@ import java.util.UUID;
 public class CustomPackets {
 
     public static void register(final RegisterPayloadHandlersEvent event) {
-        final PayloadRegistrar registrar = event.registrar("1")
+        final PayloadRegistrar registrar = event.registrar("2")
                 .executesOn(HandlerThread.MAIN);
 
         registrar.playToServer(UpdateGaugePromiseLimit.TYPE, UpdateGaugePromiseLimit.STREAM_CODEC, UpdateGaugePromiseLimit::handle);
@@ -48,6 +50,40 @@ public class CustomPackets {
 
         registrar.playToClient(OpenSalesLedgerScreen.TYPE, OpenSalesLedgerScreen.STREAM_CODEC, (message, access) -> OpenSalesLedgerScreen.handle(message));
         registrar.playToClient(OpenFlexibleShaftScreen.TYPE, OpenFlexibleShaftScreen.STREAM_CODEC, (message, access) -> OpenFlexibleShaftScreen.handle(message));
+        registrar.playToClient(ServerToClientEvent.TYPE, ServerToClientEvent.STREAM_CODEC, (message, access) -> ServerToClientEvent.handle(message, access));
+
+    }
+
+    public record ServerToClientEvent(String key) implements CustomPacketPayload {
+
+        public static final CustomPacketPayload.Type<ServerToClientEvent> TYPE = new CustomPacketPayload.Type<>(
+                CreateAdditionalLogistics.asResource("server_event")
+        );
+
+        public static final StreamCodec<FriendlyByteBuf, ServerToClientEvent> STREAM_CODEC = StreamCodec.composite(
+                ByteBufCodecs.STRING_UTF8,
+                ServerToClientEvent::key,
+                ServerToClientEvent::new
+        );
+
+        @Override
+        public Type<? extends CustomPacketPayload> type() { return TYPE; }
+
+        public static final ServerToClientEvent CLEAR_INFORMATION = new ServerToClientEvent("clear_information");
+
+        @OnlyIn(Dist.CLIENT)
+        public static void handle(ServerToClientEvent message, IPayloadContext context) {
+            if (message.key.equals("clear_information"))
+                AbstractLazyShaftBlock.clearInformationWalkCache();
+        }
+
+        public void send(ServerLevel level) {
+            PacketDistributor.sendToPlayersInDimension(level, this);
+        }
+
+        public void send(ServerLevel level, BlockPos pos) {
+            PacketDistributor.sendToPlayersNear(level, null, pos.getX(), pos.getY(), pos.getZ(), 160, this);
+        }
     }
 
     public record FinishedConfiguringFlexibleShaft(BlockPos pos) implements CustomPacketPayload {

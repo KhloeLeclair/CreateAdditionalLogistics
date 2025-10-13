@@ -147,7 +147,7 @@ public abstract class AbstractLazyShaftBlock<T extends AbstractLowEntityKineticB
 
         BlockState newState = withSides(level, pos, state);
         if (newState != state && level instanceof ServerLevel sl)
-            AbstractLowEntityKineticBlockEntity.markDirty(sl, pos);
+                AbstractLowEntityKineticBlockEntity.markDirty(sl, pos);
 
         return newState;
     }

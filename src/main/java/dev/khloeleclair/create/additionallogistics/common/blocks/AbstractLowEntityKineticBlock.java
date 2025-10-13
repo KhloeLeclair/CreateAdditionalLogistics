@@ -87,6 +87,17 @@ public abstract class AbstractLowEntityKineticBlock<T extends AbstractLowEntityK
     @Nullable
     private static AbstractLowEntityKineticBlockEntity.WalkResult informationWalkResult;
 
+    public static void clearInformationWalkCache() {
+        informationWalkResult = null;
+    }
+
+    @Override
+    public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
+        super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
+        if (pLevel.isClientSide)
+            clearInformationWalkCache();
+    }
+
     @Override
     public BlockPos getInformationSource(Level level, BlockPos pos, BlockState state) {
         if (!level.isClientSide)

@@ -328,21 +328,24 @@ public class BlockPreviewWidget extends AbstractWidget {
                 .orElse(ModelData.EMPTY);
 
         BlockState blockState = MINECRAFT.level.getBlockState(blockPos);
+
         RenderShape rendershape = blockState.getRenderShape();
         if (rendershape != RenderShape.INVISIBLE) {
-            var renderer = MINECRAFT.getBlockRenderer();
-            BakedModel bakedmodel = renderer.getBlockModel(blockState);
-            modelData = bakedmodel.getModelData(MINECRAFT.level, blockPos, blockState, modelData);
-            int blockColor = MINECRAFT.getBlockColors().getColor(blockState, MINECRAFT.level, blockPos, 0);
-            float r = FastColor.ARGB32.red(blockColor) / 255F;
-            float g = FastColor.ARGB32.green(blockColor) / 255F;
-            float b = FastColor.ARGB32.blue(blockColor) / 255F;
-            for (RenderType renderType : bakedmodel.getRenderTypes(blockState, RandomSource.create(42), modelData)) {
-                renderer.getModelRenderer()
-                        .renderModel(guiGraphics.pose().last(),
-                                buffers.getBuffer(RenderTypeHelper.getEntityRenderType(renderType, false)), blockState,
-                                bakedmodel, r, g, b, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, modelData,
-                                renderType);
+            if (rendershape == RenderShape.MODEL) {
+                var renderer = MINECRAFT.getBlockRenderer();
+                BakedModel bakedmodel = renderer.getBlockModel(blockState);
+                modelData = bakedmodel.getModelData(MINECRAFT.level, blockPos, blockState, modelData);
+                int blockColor = MINECRAFT.getBlockColors().getColor(blockState, MINECRAFT.level, blockPos, 0);
+                float r = FastColor.ARGB32.red(blockColor) / 255F;
+                float g = FastColor.ARGB32.green(blockColor) / 255F;
+                float b = FastColor.ARGB32.blue(blockColor) / 255F;
+                for (RenderType renderType : bakedmodel.getRenderTypes(blockState, RandomSource.create(42), modelData)) {
+                    renderer.getModelRenderer()
+                            .renderModel(guiGraphics.pose().last(),
+                                    buffers.getBuffer(RenderTypeHelper.getEntityRenderType(renderType, false)), blockState,
+                                    bakedmodel, r, g, b, LightTexture.FULL_BRIGHT, OverlayTexture.NO_OVERLAY, modelData,
+                                    renderType);
+                }
             }
             BlockEntity blockEntity = MINECRAFT.level.getBlockEntity(blockPos);
             if (blockEntity != null) {
