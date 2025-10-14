@@ -134,6 +134,10 @@ Just be careful when connecting things. Due to how they're connected in code, so
 Create ends up breaking an inconvenient Flexible Lazy Shaft if there's a problem
 with incompatible rotations.
 
+Did I mention Lazy Shafts, Flexible Lazy Shafts, and Lazy Cogs can be encased? They
+support Andesite Casing, Brass Casing, Copper Casing, Industrial Iron Block, and
+Weathered Iron Block.
+
 
 ## Improvements
 

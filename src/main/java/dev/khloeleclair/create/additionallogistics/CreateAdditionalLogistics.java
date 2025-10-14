@@ -1,8 +1,6 @@
 package dev.khloeleclair.create.additionallogistics;
 
 import com.mojang.logging.LogUtils;
-import com.simibubi.create.AllBlocks;
-import com.simibubi.create.AllCreativeModeTabs;
 import com.simibubi.create.content.contraptions.actors.seat.SeatBlock;
 import com.simibubi.create.content.contraptions.actors.seat.SeatEntity;
 import com.simibubi.create.content.logistics.stockTicker.StockTickerInteractionHandler;
@@ -22,7 +20,6 @@ import net.createmod.catnip.lang.FontHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.EventPriority;
@@ -84,7 +81,6 @@ public class CreateAdditionalLogistics {
 
         CustomComponents.register(modEventBus);
         modEventBus.addListener(CustomPackets::register);
-        //modEventBus.addListener(this::populateCreativeTabs);
 
         modEventBus.addListener(EventPriority.HIGHEST, DataGen::gatherData);
 
@@ -103,25 +99,6 @@ public class CreateAdditionalLogistics {
 
         return item;
     }
-
-    private void populateCreativeTabs(BuildCreativeModeTabContentsEvent event) {
-        if (event.getTab() == AllCreativeModeTabs.BASE_CREATIVE_TAB.get()) {
-
-            addToTab(event, CALBlocks.CASH_REGISTER.asStack(), AllBlocks.STOCK_TICKER.asStack(), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
-            var editor = addToTab(event, CALBlocks.PACKAGE_EDITOR.asStack(), AllBlocks.REPACKAGER.asStack(), CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
-            addToTab(event, CALBlocks.PACKAGE_ACCELERATOR.asStack(), editor, CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS);
-
-        } else if (event.getTab() == AllCreativeModeTabs.PALETTES_CREATIVE_TAB.get()) {
-
-            var after = AllBlocks.SEATS.get(DyeColor.BLACK).asStack();
-            for(DyeColor color : DyeColor.values())
-                after = addToTab(event, CALBlocks.SHORT_SEATS.get(color).asStack(), after, color == DyeColor.RED ? CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS : CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY);
-
-            for(DyeColor color : DyeColor.values())
-                after = addToTab(event, CALBlocks.TALL_SEATS.get(color).asStack(), after, color == DyeColor.RED ? CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS : CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY);
-        }
-    }
-
 
     @SubscribeEvent
     private void onServerStart(ServerStartingEvent event) {
