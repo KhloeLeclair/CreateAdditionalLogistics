@@ -50,9 +50,12 @@ public class CustomSeatEntity extends SeatEntity {
             return result;
 
         var seatPos = contraption.getSeatOf(passenger.getUUID());
-        var state = contraption.getBlocks().get(seatPos).state();
+        var block = contraption.getBlocks().get(seatPos);
+        if (block == null)
+            return result;
 
-        if (state.getBlock() instanceof AbstractSeatBlock seat) {
+        var state = block.state();
+        if (state != null && state.getBlock() instanceof AbstractSeatBlock seat) {
             var offset = seat.getSeatPosition(null, BlockPos.ZERO);
             result += offset.y - 0.5;
         }
