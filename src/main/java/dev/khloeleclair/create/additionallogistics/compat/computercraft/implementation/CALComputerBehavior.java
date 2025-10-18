@@ -4,9 +4,9 @@ import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import dan200.computercraft.api.detail.VanillaDetailRegistries;
 import dan200.computercraft.api.peripheral.IPeripheral;
-import dev.khloeleclair.create.additionallogistics.common.blockentities.CashRegisterBlockEntity;
-import dev.khloeleclair.create.additionallogistics.common.blockentities.PackageEditorBlockEntity;
-import dev.khloeleclair.create.additionallogistics.common.data.CustomComponents;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CashRegisterBlockEntity;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.packageEditor.PackageEditorBlockEntity;
+import dev.khloeleclair.create.additionallogistics.common.registries.CALDataComponents;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALItems;
 import dev.khloeleclair.create.additionallogistics.compat.computercraft.implementation.luaObjects.LuaSalesHistoryObject;
 import dev.khloeleclair.create.additionallogistics.compat.computercraft.implementation.peripherals.CashRegisterPeripheral;
@@ -37,7 +37,7 @@ public class CALComputerBehavior extends AbstractComputerBehaviour {
     public static void registerItemDetailProviders() {
         VanillaDetailRegistries.ITEM_STACK.addProvider((out, stack) -> {
             if (stack.is(CALItems.SALES_LEDGER)) {
-                var obj = new LuaSalesHistoryObject(stack.get(CustomComponents.SALES_HISTORY));
+                var obj = new LuaSalesHistoryObject(stack.get(CALDataComponents.SALES_HISTORY));
                 out.put("sales", obj);
             }
         });

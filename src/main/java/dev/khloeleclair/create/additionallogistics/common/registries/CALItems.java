@@ -4,7 +4,7 @@ import com.simibubi.create.foundation.data.CreateRegistrate;
 import com.simibubi.create.foundation.item.ItemDescription;
 import com.tterrag.registrate.util.entry.ItemEntry;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
-import dev.khloeleclair.create.additionallogistics.common.items.SalesLedgerItem;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.SalesLedgerItem;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.CreativeModeTabs;
 

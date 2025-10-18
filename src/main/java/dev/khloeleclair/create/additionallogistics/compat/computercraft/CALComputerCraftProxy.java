@@ -11,7 +11,7 @@ import java.util.function.Function;
 
 public class CALComputerCraftProxy {
 
-    private static Function<SmartBlockEntity, ? extends AbstractComputerBehaviour> fallbackFactory = FallbackComputerBehaviour::new;
+    private static final Function<SmartBlockEntity, ? extends AbstractComputerBehaviour> fallbackFactory = FallbackComputerBehaviour::new;
     @Nullable
     private static Function<SmartBlockEntity, ? extends AbstractComputerBehaviour> computerFactory;
 

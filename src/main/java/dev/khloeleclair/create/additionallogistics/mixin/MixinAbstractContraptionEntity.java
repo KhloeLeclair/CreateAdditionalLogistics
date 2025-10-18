@@ -1,7 +1,7 @@
 package dev.khloeleclair.create.additionallogistics.mixin;
 
 import com.simibubi.create.content.contraptions.AbstractContraptionEntity;
-import dev.khloeleclair.create.additionallogistics.common.entities.CustomSeatEntity;
+import dev.khloeleclair.create.additionallogistics.common.content.contraptions.actors.seats.CustomSeatEntity;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;

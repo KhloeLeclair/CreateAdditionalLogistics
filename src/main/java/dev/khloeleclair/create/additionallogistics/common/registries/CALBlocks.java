@@ -20,10 +20,21 @@ import com.tterrag.registrate.providers.RegistrateRecipeProvider;
 import com.tterrag.registrate.util.entry.BlockEntry;
 import com.tterrag.registrate.util.nullness.NonNullFunction;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
-import dev.khloeleclair.create.additionallogistics.client.ct.EncasedLazyCogCTBehavior;
-import dev.khloeleclair.create.additionallogistics.common.blocks.*;
+import dev.khloeleclair.create.additionallogistics.client.content.kinetics.lazy.EncasedLazyCogCTBehavior;
+import dev.khloeleclair.create.additionallogistics.common.content.contraptions.actors.seats.ShortSeatBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.contraptions.actors.seats.TallSeatBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.cog.EncasedLazyCogWheelBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.cog.LazyCogWheelBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.EncasedFlexibleShaftBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.FlexibleShaftBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.shaft.EncasedLazyShaftBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.shaft.LazyShaftBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CashRegisterBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.packageAccelerator.PackageAcceleratorBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.packageEditor.PackageEditorBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.trains.networkObserver.NetworkObserverBlock;
 import dev.khloeleclair.create.additionallogistics.common.datagen.CALBlockStateGen;
-import dev.khloeleclair.create.additionallogistics.common.items.LazyCogwheelBlockItem;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.cog.LazyCogwheelBlockItem;
 import net.createmod.catnip.data.Couple;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeCategory;
@@ -466,6 +477,15 @@ public class CALBlocks {
     static {
         REGISTRATE.defaultCreativeTab(AllCreativeModeTabs.BASE_CREATIVE_TAB.getKey());
     }
+
+    // Network Observer
+    public static final BlockEntry<NetworkObserverBlock> NETWORK_OBERVER =
+            REGISTRATE.block("network_observer", NetworkObserverBlock::new)
+                    .initialProperties(SharedProperties::softMetal)
+                    .properties(p -> p.mapColor(MapColor.PODZOL)
+                            .noOcclusion()
+                            .sound(SoundType.NETHERITE_BLOCK))
+                    .register();
 
     // Cash Register
     public static final BlockEntry<CashRegisterBlock> CASH_REGISTER =

@@ -1,8 +1,8 @@
 package dev.khloeleclair.create.additionallogistics.mixin;
 
 import com.simibubi.create.content.logistics.stockTicker.StockTickerInteractionHandler;
-import dev.khloeleclair.create.additionallogistics.common.blockentities.CashRegisterBlockEntity;
-import dev.khloeleclair.create.additionallogistics.common.items.SalesLedgerItem;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CashRegisterBlockEntity;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CurrencyUtilities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -14,6 +14,18 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(StockTickerInteractionHandler.class)
 public abstract class MixinStockTickerInteractionHandler {
+
+    @Inject(
+            method = "interactWithShop",
+            at = @At("HEAD"),
+            cancellable = true
+    )
+    private static void CAL$onPurchase(Player player, Level level, BlockPos targetPos, ItemStack mainHandItem, CallbackInfo ci) {
+        if (CurrencyUtilities.isConversionEnabled()) {
+            ci.cancel();
+            CurrencyUtilities.interactWithShop(player, level, targetPos, mainHandItem);
+        }
+    }
 
     @Inject(
             method = "interactWithShop",

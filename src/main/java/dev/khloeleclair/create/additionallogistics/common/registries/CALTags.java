@@ -116,6 +116,9 @@ public class CALTags {
         BASIC_SHAFTS,
         LAZY_COGS,
         LAZY_LARGE_COGS,
+
+        NUGGETS_DIAMOND(NameSpace.COMMON, "nuggets/diamond"),
+        NUGGETS_EMERALD(NameSpace.COMMON, "nuggets/emerald")
         ;
 
         public final TagKey<Item> tag;

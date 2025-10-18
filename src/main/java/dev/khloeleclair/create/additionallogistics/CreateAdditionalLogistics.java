@@ -10,17 +10,14 @@ import com.simibubi.create.foundation.item.KineticStats;
 import com.simibubi.create.foundation.item.TooltipModifier;
 import com.tterrag.registrate.util.nullness.NonNullSupplier;
 import dev.khloeleclair.create.additionallogistics.common.Config;
-import dev.khloeleclair.create.additionallogistics.common.blockentities.AbstractLowEntityKineticBlockEntity;
-import dev.khloeleclair.create.additionallogistics.common.data.CustomComponents;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.base.AbstractLowEntityKineticBlockEntity;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CurrencyUtilities;
 import dev.khloeleclair.create.additionallogistics.common.datagen.DataGen;
-import dev.khloeleclair.create.additionallogistics.common.network.CustomPackets;
 import dev.khloeleclair.create.additionallogistics.common.registries.*;
 import dev.khloeleclair.create.additionallogistics.compat.computercraft.CALComputerCraftProxy;
 import net.createmod.catnip.lang.FontHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.item.CreativeModeTab;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.AABB;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.IEventBus;
@@ -28,7 +25,6 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModContainer;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.BuildCreativeModeTabContentsEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
 import net.neoforged.neoforge.event.server.ServerStartingEvent;
 import net.neoforged.neoforge.event.server.ServerStoppedEvent;
@@ -79,25 +75,20 @@ public class CreateAdditionalLogistics {
 
         CALComputerCraftProxy.register();
 
-        CustomComponents.register(modEventBus);
-        modEventBus.addListener(CustomPackets::register);
+        CALDataComponents.register(modEventBus);
+        CALDataMaps.register(modEventBus);
+
+        modEventBus.addListener(CALPackets::register);
 
         modEventBus.addListener(EventPriority.HIGHEST, DataGen::gatherData);
 
         NeoForge.EVENT_BUS.register(this);
+        NeoForge.EVENT_BUS.addListener(CurrencyUtilities::onDataMapUpdated);
+        NeoForge.EVENT_BUS.addListener(CurrencyUtilities::onRecipesUpdated);
         NeoForge.EVENT_BUS.addListener(AbstractLowEntityKineticBlockEntity::onTick);
 
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
         Config.register(modContainer);
-    }
-
-    private static ItemStack addToTab(BuildCreativeModeTabContentsEvent event, ItemStack item, @Nullable ItemStack after, CreativeModeTab.TabVisibility visibility) {
-        if (after != null && !after.isEmpty() && event.getTab().contains(after))
-            event.insertAfter(after, item, visibility);
-        else
-            event.accept(item, visibility);
-
-        return item;
     }
 
     @SubscribeEvent

@@ -2,7 +2,7 @@ package dev.khloeleclair.create.additionallogistics.compat.computercraft.impleme
 
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaFunction;
-import dev.khloeleclair.create.additionallogistics.common.data.SalesHistoryData;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.SalesHistoryData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;

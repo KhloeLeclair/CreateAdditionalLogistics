@@ -5,7 +5,7 @@ import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaFunction;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dev.khloeleclair.create.additionallogistics.common.PatternReplacement;
-import dev.khloeleclair.create.additionallogistics.common.blockentities.PackageEditorBlockEntity;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.packageEditor.PackageEditorBlockEntity;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;

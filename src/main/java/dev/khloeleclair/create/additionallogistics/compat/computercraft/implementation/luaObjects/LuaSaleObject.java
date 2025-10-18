@@ -4,7 +4,7 @@ import com.simibubi.create.content.logistics.BigItemStack;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaFunction;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
-import dev.khloeleclair.create.additionallogistics.common.data.SalesHistoryData;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.SalesHistoryData;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Collection;

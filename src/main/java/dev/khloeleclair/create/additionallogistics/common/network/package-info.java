@@ -1,9 +1,0 @@
-@MethodsReturnNonnullByDefault
-@FieldsAreNonnullByDefault
-@ParametersAreNonnullByDefault
-package dev.khloeleclair.create.additionallogistics.common.network;
-
-import net.minecraft.FieldsAreNonnullByDefault;
-import net.minecraft.MethodsReturnNonnullByDefault;
-
-import javax.annotation.ParametersAreNonnullByDefault;

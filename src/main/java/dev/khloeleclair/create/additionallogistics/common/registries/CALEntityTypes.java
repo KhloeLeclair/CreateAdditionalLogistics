@@ -8,7 +8,7 @@ import com.tterrag.registrate.util.nullness.NonNullConsumer;
 import com.tterrag.registrate.util.nullness.NonNullFunction;
 import com.tterrag.registrate.util.nullness.NonNullSupplier;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
-import dev.khloeleclair.create.additionallogistics.common.entities.CustomSeatEntity;
+import dev.khloeleclair.create.additionallogistics.common.content.contraptions.actors.seats.CustomSeatEntity;
 import net.createmod.catnip.lang.Lang;
 import net.minecraft.client.renderer.entity.EntityRenderer;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;

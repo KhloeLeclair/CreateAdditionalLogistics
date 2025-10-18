@@ -8,10 +8,56 @@ import net.neoforged.neoforge.common.ModConfigSpec;
 // Demonstrates how to use Neo's config APIs
 public class Config {
 
+    public enum CurrencyMode {
+        DISABLED,
+        ENABLED,
+        AUTO
+    }
+
     public static void register(ModContainer modContainer) {
         modContainer.registerConfig(ModConfig.Type.CLIENT, clientSpec);
         modContainer.registerConfig(ModConfig.Type.COMMON, commonSpec);
+        modContainer.registerConfig(ModConfig.Type.SERVER, serverSpec);
     }
+
+    public static class _Server {
+        public final ModConfigSpec.EnumValue<CurrencyMode> currencyConversion;
+
+        public final ModConfigSpec.BooleanValue convertDiamonds;
+        public final ModConfigSpec.BooleanValue convertEmeralds;
+        public final ModConfigSpec.BooleanValue convertIron;
+        public final ModConfigSpec.BooleanValue convertCopper;
+
+        _Server(ModConfigSpec.Builder builder) {
+
+            builder.push("Currency Conversion");
+
+            currencyConversion = builder
+                    .comment("Whether or not to override the default shop behavior with one aware of currencies. When set to Automatic, this is only enabled if there are defined currencies. There are no defined currencies by default. Other mods must define them, or you can enable the options for handling several built-in game items.")
+                    .translation("createadditionallogistics.config.currency-conversion.enabled")
+                    .defineEnum("enabled", CurrencyMode.AUTO);
+
+            builder.push("Default Conversions");
+
+            convertDiamonds = builder
+                    .define("convertDiamonds", false);
+
+            convertEmeralds = builder
+                    .define("convertEmeralds", false);
+
+            convertIron = builder
+                    .define("convertIron", false);
+
+            convertCopper = builder
+                    .define("convertCopper", false);
+
+            builder.pop();
+            builder.pop();
+
+        }
+
+    }
+
 
     public static class _Common {
         public final ModConfigSpec.BooleanValue enablePromiseLimits;
@@ -23,7 +69,6 @@ public class Config {
         public final ModConfigSpec.BooleanValue allowBackrefs;
 
         public final ModConfigSpec.DoubleValue acceleratorStressImpact;
-
 
         _Common(ModConfigSpec.Builder builder) {
 
@@ -109,4 +154,14 @@ public class Config {
         clientSpec = pair.getRight();
         Client = pair.getLeft();
     }
+
+    static final ModConfigSpec serverSpec;
+    public static final _Server Server;
+
+    static {
+        var pair = new ModConfigSpec.Builder().configure(_Server::new);
+        serverSpec = pair.getRight();
+        Server = pair.getLeft();
+    }
+
 }

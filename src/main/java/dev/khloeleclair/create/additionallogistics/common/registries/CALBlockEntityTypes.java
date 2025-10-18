@@ -6,13 +6,19 @@ import com.simibubi.create.content.logistics.packager.PackagerVisual;
 import com.simibubi.create.foundation.data.CreateRegistrate;
 import com.tterrag.registrate.util.entry.BlockEntityEntry;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
-import dev.khloeleclair.create.additionallogistics.client.renderers.CashRegisterBlockEntityRenderer;
-import dev.khloeleclair.create.additionallogistics.client.renderers.LowEntityKineticBlockEntityRenderer;
-import dev.khloeleclair.create.additionallogistics.client.renderers.PackageAcceleratorRenderer;
-import dev.khloeleclair.create.additionallogistics.client.visuals.FlexibleShaftVisual;
-import dev.khloeleclair.create.additionallogistics.client.visuals.LazyCogVisual;
-import dev.khloeleclair.create.additionallogistics.client.visuals.PackageAcceleratorVisual;
-import dev.khloeleclair.create.additionallogistics.common.blockentities.*;
+import dev.khloeleclair.create.additionallogistics.client.content.kinetics.lazy.FlexibleShaftVisual;
+import dev.khloeleclair.create.additionallogistics.client.content.kinetics.lazy.LazyCogVisual;
+import dev.khloeleclair.create.additionallogistics.client.content.kinetics.lazy.LowEntityKineticBlockEntityRenderer;
+import dev.khloeleclair.create.additionallogistics.client.content.logistics.cashRegister.CashRegisterBlockEntityRenderer;
+import dev.khloeleclair.create.additionallogistics.client.content.logistics.packageAccelerator.PackageAcceleratorRenderer;
+import dev.khloeleclair.create.additionallogistics.client.content.logistics.packageAccelerator.PackageAcceleratorVisual;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.cog.LazyCogWheelBlockEntity;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.FlexibleShaftBlockEntity;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.shaft.LazyShaftBlockEntity;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CashRegisterBlockEntity;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.packageAccelerator.PackageAcceleratorBlockEntity;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.packageEditor.PackageEditorBlockEntity;
+import dev.khloeleclair.create.additionallogistics.common.content.trains.networkObserver.NetworkObserverBlockEntity;
 
 public class CALBlockEntityTypes {
 
@@ -73,6 +79,12 @@ public class CALBlockEntityTypes {
                             CALBlocks.INDUSTRIAL_IRON_ENCASED_LAZY_LARGE_COGWHEEL, CALBlocks.WEATHERED_IRON_ENCASED_LAZY_LARGE_COGWHEEL
                     )
                     .renderer(() -> LowEntityKineticBlockEntityRenderer::new)
+                    .register();
+
+    // Network Observer
+    public static final BlockEntityEntry<NetworkObserverBlockEntity> NETWORK_OBSERVER =
+            REGISTRATE.blockEntity("network_observer", NetworkObserverBlockEntity::new)
+                    .validBlocks(CALBlocks.NETWORK_OBERVER)
                     .register();
 
     // Cash Register

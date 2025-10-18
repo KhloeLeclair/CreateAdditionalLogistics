@@ -5,7 +5,7 @@ import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.*;
 import com.mojang.math.Axis;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
-import dev.khloeleclair.create.additionallogistics.client.renderers.LowEntityKineticBlockEntityRenderer;
+import dev.khloeleclair.create.additionallogistics.client.content.kinetics.lazy.LowEntityKineticBlockEntityRenderer;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
 import net.createmod.catnip.data.Iterate;
 import net.minecraft.client.Minecraft;
@@ -72,7 +72,7 @@ public class BlockPreviewWidget extends AbstractWidget {
     @Nullable
     private Predicate<Direction> canSelectDirection;
     @Nullable
-    private BiConsumer<Direction, Integer> clickedDiration;
+    private BiConsumer<Direction, Integer> clickedDirection;
 
     private final BlockPos position;
     private final List<BlockPos> neighbors = new ArrayList<>();
@@ -84,7 +84,8 @@ public class BlockPreviewWidget extends AbstractWidget {
     private boolean didClick = false;
 
     private boolean neighborsVisible = true;
-    private Optional<SelectedFace> selection = Optional.empty();
+    @Nullable
+    private SelectedFace selection;
 
     public BlockPreviewWidget(int x, int y, int width, int height, BlockPos position) {
         super(x, y, width, height, Component.empty());
@@ -112,7 +113,7 @@ public class BlockPreviewWidget extends AbstractWidget {
     }
 
     public BlockPreviewWidget onClick(@Nullable BiConsumer<Direction, Integer> consumer) {
-        this.clickedDiration = consumer;
+        this.clickedDirection = consumer;
         return this;
     }
 
@@ -171,10 +172,8 @@ public class BlockPreviewWidget extends AbstractWidget {
     @Override
     public boolean mouseReleased(double mouseX, double mouseY, int button) {
         if (active && visible && didClick) {
-            if (selection.isPresent()) {
-                if (clickedDiration != null)
-                    clickedDiration.accept(selection.get().side, button);
-            }
+            if (selection != null && clickedDirection != null)
+                clickedDirection.accept(selection.side, button);
         }
 
         didClick = false;
@@ -274,10 +273,10 @@ public class BlockPreviewWidget extends AbstractWidget {
                     .min(Comparator.comparingDouble(entry -> entry.getValue().distToCenterSqr(eyePosition))) // find
                     // closest
                     // to eye
-                    .map(closest -> new SelectedFace(closest.getValue(), closest.getKey().getDirection()));
+                    .map(closest -> new SelectedFace(closest.getValue(), closest.getKey().getDirection()))
+                    .orElse(null);
 
             renderSelection(guiGraphics, centerX, centerY, blockTransform);
-            //renderOverlay(guiGraphics);
 
             guiGraphics.disableScissor();
 
@@ -360,9 +359,9 @@ public class BlockPreviewWidget extends AbstractWidget {
     }
 
     private void renderSelection(GuiGraphics guiGraphics, int centerX, int centerY, Quaternionf transform) {
-        if (selection.isEmpty()) {
+        if (selection == null)
             return;
-        }
+
         guiGraphics.pose().pushPose();
         guiGraphics.pose().translate(centerX, centerY, Z_OFFSET);
         guiGraphics.pose().scale(scale, scale, -scale);
@@ -376,12 +375,11 @@ public class BlockPreviewWidget extends AbstractWidget {
         RenderSystem.setShaderTexture(0, tex.atlasLocation());
         RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
 
-        var selectedFace = selection.get();
-        BlockPos blockPos = selectedFace.blockPos;
+        BlockPos blockPos = selection.blockPos;
         guiGraphics.pose()
                 .translate(blockPos.getX() - worldOrigin.x(), blockPos.getY() - worldOrigin.y(),
                         blockPos.getZ() - worldOrigin.z());
-        Vector3f[] vec = createQuadVerts(selectedFace.side, 0, 1, 1);
+        Vector3f[] vec = createQuadVerts(selection.side, 0, 1, 1);
         Matrix4f matrix4f = guiGraphics.pose().last().pose();
         bufferbuilder.addVertex(matrix4f, vec[0].x(), vec[0].y(), vec[0].z())
                 .setColor(1F, 1F, 1F, 1F)

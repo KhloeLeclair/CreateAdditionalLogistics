@@ -1,7 +1,7 @@
 package dev.khloeleclair.create.additionallogistics.mixin;
 
 import com.simibubi.create.content.contraptions.actors.seat.SeatBlock;
-import dev.khloeleclair.create.additionallogistics.common.blocks.AbstractSeatBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.contraptions.actors.seats.AbstractSeatBlock;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;

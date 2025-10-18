@@ -1,13 +1,12 @@
 package dev.khloeleclair.create.additionallogistics.common.registries;
 
-import com.simibubi.create.Create;
 import com.simibubi.create.foundation.data.CreateRegistrate;
 import com.tterrag.registrate.builders.MenuBuilder;
 import com.tterrag.registrate.util.entry.MenuEntry;
 import com.tterrag.registrate.util.nullness.NonNullSupplier;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
-import dev.khloeleclair.create.additionallogistics.client.screen.CashRegisterScreen;
-import dev.khloeleclair.create.additionallogistics.common.menu.CashRegisterMenu;
+import dev.khloeleclair.create.additionallogistics.client.content.logistics.cashRegister.CashRegisterScreen;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CashRegisterMenu;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.gui.screens.inventory.MenuAccess;
 import net.minecraft.world.inventory.AbstractContainerMenu;

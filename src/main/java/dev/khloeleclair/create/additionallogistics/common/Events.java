@@ -1,7 +1,7 @@
 package dev.khloeleclair.create.additionallogistics.common;
 
-import dev.khloeleclair.create.additionallogistics.common.blockentities.CashRegisterBlockEntity;
-import dev.khloeleclair.create.additionallogistics.common.blockentities.PackageEditorBlockEntity;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CashRegisterBlockEntity;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.packageEditor.PackageEditorBlockEntity;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;

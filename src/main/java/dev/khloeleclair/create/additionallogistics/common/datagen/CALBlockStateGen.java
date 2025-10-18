@@ -3,15 +3,20 @@ package dev.khloeleclair.create.additionallogistics.common.datagen;
 import com.simibubi.create.Create;
 import com.simibubi.create.content.decoration.encasing.EncasedCTBehaviour;
 import com.simibubi.create.foundation.block.connected.CTSpriteShiftEntry;
-import com.simibubi.create.foundation.data.CreateRegistrate;
-import com.simibubi.create.foundation.data.SharedProperties;
+import com.simibubi.create.foundation.data.*;
 import com.tterrag.registrate.builders.BlockBuilder;
 import com.tterrag.registrate.providers.DataGenContext;
 import com.tterrag.registrate.providers.RegistrateBlockstateProvider;
 import com.tterrag.registrate.util.nullness.NonNullBiConsumer;
 import com.tterrag.registrate.util.nullness.NonNullUnaryOperator;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
-import dev.khloeleclair.create.additionallogistics.common.blocks.*;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.base.AbstractLazyShaftBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.cog.EncasedLazyCogWheelBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.cog.LazyCogWheelBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.EncasedFlexibleShaftBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.FlexibleShaftBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.shaft.EncasedLazyShaftBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.shaft.LazyShaftBlock;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALBlocks;
 import net.createmod.catnip.data.Iterate;
 import net.minecraft.client.renderer.RenderType;
@@ -353,6 +358,7 @@ public class CALBlockStateGen {
         return b -> encasedLazyCogwheelBase(b, casing, casingShift, CALBlocks.LAZY_LARGE_COGWHEEL::get, true);
     }
 
+    @SuppressWarnings("removal") // addLayer use is copied from Create
     private static <B extends EncasedLazyCogWheelBlock, P> BlockBuilder<B, P> encasedLazyCogwheelBase(BlockBuilder<B, P> b,
                                                                                               String casing, @Nullable Supplier<CTSpriteShiftEntry> casingShift, Supplier<ItemLike> drop, boolean large) {
         boolean side_is_create = casing.equals("andesite") || casing.equals("brass");

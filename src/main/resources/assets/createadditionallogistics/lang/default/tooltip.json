@@ -8,5 +8,8 @@
 
   "block.createadditionallogistics.lazy_cogwheel.tooltip.summary": "Lazy Cogwheels work exactly like normal cogs, but they can be more efficient if used together with _Lazy Shafts_ as long as there's at least two or more lazy shafts.",
 
-  "createadditionallogistics.sales_ledger.tooltip.summary": "A record of sales made at a given _Cash Register_. You can use this to quickly restock any sold items by clicking a _Stock Keeper_ with it."
+  "createadditionallogistics.sales_ledger.tooltip.summary": "A record of sales made at a given _Cash Register_. You can use this to quickly restock any sold items by clicking a _Stock Keeper_ with it.",
+
+  "createadditionallogistics.stock_keeper.player_inventory_full": "Your inventory is too full to receive change."
+
 }

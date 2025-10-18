@@ -9,7 +9,7 @@ import dev.khloeleclair.create.additionallogistics.client.registries.CALGuiTextu
 import dev.khloeleclair.create.additionallogistics.common.CALLang;
 import dev.khloeleclair.create.additionallogistics.common.Config;
 import dev.khloeleclair.create.additionallogistics.common.IPromiseLimit;
-import dev.khloeleclair.create.additionallogistics.common.network.CustomPackets;
+import dev.khloeleclair.create.additionallogistics.common.registries.CALPackets;
 import net.createmod.catnip.gui.AbstractSimiScreen;
 import net.minecraft.client.gui.GuiGraphics;
 import org.jetbrains.annotations.Nullable;
@@ -108,7 +108,7 @@ public abstract class MixinFactoryPanelScreen extends AbstractSimiScreen {
             return;
 
         int limit = promiseLimit.getState();
-        new CustomPackets.UpdateGaugePromiseLimit(behaviour.getPanelPosition(), limit).send();
+        new CALPackets.UpdateGaugePromiseLimit(behaviour.getPanelPosition(), limit).send();
     }
 
 

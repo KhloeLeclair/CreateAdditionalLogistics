@@ -2,7 +2,7 @@ package dev.khloeleclair.create.additionallogistics.mixin.client;
 
 import dev.engine_room.flywheel.api.internal.FlwApiLink;
 import dev.engine_room.flywheel.api.visualization.VisualizationManager;
-import dev.khloeleclair.create.additionallogistics.client.renderers.LowEntityKineticBlockEntityRenderer;
+import dev.khloeleclair.create.additionallogistics.client.content.kinetics.lazy.LowEntityKineticBlockEntityRenderer;
 import net.minecraft.world.level.LevelAccessor;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;

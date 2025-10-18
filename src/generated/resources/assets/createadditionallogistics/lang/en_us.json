@@ -187,6 +187,7 @@
   "createadditionallogistics.sales.entries": "Entries: %s",
   "createadditionallogistics.sales.sales": "Sales: %s",
   "createadditionallogistics.sales_ledger.tooltip.summary": "A record of sales made at a given _Cash Register_. You can use this to quickly restock any sold items by clicking a _Stock Keeper_ with it.",
+  "createadditionallogistics.stock_keeper.player_inventory_full": "Your inventory is too full to receive change.",
   "entity.createadditionallogistics.custom_seat": "Custom Seat",
   "item.createadditionallogistics.sales_ledger": "Sales Ledger"
 }

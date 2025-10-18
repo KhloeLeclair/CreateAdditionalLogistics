@@ -23,7 +23,7 @@ public class DataGen {
         PackOutput output = generator.getPackOutput();
         CompletableFuture<HolderLookup.Provider> lookupProvider = event.getLookupProvider();
 
-        announceCreateTextures(event);
+        event.createProvider(CALDataMapProvider::new);
 
         CreateAdditionalLogistics.REGISTRATE.get().addDataGenerator(ProviderType.BLOCK_TAGS, provider -> {
             provider.addTag(CALTags.CALBlockTags.BASIC_SHAFTS.tag).add(AllBlocks.SHAFT.getKey());
@@ -36,12 +36,6 @@ public class DataGen {
         if (event.includeServer())
             CALRecipeProvider.registerAllProcessing(generator, output, lookupProvider);
     }
-
-    private static void announceCreateTextures(GatherDataEvent event) {
-        var helper = event.getExistingFileHelper();
-        //helper.trackGenerated(Create.asResource("block/andesite_casing"), PackType.CLIENT_RESOURCES, ".png", "textures");
-    }
-
 
     private static void addLanguageRegistrateData() {
         CreateAdditionalLogistics.REGISTRATE.get().addDataGenerator(ProviderType.LANG, provider -> {
