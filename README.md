@@ -208,6 +208,14 @@ the stock ticker. But at least you won't do it by accident.
 
 # Changelog
 
+## 1.2.6
+
+### Fixed
+
+* Potential server crash when entities are seated on contraptions in an
+  invalid block position.
+
+
 ## 1.2.5
 
 ### Added
