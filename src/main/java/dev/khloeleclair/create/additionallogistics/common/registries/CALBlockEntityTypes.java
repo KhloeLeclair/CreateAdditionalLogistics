@@ -18,7 +18,7 @@ import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.
 import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CashRegisterBlockEntity;
 import dev.khloeleclair.create.additionallogistics.common.content.logistics.packageAccelerator.PackageAcceleratorBlockEntity;
 import dev.khloeleclair.create.additionallogistics.common.content.logistics.packageEditor.PackageEditorBlockEntity;
-import dev.khloeleclair.create.additionallogistics.common.content.trains.networkObserver.NetworkObserverBlockEntity;
+import dev.khloeleclair.create.additionallogistics.common.content.trains.networkMonitor.NetworkMonitorBlockEntity;
 
 public class CALBlockEntityTypes {
 
@@ -81,10 +81,10 @@ public class CALBlockEntityTypes {
                     .renderer(() -> LowEntityKineticBlockEntityRenderer::new)
                     .register();
 
-    // Network Observer
-    public static final BlockEntityEntry<NetworkObserverBlockEntity> NETWORK_OBSERVER =
-            REGISTRATE.blockEntity("network_observer", NetworkObserverBlockEntity::new)
-                    .validBlocks(CALBlocks.NETWORK_OBERVER)
+    // Network Monitor
+    public static final BlockEntityEntry<NetworkMonitorBlockEntity> NETWORK_MONITOR =
+            REGISTRATE.blockEntity("network_monitor", NetworkMonitorBlockEntity::new)
+                    .validBlocks(CALBlocks.NETWORK_MONITOR)
                     .register();
 
     // Cash Register

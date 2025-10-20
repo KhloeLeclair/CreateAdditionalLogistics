@@ -67,8 +67,8 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
     public void tick() {
         super.tick();
 
-        if (!level.isClientSide) {
-            if (lazyDirty) {
+        if (!level.isClientSide || isVirtual()) {
+            if (lazyDirty || connections == null) {
                 lazyDirty = false;
                 markDirty(level, worldPosition);
             }

@@ -11,7 +11,9 @@ import com.simibubi.create.foundation.utility.CreateLang;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
 import dev.khloeleclair.create.additionallogistics.client.api.currency.ICurrency;
 import dev.khloeleclair.create.additionallogistics.common.CALLang;
+import dev.khloeleclair.create.additionallogistics.common.Config;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALDataMaps;
+import dev.khloeleclair.create.additionallogistics.common.utilities.RecipeHelper;
 import dev.khloeleclair.create.additionallogistics.mixin.IStockTickerBlockEntityAccessor;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
@@ -19,7 +21,6 @@ import net.createmod.catnip.data.Couple;
 import net.createmod.catnip.data.Iterate;
 import net.createmod.catnip.data.Pair;
 import net.minecraft.ChatFormatting;
-import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -30,20 +31,14 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingInput;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeHolder;
-import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.util.thread.SidedThreadGroups;
-import net.neoforged.neoforge.client.event.RecipesUpdatedEvent;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.registries.datamaps.DataMapsUpdatedEvent;
 import org.jetbrains.annotations.Nullable;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
 import java.util.function.Function;
 
 public class CurrencyUtilities {
@@ -51,14 +46,19 @@ public class CurrencyUtilities {
     public static final Map<ResourceLocation, SimpleCurrency> CURRENCIES = new Object2ObjectOpenHashMap<>();
     public static final Map<ResourceLocation, Function<Integer, Component>> FORMATTERS = new Object2ObjectOpenHashMap<>();
 
-    public static final Map<Item, @Nullable SimpleCurrency> AUTOMATIC_CURRENCIES = new Object2ObjectOpenHashMap<>();
-
     private static boolean isPopulated;
 
-    public static boolean isConversionEnabled() {
+    public static boolean isConversionEnabled(boolean is_cash_register) {
+        if (!is_cash_register && !Config.Server.stockTickersConvertToo.get())
+            return false;
+        if (Config.Server.currencyConversion.get())
+            return true;
         ensurePopulated();
-        return true;
-        //return ! CURRENCIES.isEmpty();
+        return ! CURRENCIES.isEmpty();
+    }
+
+    public static boolean isConversionEnabled() {
+        return isConversionEnabled(false);
     }
 
     @Nullable
@@ -72,10 +72,6 @@ public class CurrencyUtilities {
         synchronized (FORMATTERS) {
             FORMATTERS.put(id, formatter);
         }
-    }
-
-    public static void onRecipesUpdated(RecipesUpdatedEvent event) {
-        AUTOMATIC_CURRENCIES.clear();
     }
 
     public static void onDataMapUpdated(DataMapsUpdatedEvent event) {
@@ -152,180 +148,8 @@ public class CurrencyUtilities {
             }
         }
 
-        synchronized (AUTOMATIC_CURRENCIES) {
-            if (AUTOMATIC_CURRENCIES.containsKey(item))
-                return AUTOMATIC_CURRENCIES.get(item);
-        }
-
-        var result = calculateCompressionRecipeCurrency(item);
-        synchronized (AUTOMATIC_CURRENCIES) {
-            if (result == null)
-                AUTOMATIC_CURRENCIES.put(item, result);
-            else {
-                for(var i : result.getItems())
-                    AUTOMATIC_CURRENCIES.put(i, result);
-            }
-        }
-
-        return result;
+        return RecipeHelper.getCompactingCurrency(item);
     }
-
-    @OnlyIn(Dist.CLIENT)
-    @Nullable
-    private static Level getClientLevel() {
-        return Minecraft.getInstance().level;
-    }
-
-    @Nullable
-    private static SimpleCurrency calculateCompressionRecipeCurrency(Item item) {
-        var server = CreateAdditionalLogistics.getServer();
-        Level level;
-        if (server != null)
-            level = server.overworld();
-        else if (Thread.currentThread().getThreadGroup() == SidedThreadGroups.CLIENT)
-            level = getClientLevel();
-        else
-            return null;
-
-        if (level == null)
-            return null;
-
-        List<Pair<Item, Integer>> decompression = new ArrayList<>();
-        List<Pair<Item, Integer>> compression = new ArrayList<>();
-
-        HashSet<Item> visited = new HashSet<>();
-        visited.add(item);
-
-        // Scan down first.
-        Item current = item;
-        while(true) {
-            ItemStack result = getUncompressResult(level, current.getDefaultInstance());
-            if (result.isEmpty())
-                break;
-
-            int count = result.getCount();
-            // We only support 2x2 and 3x3
-            if (count != 4 && count != 9)
-                break;
-
-            // Loop detection.
-            if (!visited.add(result.getItem()))
-                break;
-
-            // Detect if there's a reciprocal recipe
-            var compressionResult = getCompressionResult(level, result, count == 4 ? 2 : 3);
-
-            Item finalCurrent = current;
-            if (compressionResult.stream().noneMatch(x -> x.is(finalCurrent) && x.getCount() == 1))
-                break;
-
-            // We got here, so there's a conversion.
-            current = result.getItem();
-
-            decompression.add(Pair.of(current, count));
-        }
-
-        // Now, scan up.
-        List<Item> frontier = new LinkedList<>();
-        frontier.add(item);
-
-        while(!frontier.isEmpty()) {
-            current = frontier.removeFirst();
-            for(int size = 2; size <= 3; size++) {
-                for (var result : getCompressionResult(level, current.getDefaultInstance(), size)) {
-                    // If it produced anything we've seen before, or more than 1 item, we don't want it.
-                    if (result.isEmpty() || result.getCount() != 1 || !visited.add(result.getItem()))
-                        continue;
-
-                    // Check for a reciprocal recipe.
-                    var uncompressResult = getUncompressResult(level, result);
-                    if (uncompressResult.isEmpty() || uncompressResult.getCount() != (size == 2 ? 4 : 9) || !uncompressResult.is(current))
-                        continue;
-
-                    // We have a match.
-                    frontier.add(result.getItem());
-                    compression.add(Pair.of(result.getItem(), size == 2 ? 4 : 9));
-                }
-            }
-        }
-
-        if (decompression.isEmpty() && compression.isEmpty())
-            return null;
-
-        // Generate a key based on the key of the lowest item.
-        @Nullable ResourceLocation id;
-        if (decompression.isEmpty())
-            id = item.builtInRegistryHolder().getKey().location();
-        else
-            id = decompression.getLast().getFirst().builtInRegistryHolder().getKey().location();
-
-        if (id == null)
-            return null;
-
-        SimpleCurrency currency = new SimpleCurrency(CreateAdditionalLogistics.asResource("generated/" + id.getNamespace() + "/" + id.getPath()));
-        int value = 1;
-
-        // First, decompression items.
-        for(int i = decompression.size() - 1; i >= 0; i--) {
-            var entry = decompression.get(i);
-            currency.addItem(entry.getFirst(), value);
-            value *= entry.getSecond();
-        }
-
-        // Now, add the base item
-        currency.addItem(item, value);
-
-        // Now, the compression items
-        for(var entry : compression) {
-            value *= entry.getSecond();
-            currency.addItem(entry.getFirst(), value);
-        }
-
-        return currency;
-    }
-
-
-    private static List<ItemStack> getCompressionResult(Level level, ItemStack input, int size) {
-
-        List<ItemStack> inputGrid;
-
-        if (size == 1)
-            inputGrid = List.of(input.copyWithCount(1));
-        else if (size == 2)
-            inputGrid = List.of(input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1));
-        else if (size == 3)
-            inputGrid = List.of(input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1));
-        else
-            return List.of();
-
-        var recipes = safeGetRecipesFor(RecipeType.CRAFTING, CraftingInput.of(size, size, inputGrid), level);
-        if (recipes.isEmpty())
-            return List.of();
-
-        return recipes.stream().map(x -> x.value().getResultItem(level.registryAccess())).toList();
-    }
-
-    private static ItemStack getUncompressResult(Level level, ItemStack input) {
-        // We're looking for a recipe that puts the input stack in a 1x1 grid.
-        var inputGrid = CraftingInput.of(1, 1, List.of(input.copyWithCount(1)));
-
-        var recipes = safeGetRecipesFor(RecipeType.CRAFTING, inputGrid, level);
-        if (recipes.size() != 1)
-            return ItemStack.EMPTY;
-
-        return recipes.getFirst().value().getResultItem(level.registryAccess());
-    }
-
-
-    public static <I extends CraftingInput, T extends Recipe<I>> List<RecipeHolder<T>> safeGetRecipesFor(RecipeType<T> recipeType, I inventory, Level level) {
-        try {
-            return level.getRecipeManager().getRecipesFor(recipeType, inventory, level);
-        } catch (Exception e) {
-            CreateAdditionalLogistics.LOGGER.error("Error while getting recipe: ", e);
-            return Collections.emptyList();
-        }
-    }
-
 
     public static void interactWithShop(Player player, Level level, BlockPos targetPos, ItemStack mainHandItem) {
         if (level.isClientSide || !(level.getBlockEntity(targetPos) instanceof StockTickerBlockEntity tickerBE))

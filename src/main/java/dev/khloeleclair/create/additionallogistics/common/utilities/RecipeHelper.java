@@ -1,0 +1,204 @@
+package dev.khloeleclair.create.additionallogistics.common.utilities;
+
+import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.SimpleCurrency;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.createmod.catnip.data.Pair;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CraftingInput;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import net.minecraft.world.item.crafting.RecipeType;
+import net.minecraft.world.level.Level;
+import net.neoforged.neoforge.client.event.RecipesUpdatedEvent;
+import org.jspecify.annotations.Nullable;
+
+import java.util.*;
+
+public class RecipeHelper {
+
+    public static RecipeCache getCache() { return SidedCache.getCache(RecipeCache.class); }
+
+    public static void onRecipesUpdated(RecipesUpdatedEvent event) {
+        SidedCache.runOnEachCache(RecipeCache.class, RecipeCache::clearCache);
+    }
+
+    @Nullable
+    public static SimpleCurrency getCompactingCurrency(Item input) {
+        return getCache().getCompactingCurrency(input);
+    }
+
+    public static class RecipeCache extends SidedCache {
+
+        private final Map<Item, @Nullable SimpleCurrency> compactingCurrencies;
+
+        public RecipeCache(boolean isServer) {
+            super(isServer);
+            compactingCurrencies = new Object2ObjectOpenHashMap<>();
+        }
+
+        public void clearCache() {
+            synchronized (compactingCurrencies) {
+                compactingCurrencies.clear();
+            }
+        }
+
+        @Nullable
+        public SimpleCurrency getCompactingCurrency(Item item) {
+            final var level = getLevel();
+            if (level == null)
+                return null;
+
+            SimpleCurrency cached;
+
+            synchronized (compactingCurrencies) {
+                cached = compactingCurrencies.get(item);
+            }
+
+            if (cached != null)
+                return cached;
+
+            List<Pair<Item, Integer>> decompression = new ArrayList<>();
+            List<Pair<Item, Integer>> compression = new ArrayList<>();
+
+            HashSet<Item> visited = new HashSet<>();
+            visited.add(item);
+
+            // Scan down first.
+            Item current = item;
+            while(true) {
+                ItemStack result = getUncompressResult(level, current.getDefaultInstance());
+                if (result.isEmpty())
+                    break;
+
+                int count = result.getCount();
+                // We only support 2x2 and 3x3
+                if (count != 4 && count != 9)
+                    break;
+
+                // Loop detection.
+                if (!visited.add(result.getItem()))
+                    break;
+
+                // Detect if there's a reciprocal recipe
+                var compressionResult = getCompressionResult(level, result, count == 4 ? 2 : 3);
+
+                Item finalCurrent = current;
+                if (compressionResult.stream().noneMatch(x -> x.is(finalCurrent) && x.getCount() == 1))
+                    break;
+
+                // We got here, so there's a conversion.
+                current = result.getItem();
+
+                decompression.add(Pair.of(current, count));
+            }
+
+            // Now, scan up.
+            List<Item> frontier = new LinkedList<>();
+            frontier.add(item);
+
+            while(!frontier.isEmpty()) {
+                current = frontier.removeFirst();
+                for(int size = 2; size <= 3; size++) {
+                    for (var result : getCompressionResult(level, current.getDefaultInstance(), size)) {
+                        // If it produced anything we've seen before, or more than 1 item, we don't want it.
+                        if (result.isEmpty() || result.getCount() != 1 || !visited.add(result.getItem()))
+                            continue;
+
+                        // Check for a reciprocal recipe.
+                        var uncompressResult = getUncompressResult(level, result);
+                        if (uncompressResult.isEmpty() || uncompressResult.getCount() != (size == 2 ? 4 : 9) || !uncompressResult.is(current))
+                            continue;
+
+                        // We have a match.
+                        frontier.add(result.getItem());
+                        compression.add(Pair.of(result.getItem(), size == 2 ? 4 : 9));
+                    }
+                }
+            }
+
+            if (decompression.isEmpty() && compression.isEmpty())
+                return null;
+
+            // Generate a key based on the key of the lowest item.
+            @org.jetbrains.annotations.Nullable ResourceLocation id;
+            if (decompression.isEmpty())
+                id = item.builtInRegistryHolder().getKey().location();
+            else
+                id = decompression.getLast().getFirst().builtInRegistryHolder().getKey().location();
+
+            if (id == null)
+                return null;
+
+            SimpleCurrency currency = new SimpleCurrency(CreateAdditionalLogistics.asResource("generated/" + id.getNamespace() + "/" + id.getPath()));
+            int value = 1;
+
+            // First, decompression items.
+            for(int i = decompression.size() - 1; i >= 0; i--) {
+                var entry = decompression.get(i);
+                currency.addItem(entry.getFirst(), value);
+                value *= entry.getSecond();
+            }
+
+            // Now, add the base item
+            currency.addItem(item, value);
+
+            // Now, the compression items
+            for(var entry : compression) {
+                value *= entry.getSecond();
+                currency.addItem(entry.getFirst(), value);
+            }
+
+            synchronized (compactingCurrencies) {
+                for(var i : currency.getItems())
+                    compactingCurrencies.put(i, currency);
+            }
+
+            return currency;
+        }
+
+        private static List<ItemStack> getCompressionResult(Level level, ItemStack input, int size) {
+
+            List<ItemStack> inputGrid;
+
+            if (size == 1)
+                inputGrid = List.of(input.copyWithCount(1));
+            else if (size == 2)
+                inputGrid = List.of(input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1));
+            else if (size == 3)
+                inputGrid = List.of(input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1));
+            else
+                return List.of();
+
+            var recipes = safeGetRecipesFor(RecipeType.CRAFTING, CraftingInput.of(size, size, inputGrid), level);
+            if (recipes.isEmpty())
+                return List.of();
+
+            return recipes.stream().map(x -> x.value().getResultItem(level.registryAccess())).toList();
+        }
+
+        private static ItemStack getUncompressResult(Level level, ItemStack input) {
+            // We're looking for a recipe that puts the input stack in a 1x1 grid.
+            var inputGrid = CraftingInput.of(1, 1, List.of(input.copyWithCount(1)));
+
+            var recipes = safeGetRecipesFor(RecipeType.CRAFTING, inputGrid, level);
+            if (recipes.size() != 1)
+                return ItemStack.EMPTY;
+
+            return recipes.getFirst().value().getResultItem(level.registryAccess());
+        }
+
+    }
+
+    public static <I extends CraftingInput, T extends Recipe<I>> List<RecipeHolder<T>> safeGetRecipesFor(RecipeType<T> recipeType, I inventory, Level level) {
+        try {
+            return level.getRecipeManager().getRecipesFor(recipeType, inventory, level);
+        } catch (Exception e) {
+            CreateAdditionalLogistics.LOGGER.error("Error while getting recipe: ", e);
+            return Collections.emptyList();
+        }
+    }
+
+}

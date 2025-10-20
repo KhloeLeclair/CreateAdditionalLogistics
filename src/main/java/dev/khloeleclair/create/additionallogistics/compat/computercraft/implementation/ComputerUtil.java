@@ -6,6 +6,9 @@ import dan200.computercraft.api.detail.VanillaDetailRegistries;
 import dan200.computercraft.api.lua.LuaException;
 import dev.khloeleclair.create.additionallogistics.compat.computercraft.implementation.luaObjects.LuaComparable;
 import net.createmod.catnip.data.Glob;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.items.IItemHandler;
 
 import java.util.*;
@@ -289,6 +292,21 @@ public class ComputerUtil {
 
         return result;
     }
+
+    public static Map<String, Object> getPosition(BlockPos pos, ResourceKey<Level> dimension) {
+        var result = getPosition(pos);
+        result.put("dimension", dimension.location().toString());
+        return result;
+    }
+
+    public static Map<String, Object> getPosition(BlockPos pos) {
+        Map<String, Object> result = new HashMap<>();
+        result.put("x", pos.getX());
+        result.put("y", pos.getY());
+        result.put("z", pos.getZ());
+        return result;
+    }
+
 
     public static Map<String, ?> getItemDetail(IItemHandler inventory, int slot) throws LuaException {
 

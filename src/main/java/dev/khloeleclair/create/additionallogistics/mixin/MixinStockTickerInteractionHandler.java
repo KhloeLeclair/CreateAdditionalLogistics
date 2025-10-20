@@ -21,7 +21,7 @@ public abstract class MixinStockTickerInteractionHandler {
             cancellable = true
     )
     private static void CAL$onPurchase(Player player, Level level, BlockPos targetPos, ItemStack mainHandItem, CallbackInfo ci) {
-        if (CurrencyUtilities.isConversionEnabled()) {
+        if (CurrencyUtilities.isConversionEnabled(level.getBlockEntity(targetPos) instanceof CashRegisterBlockEntity)) {
             ci.cancel();
             CurrencyUtilities.interactWithShop(player, level, targetPos, mainHandItem);
         }

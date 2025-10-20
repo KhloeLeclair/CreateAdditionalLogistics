@@ -8,7 +8,7 @@ import dev.khloeleclair.create.additionallogistics.client.content.kinetics.lazy.
 import dev.khloeleclair.create.additionallogistics.client.content.logistics.cashRegister.SalesLedgerScreen;
 import dev.khloeleclair.create.additionallogistics.common.IPromiseLimit;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.FlexibleShaftBlockEntity;
-import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.base.AbstractLazyShaftBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.base.AbstractLazySimpleKineticBlock;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.FlexibleShaftBlock;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
@@ -39,7 +39,7 @@ import java.util.UUID;
 public class CALPackets {
 
     public static void register(final RegisterPayloadHandlersEvent event) {
-        final PayloadRegistrar registrar = event.registrar("2")
+        final PayloadRegistrar registrar = event.registrar("3")
                 .executesOn(HandlerThread.MAIN);
 
         registrar.playToServer(UpdateGaugePromiseLimit.TYPE, UpdateGaugePromiseLimit.STREAM_CODEC, UpdateGaugePromiseLimit::handle);
@@ -72,7 +72,7 @@ public class CALPackets {
         @OnlyIn(Dist.CLIENT)
         public static void handle(ServerToClientEvent message, IPayloadContext context) {
             if (message.key.equals("clear_information"))
-                AbstractLazyShaftBlock.clearInformationWalkCache();
+                AbstractLazySimpleKineticBlock.clearInformationWalkCache();
         }
 
         public void send(ServerLevel level) {
@@ -259,7 +259,7 @@ public class CALPackets {
     }
 
 
-    public record UpdateGaugePromiseLimit(FactoryPanelPosition pos, int limit) implements CustomPacketPayload {
+    public record UpdateGaugePromiseLimit(FactoryPanelPosition pos, int limit, int additionalStock) implements CustomPacketPayload {
 
         public static final CustomPacketPayload.Type<UpdateGaugePromiseLimit> TYPE = new CustomPacketPayload.Type<>(
                 CreateAdditionalLogistics.asResource("update_gauge_promise_limit")
@@ -270,6 +270,8 @@ public class CALPackets {
                 UpdateGaugePromiseLimit::pos,
                 ByteBufCodecs.INT,
                 UpdateGaugePromiseLimit::limit,
+                ByteBufCodecs.INT,
+                UpdateGaugePromiseLimit::additionalStock,
                 UpdateGaugePromiseLimit::new
         );
 
@@ -296,11 +298,20 @@ public class CALPackets {
             if (!(behavior instanceof IPromiseLimit ipl))
                 return;
 
-            if (ipl.getPromiseLimit() == message.limit)
-                return;
+            boolean changed = false;
 
-            ipl.setPromiseLimit(message.limit);
-            be.notifyUpdate();
+            if (ipl.getCALPromiseLimit() != message.limit) {
+                changed = true;
+                ipl.setCALPromiseLimit(message.limit);
+            }
+
+            if (ipl.getCALAdditionalStock() != message.additionalStock) {
+                changed = true;
+                ipl.setCALAdditionalStock(message.additionalStock);
+            }
+
+            if (changed)
+                be.notifyUpdate();
         }
 
         public void send() {

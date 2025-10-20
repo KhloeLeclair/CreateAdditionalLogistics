@@ -1,7 +1,12 @@
 package dev.khloeleclair.create.additionallogistics.common;
 
 public interface IPromiseLimit {
-    int getPromiseLimit();
-    boolean hasPromiseLimit();
-    void setPromiseLimit(int value);
+    int getCALPromiseLimit();
+    boolean hasCALPromiseLimit();
+    void setCALPromiseLimit(int value);
+
+    int getCALAdditionalStock();
+    boolean hasCALAdditionalStock();
+    void setCALAdditionalStock(int value);
+
 }

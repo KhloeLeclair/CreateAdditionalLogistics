@@ -3,14 +3,15 @@ package dev.khloeleclair.create.additionallogistics.common.datagen;
 import com.simibubi.create.Create;
 import com.simibubi.create.content.decoration.encasing.EncasedCTBehaviour;
 import com.simibubi.create.foundation.block.connected.CTSpriteShiftEntry;
-import com.simibubi.create.foundation.data.*;
+import com.simibubi.create.foundation.data.CreateRegistrate;
+import com.simibubi.create.foundation.data.SharedProperties;
 import com.tterrag.registrate.builders.BlockBuilder;
 import com.tterrag.registrate.providers.DataGenContext;
 import com.tterrag.registrate.providers.RegistrateBlockstateProvider;
 import com.tterrag.registrate.util.nullness.NonNullBiConsumer;
 import com.tterrag.registrate.util.nullness.NonNullUnaryOperator;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
-import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.base.AbstractLazyShaftBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.base.AbstractLazySimpleKineticBlock;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.cog.EncasedLazyCogWheelBlock;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.cog.LazyCogWheelBlock;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.EncasedFlexibleShaftBlock;
@@ -174,7 +175,7 @@ public class CALBlockStateGen {
                     .part()
                     .modelFile(model)
                     .addModel()
-                    .condition(AbstractLazyShaftBlock.AXIS, Direction.Axis.Z)
+                    .condition(AbstractLazySimpleKineticBlock.AXIS, Direction.Axis.Z)
                     .end();
 
             builder
@@ -182,7 +183,7 @@ public class CALBlockStateGen {
                     .modelFile(model)
                     .rotationY(90)
                     .addModel()
-                    .condition(AbstractLazyShaftBlock.AXIS, Direction.Axis.X)
+                    .condition(AbstractLazySimpleKineticBlock.AXIS, Direction.Axis.X)
                     .end();
 
             builder
@@ -190,13 +191,13 @@ public class CALBlockStateGen {
                     .modelFile(model)
                     .rotationX(90)
                     .addModel()
-                    .condition(AbstractLazyShaftBlock.AXIS, Direction.Axis.Y)
+                    .condition(AbstractLazySimpleKineticBlock.AXIS, Direction.Axis.Y)
                     .end();
 
             for(Direction dir : Iterate.directions) {
                 BooleanProperty prop = dir.getAxisDirection() == Direction.AxisDirection.POSITIVE
-                        ? AbstractLazyShaftBlock.POSITIVE
-                        : AbstractLazyShaftBlock.NEGATIVE;
+                        ? AbstractLazySimpleKineticBlock.POSITIVE
+                        : AbstractLazySimpleKineticBlock.NEGATIVE;
 
                 ModelFile m = p.models()
                         .withExistingParent(c.getName() + "_" + dir.getSerializedName(), p.modLoc("block/flexible_shaft/block_" + dir.getSerializedName()))
@@ -206,7 +207,7 @@ public class CALBlockStateGen {
                         .part()
                         .modelFile(m)
                         .addModel()
-                        .condition(AbstractLazyShaftBlock.AXIS, dir.getAxis())
+                        .condition(AbstractLazySimpleKineticBlock.AXIS, dir.getAxis())
                         .condition(prop, true)
                         .end();
             }
@@ -230,8 +231,8 @@ public class CALBlockStateGen {
                     .modelFile(model)
                     .addModel()
                     .useOr()
-                    .condition(AbstractLazyShaftBlock.NEGATIVE, false)
-                    .condition(AbstractLazyShaftBlock.POSITIVE, false)
+                    .condition(AbstractLazySimpleKineticBlock.NEGATIVE, false)
+                    .condition(AbstractLazySimpleKineticBlock.POSITIVE, false)
                     .end();
 
             ModelFile connection = p.models().getExistingFile(p.modLoc(lazyPath + "/connection"));
@@ -240,9 +241,9 @@ public class CALBlockStateGen {
                     .part()
                     .modelFile(connection)
                     .addModel()
-                    .condition(AbstractLazyShaftBlock.AXIS, Direction.Axis.Z)
-                    .condition(AbstractLazyShaftBlock.POSITIVE, true)
-                    .condition(AbstractLazyShaftBlock.NEGATIVE, true)
+                    .condition(AbstractLazySimpleKineticBlock.AXIS, Direction.Axis.Z)
+                    .condition(AbstractLazySimpleKineticBlock.POSITIVE, true)
+                    .condition(AbstractLazySimpleKineticBlock.NEGATIVE, true)
                     .end();
 
             builder
@@ -250,9 +251,9 @@ public class CALBlockStateGen {
                     .modelFile(connection)
                     .rotationY(90)
                     .addModel()
-                    .condition(AbstractLazyShaftBlock.AXIS, Direction.Axis.X)
-                    .condition(AbstractLazyShaftBlock.POSITIVE, true)
-                    .condition(AbstractLazyShaftBlock.NEGATIVE, true)
+                    .condition(AbstractLazySimpleKineticBlock.AXIS, Direction.Axis.X)
+                    .condition(AbstractLazySimpleKineticBlock.POSITIVE, true)
+                    .condition(AbstractLazySimpleKineticBlock.NEGATIVE, true)
                     .end();
 
             builder
@@ -260,19 +261,19 @@ public class CALBlockStateGen {
                     .modelFile(connection)
                     .rotationX(90)
                     .addModel()
-                    .condition(AbstractLazyShaftBlock.AXIS, Direction.Axis.Y)
-                    .condition(AbstractLazyShaftBlock.POSITIVE, true)
-                    .condition(AbstractLazyShaftBlock.NEGATIVE, true)
+                    .condition(AbstractLazySimpleKineticBlock.AXIS, Direction.Axis.Y)
+                    .condition(AbstractLazySimpleKineticBlock.POSITIVE, true)
+                    .condition(AbstractLazySimpleKineticBlock.NEGATIVE, true)
                     .end();
 
             for(Direction dir : Iterate.directions) {
                 BooleanProperty prop = dir.getAxisDirection() == Direction.AxisDirection.POSITIVE
-                        ? AbstractLazyShaftBlock.POSITIVE
-                        : AbstractLazyShaftBlock.NEGATIVE;
+                        ? AbstractLazySimpleKineticBlock.POSITIVE
+                        : AbstractLazySimpleKineticBlock.NEGATIVE;
 
                 BooleanProperty otherProp = dir.getAxisDirection() == Direction.AxisDirection.NEGATIVE
-                        ? AbstractLazyShaftBlock.POSITIVE
-                        : AbstractLazyShaftBlock.NEGATIVE;
+                        ? AbstractLazySimpleKineticBlock.POSITIVE
+                        : AbstractLazySimpleKineticBlock.NEGATIVE;
 
                 ModelFile m = p.models()
                         .withExistingParent(c.getName() + "_" + dir.getSerializedName(), p.modLoc(path + "/block_" + dir.getSerializedName()))
@@ -282,7 +283,7 @@ public class CALBlockStateGen {
                         .part()
                         .modelFile(m)
                         .addModel()
-                        .condition(AbstractLazyShaftBlock.AXIS, dir.getAxis())
+                        .condition(AbstractLazySimpleKineticBlock.AXIS, dir.getAxis())
                         .condition(prop, true)
                         .condition(otherProp, false)
                         .end();
@@ -315,7 +316,7 @@ public class CALBlockStateGen {
         return builder -> encasedBase(builder, CALBlocks.LAZY_SHAFT::get)
                 .onRegister(CreateRegistrate.connectedTextures(() -> new EncasedCTBehaviour(casingShift.get())))
                 .onRegister(CreateRegistrate.casingConnectivity((block, cc) -> cc.make(block, casingShift.get(),
-                        (s, f) -> f.getAxis() != s.getValue(AbstractLazyShaftBlock.AXIS))))
+                        (s, f) -> f.getAxis() != s.getValue(AbstractLazySimpleKineticBlock.AXIS))))
                 .blockstate((c, p) -> axisBlock(c, p, blockState -> p.models()
                                 .withExistingParent("block/encased_lazy_shaft/block_" + casing, Create.asResource("block/encased_shaft/block"))
                                 .texture("casing", casingLocation)
@@ -394,13 +395,13 @@ public class CALBlockStateGen {
                 .onRegister(thing -> {
                     if (casingShift != null)
                         CreateRegistrate.casingConnectivity((block, cc) -> cc.make(block, casingShift.get(),
-                                (s, f) -> f.getAxis() == s.getValue(AbstractLazyShaftBlock.AXIS)
-                                        && s.getValue(f.getAxisDirection() == Direction.AxisDirection.POSITIVE ? AbstractLazyShaftBlock.POSITIVE
-                                        : AbstractLazyShaftBlock.NEGATIVE))).accept(thing);
+                                (s, f) -> f.getAxis() == s.getValue(AbstractLazySimpleKineticBlock.AXIS)
+                                        && s.getValue(f.getAxisDirection() == Direction.AxisDirection.POSITIVE ? AbstractLazySimpleKineticBlock.POSITIVE
+                                        : AbstractLazySimpleKineticBlock.NEGATIVE))).accept(thing);
                 })
                 .blockstate((c, p) -> axisBlock(c, p, blockState -> {
-                    String suffix = (blockState.getValue(AbstractLazyShaftBlock.POSITIVE) ? "" : "_top")
-                            + (blockState.getValue(AbstractLazyShaftBlock.NEGATIVE) ? "" : "_bottom");
+                    String suffix = (blockState.getValue(AbstractLazySimpleKineticBlock.POSITIVE) ? "" : "_top")
+                            + (blockState.getValue(AbstractLazySimpleKineticBlock.NEGATIVE) ? "" : "_bottom");
                     String modelName = c.getName() + suffix;
                     return p.models()
                             .withExistingParent(modelName, Create.asResource("block/" + blockFolder + "/block" + suffix))

@@ -10,5 +10,9 @@
   "createadditionallogistics.package_editor.invalid_pattern": "One of your rules has a problem:",
 
   "createadditionallogistics.gauge.promise_limit.none": "Promises are not limited",
-  "createadditionallogistics.gauge.promise_limit": "Promises are limited to"
+  "createadditionallogistics.gauge.promise_limit": "Promises are limited to",
+
+  "createadditionallogistics.gauge.request_additional.none": "When restocking, additional items are not requested",
+  "createadditionallogistics.gauge.request_additional": "When restocking, this many additional items are requested"
+
 }

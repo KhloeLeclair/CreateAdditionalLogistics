@@ -14,6 +14,7 @@ import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.
 import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CurrencyUtilities;
 import dev.khloeleclair.create.additionallogistics.common.datagen.DataGen;
 import dev.khloeleclair.create.additionallogistics.common.registries.*;
+import dev.khloeleclair.create.additionallogistics.common.utilities.RecipeHelper;
 import dev.khloeleclair.create.additionallogistics.compat.computercraft.CALComputerCraftProxy;
 import net.createmod.catnip.lang.FontHelper;
 import net.minecraft.resources.ResourceLocation;
@@ -84,7 +85,7 @@ public class CreateAdditionalLogistics {
 
         NeoForge.EVENT_BUS.register(this);
         NeoForge.EVENT_BUS.addListener(CurrencyUtilities::onDataMapUpdated);
-        NeoForge.EVENT_BUS.addListener(CurrencyUtilities::onRecipesUpdated);
+        NeoForge.EVENT_BUS.addListener(RecipeHelper::onRecipesUpdated);
         NeoForge.EVENT_BUS.addListener(AbstractLowEntityKineticBlockEntity::onTick);
 
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us

@@ -31,7 +31,7 @@ public class LazyCogwheelBlockItem extends BlockItem {
     private final int placementHelperId;
     private final int integratedCogHelperId;
 
-    public LazyCogwheelBlockItem(LazyCogWheelBlock block, Properties properties) {
+    public LazyCogwheelBlockItem(AbstractLazyCogWheelBlock block, Properties properties) {
         super(block, properties);
         large = block.isLargeCog();
 

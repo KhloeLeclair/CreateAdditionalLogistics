@@ -5,15 +5,17 @@ import com.simibubi.create.compat.computercraft.implementation.ComputerBehaviour
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
+import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.createmod.catnip.platform.CatnipServices;
 
 import javax.annotation.Nullable;
-import java.util.concurrent.atomic.AtomicInteger;
+import java.lang.ref.WeakReference;
+import java.util.Map;
 
 public abstract class SyncedPeripheral<T extends SmartBlockEntity> implements IPeripheral {
 
     protected final T blockEntity;
-    private final AtomicInteger computers = new AtomicInteger();
+    private final Map<Integer, WeakReference<IComputerAccess>> computers = new Int2ObjectOpenHashMap<>();
 
     public SyncedPeripheral(T blockEntity) {
         this.blockEntity = blockEntity;
@@ -21,18 +23,52 @@ public abstract class SyncedPeripheral<T extends SmartBlockEntity> implements IP
 
     @Override
     public void attach(IComputerAccess computer) {
-        computers.incrementAndGet();
+        synchronized (computers) {
+            computers.put(computer.getID(), new WeakReference<>(computer));
+        }
         updateBlockEntity();
     }
 
     @Override
     public void detach(IComputerAccess computer) {
-        computers.decrementAndGet();
+        synchronized (computers) {
+            computers.remove(computer.getID());
+        }
         updateBlockEntity();
     }
 
+    public void queuePositionedEvent(String event, Object... arguments) {
+        pruneDeadComputers();
+        for(var ref : computers.values()) {
+            var computer = ref.get();
+            if (computer != null) {
+                Object[] args = new Object[arguments.length + 1];
+                System.arraycopy(arguments, 0, args, 1, arguments.length);
+                args[0] = computer.getAttachmentName();
+
+                computer.queueEvent(event, args);
+            }
+        }
+    }
+
+    public void queueEvent(String event, Object... arguments) {
+        pruneDeadComputers();
+        for(var ref : computers.values()) {
+            var computer = ref.get();
+            if (computer != null)
+                computer.queueEvent(event, arguments);
+        }
+    }
+
+    private void pruneDeadComputers() {
+        synchronized (computers) {
+            computers.values().removeIf(ref -> ref.get() == null);
+        }
+    }
+
     private void updateBlockEntity() {
-        boolean hasAttachedComputer = computers.get() > 0;
+        pruneDeadComputers();
+        boolean hasAttachedComputer = ! computers.isEmpty();
 
         blockEntity.getBehaviour(ComputerBehaviour.TYPE).setHasAttachedComputer(hasAttachedComputer);
         CatnipServices.NETWORK.sendToAllClients(new AttachedComputerPacket(blockEntity.getBlockPos(), hasAttachedComputer));

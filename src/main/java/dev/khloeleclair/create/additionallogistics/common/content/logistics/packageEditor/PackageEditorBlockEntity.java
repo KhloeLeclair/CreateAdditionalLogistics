@@ -18,6 +18,7 @@ import dev.khloeleclair.create.additionallogistics.common.CALLang;
 import dev.khloeleclair.create.additionallogistics.common.Config;
 import dev.khloeleclair.create.additionallogistics.common.PatternReplacement;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALBlockEntityTypes;
+import dev.khloeleclair.create.additionallogistics.compat.computercraft.AbstractEventfulComputerBehavior;
 import dev.khloeleclair.create.additionallogistics.compat.computercraft.CALComputerCraftProxy;
 import it.unimi.dsi.fastutil.Pair;
 import net.createmod.catnip.data.Iterate;
@@ -49,8 +50,7 @@ import java.util.regex.PatternSyntaxException;
 
 public class PackageEditorBlockEntity extends PackagerBlockEntity implements IHaveHoveringInformation {
 
-    @Nullable
-    public AbstractComputerBehaviour computerBehavior;
+    public AbstractEventfulComputerBehavior computerBehavior;
 
     protected record ReplacementSettings(int maxStarHeight, int maxRepetitions, boolean allowBackrefs) {
         static ReplacementSettings get() {
@@ -91,7 +91,7 @@ public class PackageEditorBlockEntity extends PackagerBlockEntity implements IHa
             event.registerBlockEntity(
                     PeripheralCapability.get(),
                     CALBlockEntityTypes.PACKAGE_EDITOR.get(),
-                    (be, context) -> be.computerBehavior == null ? null : be.computerBehavior.getPeripheralCapability()
+                    (be, context) -> be.computerBehavior.getPeripheralCapability()
             );
         }
     }
@@ -137,11 +137,13 @@ public class PackageEditorBlockEntity extends PackagerBlockEntity implements IHa
 
         if (!replacements.isEmpty()) {
             String address = PackageItem.getAddress(box);
-            address = applyRules(address);
-            if (address.isEmpty())
+            String newAddress = applyRules(address);
+            if (newAddress.isEmpty())
                 PackageItem.clearAddress(box);
             else
-                PackageItem.addAddress(box, address);
+                PackageItem.addAddress(box, newAddress);
+
+            computerBehavior.queuePositionedEvent("package_readdressed", address, newAddress, box);
         }
     }
 
@@ -181,8 +183,9 @@ public class PackageEditorBlockEntity extends PackagerBlockEntity implements IHa
     }
 
     @Override
-    public void tick() {
-        super.tick();
+    public void invalidate() {
+        super.invalidate();
+        computerBehavior.removePeripheral();
     }
 
     public boolean unwrapBox(ItemStack box, boolean simulate) {

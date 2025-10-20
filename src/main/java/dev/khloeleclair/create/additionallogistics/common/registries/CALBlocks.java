@@ -7,6 +7,8 @@ import com.simibubi.create.content.decoration.encasing.EncasedBlock;
 import com.simibubi.create.content.decoration.encasing.EncasingRegistry;
 import com.simibubi.create.content.logistics.packager.PackagerGenerator;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBlockItem;
+import com.simibubi.create.content.trains.graph.EdgePointType;
+import com.simibubi.create.content.trains.track.TrackTargetingBlockItem;
 import com.simibubi.create.foundation.block.DyedBlockList;
 import com.simibubi.create.foundation.data.CreateRegistrate;
 import com.simibubi.create.foundation.data.ModelGen;
@@ -25,6 +27,7 @@ import dev.khloeleclair.create.additionallogistics.common.content.contraptions.a
 import dev.khloeleclair.create.additionallogistics.common.content.contraptions.actors.seats.TallSeatBlock;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.cog.EncasedLazyCogWheelBlock;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.cog.LazyCogWheelBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.cog.LazyCogwheelBlockItem;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.EncasedFlexibleShaftBlock;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.FlexibleShaftBlock;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.shaft.EncasedLazyShaftBlock;
@@ -32,9 +35,8 @@ import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.
 import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CashRegisterBlock;
 import dev.khloeleclair.create.additionallogistics.common.content.logistics.packageAccelerator.PackageAcceleratorBlock;
 import dev.khloeleclair.create.additionallogistics.common.content.logistics.packageEditor.PackageEditorBlock;
-import dev.khloeleclair.create.additionallogistics.common.content.trains.networkObserver.NetworkObserverBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.trains.networkMonitor.NetworkMonitorBlock;
 import dev.khloeleclair.create.additionallogistics.common.datagen.CALBlockStateGen;
-import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.cog.LazyCogwheelBlockItem;
 import net.createmod.catnip.data.Couple;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeCategory;
@@ -478,13 +480,18 @@ public class CALBlocks {
         REGISTRATE.defaultCreativeTab(AllCreativeModeTabs.BASE_CREATIVE_TAB.getKey());
     }
 
-    // Network Observer
-    public static final BlockEntry<NetworkObserverBlock> NETWORK_OBERVER =
-            REGISTRATE.block("network_observer", NetworkObserverBlock::new)
+    // Network Monitor
+    public static final BlockEntry<NetworkMonitorBlock> NETWORK_MONITOR =
+            REGISTRATE.block("network_monitor", NetworkMonitorBlock::new)
                     .initialProperties(SharedProperties::softMetal)
                     .properties(p -> p.mapColor(MapColor.PODZOL)
                             .noOcclusion()
                             .sound(SoundType.NETHERITE_BLOCK))
+                    .transform(pickaxeOnly())
+                    .blockstate((c, p) -> p.simpleBlock(c.get(), p.models().getExistingFile(p.modLoc("block/" + c.getName() + "/block"))))
+                    .lang("Train Network Monitor Peripheral")
+                    .item(TrackTargetingBlockItem.ofType(EdgePointType.OBSERVER))
+                    .build()
                     .register();
 
     // Cash Register

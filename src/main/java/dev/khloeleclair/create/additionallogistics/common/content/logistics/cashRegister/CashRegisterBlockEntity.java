@@ -13,10 +13,12 @@ import com.simibubi.create.foundation.item.SmartInventory;
 import com.simibubi.create.foundation.utility.CreateLang;
 import dan200.computercraft.api.peripheral.PeripheralCapability;
 import dev.khloeleclair.create.additionallogistics.common.CALLang;
-import dev.khloeleclair.create.additionallogistics.common.registries.CALDataComponents;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALBlockEntityTypes;
+import dev.khloeleclair.create.additionallogistics.common.registries.CALDataComponents;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALItems;
+import dev.khloeleclair.create.additionallogistics.compat.computercraft.AbstractEventfulComputerBehavior;
 import dev.khloeleclair.create.additionallogistics.compat.computercraft.CALComputerCraftProxy;
+import net.createmod.catnip.data.Pair;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -49,8 +51,7 @@ import java.util.List;
 
 public class CashRegisterBlockEntity extends StockTickerBlockEntity {
 
-    @Nullable
-    public AbstractComputerBehaviour computerBehavior;
+    public AbstractEventfulComputerBehavior computerBehavior;
 
     private ItemStack ledger;
     private final IItemHandlerModifiable ledgerHandler;
@@ -141,6 +142,12 @@ public class CashRegisterBlockEntity extends StockTickerBlockEntity {
         };
 
         invWrapper = new CombinedInvWrapper(receivedPayments, ledgerHandler);
+    }
+
+    @Override
+    public void invalidate() {
+        super.invalidate();
+        computerBehavior.removePeripheral();
     }
 
     public boolean hadRecentSale() {
@@ -309,12 +316,14 @@ public class CashRegisterBlockEntity extends StockTickerBlockEntity {
                 return;
         }
 
-        history = history.withBigSale(player.getUUID(), payment.getStacks(), order.getStacks());
+        var result = history.withBigSale(player.getUUID(), payment.getStacks(), order.getStacks());
+
+        computerBehavior.queuePositionedEvent("sale", Pair.of(history, history.lastSale()));
 
         if (ledger.isEmpty())
             ledger = CALItems.SALES_LEDGER.asStack();
 
-        ledger.set(CALDataComponents.SALES_HISTORY, history);
+        ledger.set(CALDataComponents.SALES_HISTORY, result);
         saleTicks = 20;
         notifyUpdate();
     }

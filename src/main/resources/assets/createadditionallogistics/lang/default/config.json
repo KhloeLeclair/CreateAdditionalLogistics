@@ -9,6 +9,10 @@
   "createadditionallogistics.configuration.regexSafety": "RegEx Safety",
   "createadditionallogistics.configuration.kinetics": "Kinetics",
   "createadditionallogistics.configuration.packageAccelerator": "Package Accelerator",
+  "createadditionallogistics.configuration.currencyConversion": "Currency Conversion",
+
+  "createadditionallogistics.config.currency-conversion.stock-tickers": "Allow Stock Tickers",
+  "createadditionallogistics.config.currency-conversion.compression": "Handle Compressable Items",
 
   "createadditionallogistics.config.enable-promise-limits": "Enable Promise Limits",
   "createadditionallogistics.config.protect-seats": "Protect Stock Keeper Seats",

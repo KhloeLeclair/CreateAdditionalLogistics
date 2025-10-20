@@ -1,8 +1,8 @@
 package dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.base;
 
 import com.simibubi.create.content.decoration.encasing.EncasableBlock;
-import com.simibubi.create.content.decoration.encasing.EncasedBlock;
 import com.simibubi.create.content.kinetics.base.IRotate;
+import com.simibubi.create.content.kinetics.simpleRelays.ICogWheel;
 import com.simibubi.create.foundation.block.ProperWaterloggedBlock;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.FlexibleShaftBlock;
 import net.createmod.catnip.data.Iterate;
@@ -20,25 +20,23 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
-import net.minecraft.world.level.material.FluidState;
-import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import org.jetbrains.annotations.Nullable;
 
-public abstract class AbstractLazyShaftBlock<T extends AbstractLowEntityKineticBlockEntity> extends AbstractLowEntityKineticBlock<T> implements EncasableBlock, ProperWaterloggedBlock {
+public abstract class AbstractLazySimpleKineticBlock<T extends AbstractLowEntityKineticBlockEntity> extends AbstractLowEntityKineticBlock<T> implements EncasableBlock {
 
     public static final EnumProperty<Direction.Axis> AXIS = BlockStateProperties.AXIS;
     public static final BooleanProperty NEGATIVE = BooleanProperty.create("negative");
     public static final BooleanProperty POSITIVE = BooleanProperty.create("positive");
 
 
-    public AbstractLazyShaftBlock(Properties properties) {
+    public AbstractLazySimpleKineticBlock(Properties properties) {
         super(properties);
 
         var state = defaultBlockState();
-        if (state.hasProperty(WATERLOGGED))
-            state = state.setValue(WATERLOGGED, false);
+        if (state.hasProperty(ProperWaterloggedBlock.WATERLOGGED))
+            state = state.setValue(ProperWaterloggedBlock.WATERLOGGED, false);
 
         registerDefaultState(state
                 .setValue(AXIS, Direction.Axis.Y)
@@ -47,8 +45,8 @@ public abstract class AbstractLazyShaftBlock<T extends AbstractLowEntityKineticB
     }
 
     protected BlockState copyValuesForCasing(BlockState from, BlockState to) {
-        if (from.hasProperty(WATERLOGGED) && to.hasProperty(WATERLOGGED))
-            to = to.setValue(WATERLOGGED, from.getValue(WATERLOGGED));
+        if (from.hasProperty(ProperWaterloggedBlock.WATERLOGGED) && to.hasProperty(ProperWaterloggedBlock.WATERLOGGED))
+            to = to.setValue(ProperWaterloggedBlock.WATERLOGGED, from.getValue(ProperWaterloggedBlock.WATERLOGGED));
         if (from.hasProperty(AXIS) && to.hasProperty(AXIS))
             to = to.setValue(AXIS, from.getValue(AXIS));
         if (from.hasProperty(POSITIVE) && to.hasProperty(POSITIVE))
@@ -59,29 +57,13 @@ public abstract class AbstractLazyShaftBlock<T extends AbstractLowEntityKineticB
     }
 
     @Override
-    public FluidState fluidState(BlockState state) {
-        if (!state.hasProperty(WATERLOGGED))
-            return Fluids.EMPTY.defaultFluidState();
-
-        return ProperWaterloggedBlock.super.fluidState(state);
-    }
-
-    @Override
-    public void updateWater(LevelAccessor level, BlockState state, BlockPos pos) {
-        if (state.hasProperty(WATERLOGGED))
-            ProperWaterloggedBlock.super.updateWater(level, state, pos);
-    }
-
-    @Override
-    public BlockState withWater(BlockState placementState, BlockPlaceContext ctx) {
-        if (placementState.hasProperty(WATERLOGGED))
-            return ProperWaterloggedBlock.super.withWater(placementState, ctx);
-        return placementState;
-    }
-
-    @Override
     protected boolean areStatesKineticallyEquivalent(BlockState oldState, BlockState newState) {
-        if (!(oldState.getBlock() instanceof AbstractLazyShaftBlock<?>) || !(newState.getBlock() instanceof AbstractLazyShaftBlock<?>))
+        if (!(oldState.getBlock() instanceof AbstractLazySimpleKineticBlock<?>) || !(newState.getBlock() instanceof AbstractLazySimpleKineticBlock<?>))
+            return false;
+
+        if (ICogWheel.isLargeCog(oldState) != ICogWheel.isLargeCog(newState))
+            return false;
+        if (ICogWheel.isSmallCog(oldState) != ICogWheel.isSmallCog(newState))
             return false;
 
         if (!oldState.hasProperty(AXIS) || !newState.hasProperty(AXIS))
@@ -139,8 +121,8 @@ public abstract class AbstractLazyShaftBlock<T extends AbstractLowEntityKineticB
     protected void createBlockStateDefinition(StateDefinition.Builder<Block, BlockState> builder) {
         super.createBlockStateDefinition(builder);
         builder.add(AXIS, POSITIVE, NEGATIVE);
-        if (!(this instanceof EncasedBlock))
-            builder.add(WATERLOGGED);
+        if (this instanceof ProperWaterloggedBlock)
+            builder.add(ProperWaterloggedBlock.WATERLOGGED);
     }
 
     @Nullable
@@ -184,18 +166,14 @@ public abstract class AbstractLazyShaftBlock<T extends AbstractLowEntityKineticB
 
     @Override
     protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
-        updateWater(level, state, pos);
+        if (this instanceof ProperWaterloggedBlock wlb)
+            wlb.updateWater(level, state, pos);
 
         BlockState newState = withSides(level, pos, state);
         if (newState != state && level instanceof ServerLevel sl)
                 AbstractLowEntityKineticBlockEntity.markDirty(sl, pos);
 
         return newState;
-    }
-
-    @Override
-    protected FluidState getFluidState(BlockState state) {
-        return fluidState(state);
     }
 
     @Override
@@ -208,7 +186,11 @@ public abstract class AbstractLazyShaftBlock<T extends AbstractLowEntityKineticB
             state = defaultBlockState().setValue(AXIS, preferred != null && context.getPlayer().isShiftKeyDown()
                     ? context.getClickedFace().getAxis() : context.getNearestLookingDirection().getAxis());
 
-        return withWater(withSides(context.getLevel(), context.getClickedPos(), state), context);
+        state = withSides(context.getLevel(), context.getClickedPos(), state);
+        if (this instanceof ProperWaterloggedBlock wlb)
+            state = wlb.withWater(state, context);
+
+        return state;
     }
 
     @Override

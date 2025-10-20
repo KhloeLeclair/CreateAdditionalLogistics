@@ -57,11 +57,6 @@ public class PackageAcceleratorBlock extends DirectionalKineticBlock implements 
     }
 
     @Override
-    public void onPlace(BlockState state, Level worldIn, BlockPos pos, BlockState oldState, boolean isMoving) {
-        super.onPlace(state, worldIn, pos, oldState, isMoving);
-    }
-
-    @Override
     public Direction getPreferredFacing(BlockPlaceContext context) {
         final var level = context.getLevel();
         final var pos = context.getClickedPos();

@@ -84,6 +84,29 @@ public abstract class AbstractLowEntityKineticBlock<T extends AbstractLowEntityK
     }
 
     @Override
+    public void onPlace(BlockState state, Level worldIn, BlockPos pos, BlockState oldState, boolean isMoving) {
+        // Reimplementation of onPlace that helps prevent kinetic connection issues when a block
+        // is encased / unencased. This is basically the same, but instead of checking for an exact
+        // block match we're just checking that the block is still based on this class. And there's
+        // an added check that the block entity type didn't change.
+
+        if (worldIn.getBlockEntity(pos) instanceof AbstractLowEntityKineticBlockEntity kbe) {
+            kbe.preventSpeedUpdate = 0;
+
+            if ((oldState.getBlock() instanceof AbstractLowEntityKineticBlock<?>) != (state.getBlock() instanceof AbstractLowEntityKineticBlock<?>))
+                return;
+            if (oldState.getBlock() instanceof IBE<?> oldIbe && state.getBlock() instanceof IBE<?> ibe && oldIbe.getBlockEntityType() != ibe.getBlockEntityType())
+                return;
+            if (state.hasBlockEntity() != oldState.hasBlockEntity())
+                return;
+            if (!areStatesKineticallyEquivalent(oldState, state))
+                return;
+
+            kbe.preventSpeedUpdate = 2;
+        }
+    }
+
+    @Override
     public void onRemove(BlockState pState, Level pLevel, BlockPos pPos, BlockState pNewState, boolean pIsMoving) {
         // We need to avoid calling super.onRemove if we're encasing/unencasing to avoid resetting our block entity.
         boolean call_super = true;

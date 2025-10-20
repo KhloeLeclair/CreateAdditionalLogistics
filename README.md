@@ -208,6 +208,46 @@ the stock ticker. But at least you won't do it by accident.
 
 # Changelog
 
+## 1.3.0
+
+### Added
+
+* Restockers now have an Additional Items field that can be used to request
+  additional items whenever the monitored inventory falls below its minimum
+  stock level and a restock is triggered.
+
+* Train Network Monitor, a new CC: Tweaked peripheral that can be used to
+  discover the state of all stations and associated postboxes on a rail
+  network. This is a work-in-progress block and currently has no recipe.
+
+* Cash Registers now support automatic currency conversion. This means that,
+  as an example, if something costs a single Diamond and you only have a
+  Diamond Block in your inventory, it will take the Diamond Block and give
+  you eight Diamonds in change. This feature automatically discovers crafting
+  2x2 or 3x3 crafting recipes for converting items up, and also supports a
+  data asset for adding other currencies, such as the cogs from Numismatics.
+
+### Changed
+
+* The Cash Register, when used as a CC: Tweaked peripheral, now emits a `sale`
+  event when a sale happens.
+
+* The Package Editor, when used as a CC: Tweaked peripheral, now emits a
+  `package_readdressed` event when a package is processed.
+
+* The address input field for Package Filters, Stock Keepers, Factory Gauges,
+  and Redstone Requesters have had their length limit increased to 100 to
+  match the change made to Frogport and Postboxes.
+
+### Fixed
+
+* Encased Lazy Shafts causing an error when used in schematics due to a missing
+  block property.
+
+* Encasing / unencasing Lazy Shafts causing a network update that can, in
+  some circumstances, cause a lazy shaft to power itself.
+
+
 ## 1.2.6
 
 ### Fixed

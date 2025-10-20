@@ -26,7 +26,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
 
-public class EncasedLazyShaftBlock extends LazyShaftBlock implements SpecialBlockItemRequirement, EncasedBlock {
+public class EncasedLazyShaftBlock extends AbstractLazyShaftBlock implements SpecialBlockItemRequirement, EncasedBlock {
 
     private final Supplier<Block> casing;
 

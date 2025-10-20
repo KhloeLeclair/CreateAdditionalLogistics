@@ -20,7 +20,8 @@
     "client.MixinPackagePortScreen",
     "client.MixinFactoryPanelScreen",
     "client.MixinStockKeeperRequestScreen",
-    "client.MixinVisualizationManager"
+    "client.MixinVisualizationManager",
+    "client.MixinAddressEditBox"
   ],
   "injectors": {
     "defaultRequire": 1

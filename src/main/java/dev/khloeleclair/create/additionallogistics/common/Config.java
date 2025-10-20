@@ -14,6 +14,10 @@ public class Config {
         AUTO
     }
 
+    private static String t(String path) {
+        return CALLang.key("config." + path);
+    }
+
     public static void register(ModContainer modContainer) {
         modContainer.registerConfig(ModConfig.Type.CLIENT, clientSpec);
         modContainer.registerConfig(ModConfig.Type.COMMON, commonSpec);
@@ -21,41 +25,24 @@ public class Config {
     }
 
     public static class _Server {
-        public final ModConfigSpec.EnumValue<CurrencyMode> currencyConversion;
-
-        public final ModConfigSpec.BooleanValue convertDiamonds;
-        public final ModConfigSpec.BooleanValue convertEmeralds;
-        public final ModConfigSpec.BooleanValue convertIron;
-        public final ModConfigSpec.BooleanValue convertCopper;
+        public final ModConfigSpec.BooleanValue currencyConversion;
+        public final ModConfigSpec.BooleanValue stockTickersConvertToo;
 
         _Server(ModConfigSpec.Builder builder) {
-
-            builder.push("Currency Conversion");
+            builder.comment("Currency Conversion").push("currencyConversion");
 
             currencyConversion = builder
-                    .comment("Whether or not to override the default shop behavior with one aware of currencies. When set to Automatic, this is only enabled if there are defined currencies. There are no defined currencies by default. Other mods must define them, or you can enable the options for handling several built-in game items.")
-                    .translation("createadditionallogistics.config.currency-conversion.enabled")
-                    .defineEnum("enabled", CurrencyMode.AUTO);
+                    .comment("When enabled, items that are freely converted to and from other items (for example, 9 Diamonds equal 1 Diamond Block) will be converted automatically to make shopping easier. Otherwise, only specifically defined currencies will work.")
+                    .translation(t("currency-conversion.compression"))
+                    .define("compression", true);
 
-            builder.push("Default Conversions");
-
-            convertDiamonds = builder
-                    .define("convertDiamonds", false);
-
-            convertEmeralds = builder
-                    .define("convertEmeralds", false);
-
-            convertIron = builder
-                    .define("convertIron", false);
-
-            convertCopper = builder
-                    .define("convertCopper", false);
+            stockTickersConvertToo = builder
+                    .comment("Allow Stock Tickers to perform Currency Conversion as well.")
+                    .translation(t("currency-conversion.stock-tickers"))
+                    .define("allowStockTickers", false);
 
             builder.pop();
-            builder.pop();
-
         }
-
     }
 
 
@@ -74,41 +61,41 @@ public class Config {
 
             enablePromiseLimits = builder
                     .comment("Adds a new configurable value to factory gauges that allows configuring how many promises each gauge can have at a time.")
-                    .translation("createadditionallogistics.config.enable-promise-limits")
+                    .translation(t("enable-promise-limits"))
                     .define("enablePromiseLimits", true);
 
             protectStockKeeperSeats = builder
                     .comment("Prevent players from accidentally sitting in Seats holding a Stock Keeper.")
-                    .translation("createadditionallogistics.config.protect-seats")
+                    .translation(t("protect-seats"))
                     .define("protectStockKeeperSeats", true);
 
             builder.comment("Package Addresses").push("addresses");
 
             globOptimize = builder
                     .comment("Use optimized logic and caching for package address matching.")
-                    .translation("createadditionallogistics.config.addresses.optimize")
+                    .translation(t("addresses.optimize"))
                     .define("globOptimize", true);
 
             globAllowRegex = builder
                     .comment("Allow the user of regular expressions timestamp matching packages in Create (Frogports, Postboxes, Package Filters, etc.) with the \"RegEx:\" prefix.")
-                    .translation("createadditionallogistics.config.addresses.allowRegex")
+                    .translation(t("addresses.allowRegex"))
                     .define("globAllowRegex", true);
 
             builder.comment("Regex Safety").push("regexSafety");
 
             maxStarHeight = builder
                     .comment("Maximum star height to allow in one regular expression. This is intended to prevent catastrophic backtracking.")
-                    .translation("createadditionallogistics.config.regex.starHeight")
+                    .translation(t("regex.starHeight"))
                     .defineInRange("maxStarHeight", 1, 0, 6);
 
             maxRepetitions = builder
                     .comment("Maximum repetitions to allow in one regular expression. This is intended to minimize overall work.")
-                    .translation("createadditionallogistics.config.regex.maxRepetitions")
+                    .translation(t("regex.maxRepetitions"))
                     .defineInRange("maxRepetitions", 1000, 0, Integer.MAX_VALUE);
 
             allowBackrefs = builder
                     .comment("Whether or not to allow backreferences in regular expressions.")
-                    .translation("createadditionallogistics.config.regex.allowBackrefs")
+                    .translation(t("regex.allowBackrefs"))
                     .define("allowBackrefs", false);
 
             builder.pop();
@@ -121,7 +108,7 @@ public class Config {
 
             acceleratorStressImpact = builder
                     .comment("The stress impact of the Package Accelerator")
-                    .translation(CALLang.key("config.kinetics.stress-impact"))
+                    .translation(t("kinetics.stress-impact"))
                     .defineInRange("acceleratorStressImpact", 4.0, 1, 100);
 
             builder.pop();
