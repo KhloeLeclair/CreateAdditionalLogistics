@@ -6,6 +6,7 @@ import it.unimi.dsi.fastutil.Pair;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.data.PackOutput;
 import net.minecraft.resources.ResourceLocation;
+import net.neoforged.neoforge.common.conditions.ModLoadedCondition;
 import net.neoforged.neoforge.common.data.DataMapProvider;
 
 import java.util.concurrent.CompletableFuture;
@@ -28,9 +29,17 @@ public class CALDataMapProvider extends DataMapProvider {
     protected void gather(HolderLookup.Provider provider) {
         super.gather(provider);
 
-        var builder = this.builder(CALDataMaps.CURRENCY_DATA);
+        addNumismaticsCoins(provider);
+    }
 
-        var numismatics = new Pair[]{
+    private static final String NUMISMATICS = "numismatics";
+
+    private void addNumismaticsCoins(HolderLookup.Provider provider) {
+
+        var builder = this.builder(CALDataMaps.CURRENCY_DATA)
+                .conditions(new ModLoadedCondition(NUMISMATICS));
+
+        var coins = new Pair[]{
                 Pair.of("spur", 1),
                 Pair.of("bevel", 8),
                 Pair.of("sprocket", 16),
@@ -39,22 +48,13 @@ public class CALDataMapProvider extends DataMapProvider {
                 Pair.of("sun", 4096)
         };
 
-        for(var entry : numismatics) {
+        for(var entry : coins) {
             var key = (String) entry.first();
             var value = (int) entry.second();
 
-            builder.add(ResourceLocation.fromNamespaceAndPath("numismatics", key), get("numismatics", "coins", value), false);
+            builder.add(ResourceLocation.fromNamespaceAndPath(NUMISMATICS, key), get(NUMISMATICS, "coins", value), false);
         }
 
-                /*.add(CALTags.CALItemTags.NUGGETS_DIAMOND.tag, get("diamond", 1), false)
-                .add(Tags.Items.GEMS_DIAMOND, get("diamond", 9), false)
-                .add(Tags.Items.STORAGE_BLOCKS_DIAMOND, get("diamond", 81), false)
-
-                .add(CALTags.CALItemTags.NUGGETS_EMERALD.tag, get("emerald", 1), false)
-                .add(Tags.Items.GEMS_EMERALD, get("emerald", 9), false)
-                .add(Tags.Items.STORAGE_BLOCKS_EMERALD, get("emerald", 81), false)*/
-
         builder.build();
-
     }
 }

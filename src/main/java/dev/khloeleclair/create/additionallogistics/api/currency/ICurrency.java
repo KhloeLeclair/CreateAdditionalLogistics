@@ -13,6 +13,8 @@ import java.util.function.BiFunction;
 
 public interface ICurrency {
 
+    // TODO: Figure out how to implement a proper API that other mods can import.
+
     record ExtractionResult(List<ItemStack> remaining, int remainingValue) {}
 
     static void registerFormatter(ResourceLocation id, BiFunction<Integer, TooltipFlag, Component> formatter) {

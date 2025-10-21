@@ -53,19 +53,13 @@ public class CurrencyUtilities {
     private static boolean isPopulated;
 
     static {
+        // Numismatics Support
         BUILTIN_FORMATTERS.put(ResourceLocation.fromNamespaceAndPath("numismatics", "coins"), (value, ctx) -> {
-            int cogs;
-            int spurs;
-
-            if (ctx.hasShiftDown()) {
+            if (ctx.hasShiftDown())
                 return null;
 
-                //cogs = 0;
-                //spurs = value;
-            } else {
-                cogs = value / 64;
-                spurs = value % 64;
-            }
+            int cogs = value / 64;
+            int spurs = value % 64;
 
             var result = Component.literal(String.valueOf(spurs)).append("¤");
 
