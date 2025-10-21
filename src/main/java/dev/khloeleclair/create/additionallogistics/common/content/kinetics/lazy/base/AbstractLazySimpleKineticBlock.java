@@ -4,7 +4,7 @@ import com.simibubi.create.content.decoration.encasing.EncasableBlock;
 import com.simibubi.create.content.kinetics.base.IRotate;
 import com.simibubi.create.content.kinetics.simpleRelays.ICogWheel;
 import com.simibubi.create.foundation.block.ProperWaterloggedBlock;
-import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.FlexibleShaftBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.AbstractFlexibleShaftBlock;
 import net.createmod.catnip.data.Iterate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
@@ -136,7 +136,7 @@ public abstract class AbstractLazySimpleKineticBlock<T extends AbstractLowEntity
             var newPos = pos.relative(side);
             var newState = level.getBlockState(newPos);
             var newBlock = newState.getBlock();
-            if (newBlock instanceof FlexibleShaftBlock) {
+            if (newBlock instanceof AbstractFlexibleShaftBlock) {
                 if (context.getClickedFace() == side.getOpposite())
                     return axis;
                 if (preferredAxis != null && preferredAxis != axis) {

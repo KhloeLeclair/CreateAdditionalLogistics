@@ -1,12 +1,13 @@
 package dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister;
 
-import dev.khloeleclair.create.additionallogistics.client.api.currency.ICurrency;
+import dev.khloeleclair.create.additionallogistics.api.currency.ICurrency;
 import dev.khloeleclair.create.additionallogistics.common.CALLang;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -121,10 +122,10 @@ public class SimpleCurrency implements ICurrency {
     }
 
     @Override
-    public Component formatValue(int value) {
+    public Component formatValue(int value, TooltipFlag flag) {
         var formatter = CurrencyUtilities.getFormatter(id);
         if (formatter != null)
-            return formatter.apply(value);
+            return formatter.apply(value, flag);
 
         return CALLang.number(value).component();
     }

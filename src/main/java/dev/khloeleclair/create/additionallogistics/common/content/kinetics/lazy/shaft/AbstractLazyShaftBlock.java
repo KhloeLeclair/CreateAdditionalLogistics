@@ -1,7 +1,7 @@
 package dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.shaft;
 
 import com.simibubi.create.foundation.placement.PoleHelper;
-import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.FlexibleShaftBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.AbstractFlexibleShaftBlock;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.base.AbstractLazySimpleKineticBlock;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALBlockEntityTypes;
 import net.createmod.catnip.placement.IPlacementHelper;
@@ -94,7 +94,7 @@ public abstract class AbstractLazyShaftBlock extends AbstractLazySimpleKineticBl
             return s -> {
                 if (s.getBlock() instanceof AbstractLazyShaftBlock)
                     return true;
-                return s.getBlock() instanceof FlexibleShaftBlock;
+                return s.getBlock() instanceof AbstractFlexibleShaftBlock;
             };
         }
 
@@ -113,7 +113,7 @@ public abstract class AbstractLazyShaftBlock extends AbstractLazySimpleKineticBl
         @Override
         public PlacementOffset getOffset(Player player, Level world, BlockState state, BlockPos pos,
                                          BlockHitResult ray) {
-            PlacementOffset offset = state.getBlock() instanceof FlexibleShaftBlock
+            PlacementOffset offset = state.getBlock() instanceof AbstractFlexibleShaftBlock
                     ? getOffsetFlexible(player, world, state, pos, ray)
                     : super.getOffset(player, world, state, pos, ray);
 

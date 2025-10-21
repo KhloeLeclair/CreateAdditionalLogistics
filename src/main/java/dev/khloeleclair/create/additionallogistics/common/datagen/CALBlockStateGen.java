@@ -15,6 +15,7 @@ import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.cog.EncasedLazyCogWheelBlock;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.cog.LazyCogWheelBlock;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.EncasedFlexibleShaftBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.AbstractFlexibleShaftBlock;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.FlexibleShaftBlock;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.shaft.EncasedLazyShaftBlock;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.shaft.LazyShaftBlock;
@@ -72,7 +73,7 @@ public class CALBlockStateGen {
             if (casingShift != null) {
                 b.onRegister(CreateRegistrate.connectedTextures(() -> new EncasedCTBehaviour(casingShift.get())));
                 b.onRegister(CreateRegistrate.casingConnectivity((block, cc) -> cc.make(block, casingShift.get(),
-                        (s, f) -> s.getValue(FlexibleShaftBlock.SIDES[f.ordinal()]))));
+                        (s, f) -> s.getValue(AbstractFlexibleShaftBlock.SIDES[f.ordinal()]))));
             }
 
             return b;
@@ -104,7 +105,7 @@ public class CALBlockStateGen {
 
             for(Direction dir : Iterate.directions) {
                 int index = dir.ordinal();
-                BooleanProperty property = FlexibleShaftBlock.SIDES[index];
+                BooleanProperty property = AbstractFlexibleShaftBlock.SIDES[index];
 
                 ModelFile m = p.models()
                         .withExistingParent("encased_flexible_shaft_" + casing + "_" + dir.getSerializedName(), p.modLoc(path + "/block_" + dir.getSerializedName()))
@@ -142,7 +143,7 @@ public class CALBlockStateGen {
 
             for(Direction dir : Iterate.directions) {
                 int index = dir.ordinal();
-                BooleanProperty property = FlexibleShaftBlock.SIDES[index];
+                BooleanProperty property = AbstractFlexibleShaftBlock.SIDES[index];
 
                 ModelFile m;
                 //if (texture == null)

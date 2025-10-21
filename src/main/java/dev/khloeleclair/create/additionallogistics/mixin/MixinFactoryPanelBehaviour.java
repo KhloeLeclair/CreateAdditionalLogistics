@@ -25,26 +25,19 @@ public abstract class MixinFactoryPanelBehaviour extends FilteringBehaviour impl
 
     private static final String CAL_PROMISE_LIMIT_KEY = "CAL$PromiseLimit";
     private static final String CAL_ADDITIONAL_STOCK_KEY = "CAL$Stock$Add";
-    private static final String CAL_LAST_INVENTORY_KEY = "CAL$LastInv";
-    private static final String CAL_REMAINING_ADDITIONAL_KEY = "CAL$Rem$Add";
+    private static final String CAL_REMAINING_ADDITIONAL_KEY = "CAL$Stock$Rem";
 
     @Shadow
     public boolean satisfied;
+    @Shadow
+    private int lastReportedLevelInStorage;
 
     @Unique
     private int CAL$promiseLimit = -1;
     @Unique
     private int CAL$AdditionalStock = 0;
     @Unique
-    private int CAL$LastInventory = -1;
-    @Unique
     private int CAL$RemainingAdditional = 0;
-
-    @Shadow
-    public abstract int getLevelInStorage();
-
-    @Shadow
-    public abstract int getPromised();
 
     public MixinFactoryPanelBehaviour(SmartBlockEntity be, ValueBoxTransform slot) {
         super(be, slot);
@@ -66,7 +59,7 @@ public abstract class MixinFactoryPanelBehaviour extends FilteringBehaviour impl
 
     public int getCALAdditionalStock() { return CAL$AdditionalStock; }
 
-    public boolean hasCALAdditionalStock() { return CAL$AdditionalStock > 0; }
+    public boolean hasCALAdditionalStock() { return CAL$AdditionalStock > 0 && Config.Common.enableAdditionalStock.get(); }
 
     public void setCALAdditionalStock(int value) {
         if (value < 0)
@@ -98,11 +91,8 @@ public abstract class MixinFactoryPanelBehaviour extends FilteringBehaviour impl
 
         tag.putInt(CAL_PROMISE_LIMIT_KEY, CAL$promiseLimit);
 
-        if (fpb.panelBE().restocker) {
-            tag.putInt(CAL_ADDITIONAL_STOCK_KEY, CAL$AdditionalStock);
-            tag.putInt(CAL_LAST_INVENTORY_KEY, CAL$LastInventory);
-            tag.putInt(CAL_REMAINING_ADDITIONAL_KEY, CAL$RemainingAdditional);
-        }
+        tag.putInt(CAL_ADDITIONAL_STOCK_KEY, CAL$AdditionalStock);
+        tag.putInt(CAL_REMAINING_ADDITIONAL_KEY, CAL$RemainingAdditional);
 
         nbt.put(tagName, tag);
     }
@@ -116,14 +106,13 @@ public abstract class MixinFactoryPanelBehaviour extends FilteringBehaviour impl
         // If the number of items has gone down in the last tick, we should
         // subtract a value from RemainingAdditional to ensure we don't keep
         // requesting more and more items above the base amount.
-        if (CAL$RemainingAdditional > 0 && CAL$LastInventory > value) {
-            int difference = CAL$LastInventory - value;
+        if (CAL$RemainingAdditional > 0 && lastReportedLevelInStorage > value) {
+            int difference = lastReportedLevelInStorage - value;
             CAL$RemainingAdditional -= difference;
             if (CAL$RemainingAdditional < 0)
                 CAL$RemainingAdditional = 0;
         }
 
-        CAL$LastInventory = value;
         return value;
     }
 
@@ -132,7 +121,7 @@ public abstract class MixinFactoryPanelBehaviour extends FilteringBehaviour impl
             at = @At("RETURN")
     )
     private void CAL$onTickStorageMonitor(CallbackInfo ci) {
-        if (!satisfied && CAL$RemainingAdditional <= 0 && FPB().panelBE().restocker) {
+        if (!satisfied && CAL$RemainingAdditional <= 0 && FPB().panelBE().restocker && hasCALAdditionalStock()) {
             // We're freshly unsatisfied. Set the RemainingAdditional value so we
             // can start using it to determine how much to order.
             CAL$RemainingAdditional = CAL$AdditionalStock;
@@ -254,7 +243,6 @@ public abstract class MixinFactoryPanelBehaviour extends FilteringBehaviour impl
             this.setCALPromiseLimit(-1);
 
         CAL$AdditionalStock = Mth.clamp(tag.getInt(CAL_ADDITIONAL_STOCK_KEY), 0, 64 * 100 * 20);
-        CAL$LastInventory = tag.getInt(CAL_LAST_INVENTORY_KEY);
         CAL$RemainingAdditional = tag.getInt(CAL_REMAINING_ADDITIONAL_KEY);
     }
 

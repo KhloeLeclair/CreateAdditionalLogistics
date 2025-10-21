@@ -1,6 +1,7 @@
 package dev.khloeleclair.create.additionallogistics.common.registries;
 
 import com.simibubi.create.*;
+import com.simibubi.create.compat.Mods;
 import com.simibubi.create.content.contraptions.actors.seat.SeatInteractionBehaviour;
 import com.simibubi.create.content.contraptions.actors.seat.SeatMovementBehaviour;
 import com.simibubi.create.content.decoration.encasing.EncasedBlock;
@@ -38,6 +39,7 @@ import dev.khloeleclair.create.additionallogistics.common.content.logistics.pack
 import dev.khloeleclair.create.additionallogistics.common.content.trains.networkMonitor.NetworkMonitorBlock;
 import dev.khloeleclair.create.additionallogistics.common.datagen.CALBlockStateGen;
 import net.createmod.catnip.data.Couple;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
@@ -476,11 +478,12 @@ public class CALBlocks {
                 .register();
     });
 
+    // Network Monitor
     static {
-        REGISTRATE.defaultCreativeTab(AllCreativeModeTabs.BASE_CREATIVE_TAB.getKey());
+        // Don't list the network monitor in a creative tab if CC: Tweaked isn't installed.
+        REGISTRATE.defaultCreativeTab(Mods.COMPUTERCRAFT.isLoaded() ? AllCreativeModeTabs.BASE_CREATIVE_TAB.getKey() : null);
     }
 
-    // Network Monitor
     public static final BlockEntry<NetworkMonitorBlock> NETWORK_MONITOR =
             REGISTRATE.block("network_monitor", NetworkMonitorBlock::new)
                     .initialProperties(SharedProperties::softMetal)
@@ -490,9 +493,25 @@ public class CALBlocks {
                     .transform(pickaxeOnly())
                     .blockstate((c, p) -> p.simpleBlock(c.get(), p.models().getExistingFile(p.modLoc("block/" + c.getName() + "/block"))))
                     .lang("Train Network Monitor Peripheral")
+                    .recipe((c,p) -> {
+                        var ender_modem = BuiltInRegistries.ITEM.getOptional(ResourceLocation.fromNamespaceAndPath("computercraft", "ender_modem"));
+                        if (ender_modem.isEmpty())
+                            return;
+
+                        ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, c.get())
+                                .unlockedBy("has_cc_modem", RegistrateRecipeProvider.has(ender_modem.get()))
+                                .requires(AllBlocks.RAILWAY_CASING)
+                                .requires(AllItems.TRANSMITTER)
+                                .requires(ender_modem.get())
+                                .save(p, CreateAdditionalLogistics.asResource("crafting/trains/" + c.getName()));
+                    })
                     .item(TrackTargetingBlockItem.ofType(EdgePointType.OBSERVER))
                     .build()
                     .register();
+
+    static {
+        REGISTRATE.defaultCreativeTab(AllCreativeModeTabs.BASE_CREATIVE_TAB.getKey());
+    }
 
     // Cash Register
     public static final BlockEntry<CashRegisterBlock> CASH_REGISTER =

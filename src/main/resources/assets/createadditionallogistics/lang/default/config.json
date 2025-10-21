@@ -10,14 +10,19 @@
   "createadditionallogistics.configuration.kinetics": "Kinetics",
   "createadditionallogistics.configuration.packageAccelerator": "Package Accelerator",
   "createadditionallogistics.configuration.currencyConversion": "Currency Conversion",
+  "createadditionallogistics.configuration.trainNetworkMonitor": "Train Network Monitor",
 
   "createadditionallogistics.config.currency-conversion.stock-tickers": "Allow Stock Tickers",
   "createadditionallogistics.config.currency-conversion.compression": "Handle Compressable Items",
 
+  "createadditionallogistics.config.enable-additional-stock": "Enable Additional Stock",
   "createadditionallogistics.config.enable-promise-limits": "Enable Promise Limits",
   "createadditionallogistics.config.protect-seats": "Protect Stock Keeper Seats",
 
   "createadditionallogistics.config.kinetics.stress-impact": "Stress Impact",
+
+  "createadditionallogistics.config.trains.network-monitor.allow-inventory": "Allow Reading Inventory",
+  "createadditionallogistics.config.trains.network-monitor.allow-writing": "Allow Writing",
 
   "createadditionallogistics.config.addresses.allowRegex": "Allow RegEx",
   "createadditionallogistics.config.addresses.optimize": "Optimize Matching",

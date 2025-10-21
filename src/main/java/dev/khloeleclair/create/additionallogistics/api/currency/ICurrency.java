@@ -1,22 +1,28 @@
-package dev.khloeleclair.create.additionallogistics.client.api.currency;
+package dev.khloeleclair.create.additionallogistics.api.currency;
 
 import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CurrencyUtilities;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 public interface ICurrency {
 
     record ExtractionResult(List<ItemStack> remaining, int remainingValue) {}
 
-    static void registerFormatter(ResourceLocation id, Function<Integer, Component> formatter) {
+    static void registerFormatter(ResourceLocation id, BiFunction<Integer, TooltipFlag, Component> formatter) {
         CurrencyUtilities.registerFormatter(id, formatter);
     }
+
+    static CurrencyBuilder builder(ResourceLocation id) {
+        return new CurrencyBuilder(id);
+    }
+
 
     @Nullable
     static ICurrency get(ResourceLocation id) {
@@ -43,6 +49,6 @@ public interface ICurrency {
 
     boolean hasFormatter();
 
-    Component formatValue(int value);
+    Component formatValue(int value, TooltipFlag flag);
 
 }

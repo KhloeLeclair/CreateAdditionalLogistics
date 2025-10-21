@@ -247,6 +247,8 @@ the stock ticker. But at least you won't do it by accident.
 * Encasing / unencasing Lazy Shafts causing a network update that can, in
   some circumstances, cause a lazy shaft to power itself.
 
+* Flexible Shafts not being placed with correct side configurations by schematics.
+
 
 ## 1.2.6
 

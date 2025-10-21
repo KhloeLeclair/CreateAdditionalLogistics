@@ -1,5 +1,8 @@
 package dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible;
 
+import com.simibubi.create.api.contraption.transformable.TransformableBlockEntity;
+import com.simibubi.create.api.schematic.nbt.PartialSafeNBT;
+import com.simibubi.create.content.contraptions.StructureTransform;
 import com.simibubi.create.content.decoration.encasing.EncasedBlock;
 import com.simibubi.create.content.kinetics.base.IRotate;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
@@ -9,12 +12,15 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Arrays;
 
-public class FlexibleShaftBlockEntity extends AbstractLowEntityKineticBlockEntity {
+public class FlexibleShaftBlockEntity extends AbstractLowEntityKineticBlockEntity implements PartialSafeNBT, TransformableBlockEntity {
 
     protected final byte[] sideActive;
     protected boolean validateSides;
@@ -39,13 +45,13 @@ public class FlexibleShaftBlockEntity extends AbstractLowEntityKineticBlockEntit
     @Override
     public void writeSafe(CompoundTag tag, HolderLookup.Provider registries) {
         super.writeSafe(tag, registries);
-        tag.putByteArray("Sides", sideActive);
+        tag.putByteArray("Sides", Arrays.copyOf(sideActive, sideActive.length));
     }
 
     @Override
     protected void write(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
         super.write(compound, registries, clientPacket);
-        compound.putByteArray("Sides", sideActive);
+        compound.putByteArray("Sides", Arrays.copyOf(sideActive, sideActive.length));
     }
 
     @Override
@@ -83,7 +89,7 @@ public class FlexibleShaftBlockEntity extends AbstractLowEntityKineticBlockEntit
         var state = getBlockState();
         for(Direction side : Iterate.directions) {
             int index = side.ordinal();
-            if (state.getValue(FlexibleShaftBlock.SIDES[index]) && sideActive[index] != 0) {
+            if (state.getValue(AbstractFlexibleShaftBlock.SIDES[index]) && sideActive[index] != 0) {
                 if (hasConnection(side) && !detached) {
                     detached = true;
                     detachKinetics();
@@ -104,7 +110,7 @@ public class FlexibleShaftBlockEntity extends AbstractLowEntityKineticBlockEntit
 
     public void deactivateSelf() {
         notifyConnectedToValidate();
-        level.setBlockAndUpdate(worldPosition, getBlockState().setValue(FlexibleShaftBlock.ACTIVE, false));
+        level.setBlockAndUpdate(worldPosition, getBlockState().setValue(AbstractFlexibleShaftBlock.ACTIVE, false));
         AbstractLowEntityKineticBlockEntity.markDirty(level, worldPosition);
     }
 
@@ -155,8 +161,8 @@ public class FlexibleShaftBlockEntity extends AbstractLowEntityKineticBlockEntit
         if (state.getBlock() instanceof EncasedBlock) {
             final boolean side_state = value == 0;
 
-            if (state.getValue(FlexibleShaftBlock.SIDES[index]) != side_state) {
-                level.setBlockAndUpdate(worldPosition, state.setValue(FlexibleShaftBlock.SIDES[index], side_state));
+            if (state.getValue(AbstractFlexibleShaftBlock.SIDES[index]) != side_state) {
+                level.setBlockAndUpdate(worldPosition, state.setValue(AbstractFlexibleShaftBlock.SIDES[index], side_state));
             }
         }
 
@@ -192,4 +198,32 @@ public class FlexibleShaftBlockEntity extends AbstractLowEntityKineticBlockEntit
         notifyConnectedToValidate();
     }
 
+    @Override
+    public void transform(BlockEntity blockEntity, StructureTransform transform) {
+
+        byte[] sides = sideActive;
+
+        if (transform.mirror != Mirror.NONE) {
+            byte[] newSides = new byte[sides.length];
+
+            for(Direction dir : Iterate.directions) {
+                newSides[transform.mirror.mirror(dir).ordinal()] = sides[dir.ordinal()];
+            }
+
+            sides = newSides;
+        }
+
+        if (transform.rotation != Rotation.NONE) {
+            byte[] newSides = new byte[sides.length];
+
+            for(Direction dir : Iterate.directions) {
+                newSides[transform.rotation.rotate(dir).ordinal()] = sides[dir.ordinal()];
+            }
+
+            sides = newSides;
+        }
+
+        System.arraycopy(sides, 0, sideActive, 0, sides.length);
+
+    }
 }

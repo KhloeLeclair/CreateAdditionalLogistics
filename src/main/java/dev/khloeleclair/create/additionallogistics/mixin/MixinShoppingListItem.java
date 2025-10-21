@@ -3,8 +3,9 @@ package dev.khloeleclair.create.additionallogistics.mixin;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.simibubi.create.content.logistics.packager.InventorySummary;
 import com.simibubi.create.content.logistics.tableCloth.ShoppingListItem;
-import dev.khloeleclair.create.additionallogistics.client.api.currency.ICurrency;
+import dev.khloeleclair.create.additionallogistics.api.currency.ICurrency;
 import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CurrencyUtilities;
+import dev.khloeleclair.create.additionallogistics.common.registries.CALDataComponents;
 import net.createmod.catnip.data.Couple;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
@@ -31,7 +32,7 @@ public class MixinShoppingListItem {
             cancellable = true
     )
     private void CAL$appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag, CallbackInfo ci, @Nullable @Local Couple<InventorySummary> lists) {
-        if (lists == null || ! CurrencyUtilities.isConversionEnabled())
+        if (lists == null || ! CurrencyUtilities.isConversionEnabled(stack.get(CALDataComponents.CASH_REGISTER_POS) != null))
             return;
 
         var items = lists.getSecond();
@@ -39,7 +40,7 @@ public class MixinShoppingListItem {
         for(var item : items.getStacks()) {
             if (ICurrency.getForItem(item.stack.getItem()) != null) {
                 ci.cancel();
-                CurrencyUtilities.createShoppingListTooltip(stack, tooltipComponents, lists);
+                CurrencyUtilities.createShoppingListTooltip(stack, tooltipComponents, tooltipFlag, lists);
                 return;
             }
         }

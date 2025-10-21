@@ -28,6 +28,9 @@ public class Config {
         public final ModConfigSpec.BooleanValue currencyConversion;
         public final ModConfigSpec.BooleanValue stockTickersConvertToo;
 
+        public final ModConfigSpec.BooleanValue allowTrainInventoryReading;
+        public final ModConfigSpec.BooleanValue allowTrainWriting;
+
         _Server(ModConfigSpec.Builder builder) {
             builder.comment("Currency Conversion").push("currencyConversion");
 
@@ -42,12 +45,27 @@ public class Config {
                     .define("allowStockTickers", false);
 
             builder.pop();
+
+            builder.comment("Train Network Monitor").push("trainNetworkMonitor");
+
+            allowTrainInventoryReading = builder
+                    .comment("When enabled, a train's inventory and fluid contents can be read using a Train Network Monitor Peripheral. When disabled, only information about packages is available.")
+                    .translation(t("trains.network-monitor.allow-inventory"))
+                    .define("allowInventoryAccess", false);
+
+            allowTrainWriting = builder
+                    .comment("When enabled, trains and stations can be modified using a Train Network Monitor Peripheral. When disabled, data can only be read.")
+                    .translation(t("trains.network-monitor.allow-writing"))
+                    .define("allowWriting", false);
+
+            builder.pop();
         }
     }
 
 
     public static class _Common {
         public final ModConfigSpec.BooleanValue enablePromiseLimits;
+        public final ModConfigSpec.BooleanValue enableAdditionalStock;
         public final ModConfigSpec.BooleanValue protectStockKeeperSeats;
         public final ModConfigSpec.BooleanValue globAllowRegex;
         public final ModConfigSpec.BooleanValue globOptimize;
@@ -63,6 +81,11 @@ public class Config {
                     .comment("Adds a new configurable value to factory gauges that allows configuring how many promises each gauge can have at a time.")
                     .translation(t("enable-promise-limits"))
                     .define("enablePromiseLimits", true);
+
+            enableAdditionalStock = builder
+                    .comment("Adds a new configurable value to Restocker factory gauges that allows configuring the gauge to request additional items when restocking.")
+                    .translation(t("enable-additional-stock"))
+                    .define("enableAdditionalStock", true);
 
             protectStockKeeperSeats = builder
                     .comment("Prevent players from accidentally sitting in Seats holding a Stock Keeper.")

@@ -9,7 +9,7 @@ import com.simibubi.create.content.logistics.stockTicker.StockTickerBlockEntity;
 import com.simibubi.create.content.logistics.tableCloth.ShoppingListItem;
 import com.simibubi.create.foundation.utility.CreateLang;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
-import dev.khloeleclair.create.additionallogistics.client.api.currency.ICurrency;
+import dev.khloeleclair.create.additionallogistics.api.currency.ICurrency;
 import dev.khloeleclair.create.additionallogistics.common.CALLang;
 import dev.khloeleclair.create.additionallogistics.common.Config;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALDataMaps;
@@ -31,6 +31,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.registries.datamaps.DataMapsUpdatedEvent;
@@ -38,15 +39,47 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
 public class CurrencyUtilities {
 
-    public static final Map<ResourceLocation, SimpleCurrency> CURRENCIES = new Object2ObjectOpenHashMap<>();
-    public static final Map<ResourceLocation, Function<Integer, Component>> FORMATTERS = new Object2ObjectOpenHashMap<>();
+    public static final Map<ResourceLocation, ICurrency> CURRENCIES = new Object2ObjectOpenHashMap<>();
+    public static final Map<Item, ResourceLocation> API_CURRENCIES = new Object2ObjectOpenHashMap<>();
+    public static final Map<ResourceLocation, BiFunction<Integer, TooltipFlag, Component>> FORMATTERS = new Object2ObjectOpenHashMap<>();
+    public static final Map<ResourceLocation, BiFunction<Integer, TooltipFlag, Component>> BUILTIN_FORMATTERS = new Object2ObjectOpenHashMap<>();
 
     private static boolean isPopulated;
+
+    static {
+        BUILTIN_FORMATTERS.put(ResourceLocation.fromNamespaceAndPath("numismatics", "coins"), (value, ctx) -> {
+            int cogs;
+            int spurs;
+
+            if (ctx.hasShiftDown()) {
+                return null;
+
+                //cogs = 0;
+                //spurs = value;
+            } else {
+                cogs = value / 64;
+                spurs = value % 64;
+            }
+
+            var result = Component.literal(String.valueOf(spurs)).append("¤");
+
+            if (cogs > 0) {
+                var new_result = CALLang.number(cogs).text(" ").text(Component.translatable("item.numismatics.cog").getString().toLowerCase(Locale.ROOT) + (cogs == 1 ? "" : "s"));
+                if (spurs == 0)
+                    return new_result.component();
+
+                result = new_result.text(", ").add(result).component();
+            }
+
+            return result;
+        });
+    }
 
     public static boolean isConversionEnabled(boolean is_cash_register) {
         if (!is_cash_register && !Config.Server.stockTickersConvertToo.get())
@@ -58,17 +91,32 @@ public class CurrencyUtilities {
     }
 
     public static boolean isConversionEnabled() {
-        return isConversionEnabled(false);
+        return isConversionEnabled(true);
     }
 
     @Nullable
-    public static Function<Integer, Component> getFormatter(ResourceLocation id) {
+    public static BiFunction<Integer, TooltipFlag, Component> getFormatter(ResourceLocation id) {
         synchronized (FORMATTERS) {
-            return FORMATTERS.get(id);
+            if (FORMATTERS.containsKey(id))
+                return FORMATTERS.get(id);
+        }
+
+        synchronized (BUILTIN_FORMATTERS) {
+            return BUILTIN_FORMATTERS.get(id);
         }
     }
 
-    public static void registerFormatter(ResourceLocation id, Function<Integer, Component> formatter) {
+    public static void registerCurrency(ResourceLocation id, ICurrency currency) {
+        synchronized (CURRENCIES) {
+            CURRENCIES.put(id, currency);
+        }
+        synchronized (API_CURRENCIES) {
+            for(var item : currency.getItems())
+                API_CURRENCIES.put(item, currency.getId());
+        }
+    }
+
+    public static void registerFormatter(ResourceLocation id, BiFunction<Integer, TooltipFlag, Component> formatter) {
         synchronized (FORMATTERS) {
             FORMATTERS.put(id, formatter);
         }
@@ -78,7 +126,14 @@ public class CurrencyUtilities {
         if (event.getRegistryKey() != Registries.ITEM || !isPopulated)
             return;
 
-        CURRENCIES.clear();
+        // Remove any currency not involved with the API.
+        synchronized (CURRENCIES) {
+            if (API_CURRENCIES.isEmpty())
+                CURRENCIES.clear();
+            else
+                CURRENCIES.keySet().removeIf(x -> ! API_CURRENCIES.containsValue(x));
+        }
+
         isPopulated = false;
     }
 
@@ -113,20 +168,13 @@ public class CurrencyUtilities {
                 }
 
                 var currency = CURRENCIES.computeIfAbsent(id, SimpleCurrency::new);
-                currency.addItem(item, value);
+                if (currency instanceof SimpleCurrency sc)
+                    sc.addItem(item, value);
                 i++;
             }
 
             CreateAdditionalLogistics.LOGGER.debug("Added {} items to {} currencies.", i, CURRENCIES.size());
         }
-
-        FORMATTERS.put(ResourceLocation.fromNamespaceAndPath("numismatics", "spur"), val -> {
-            int cogs = val / 64;
-            int spurs = val % 64;
-
-            return CALLang.number(cogs).text(" cogs, ").text(String.valueOf(spurs)).text("¤").component();
-        });
-
     }
 
     @Nullable
@@ -142,11 +190,19 @@ public class CurrencyUtilities {
     public static ICurrency getForItem(Item item) {
         ensurePopulated();
         var data = item.builtInRegistryHolder().getData(CALDataMaps.CURRENCY_DATA);
-        if (data != null && data.id() != null) {
-            synchronized (CURRENCIES) {
-                return CURRENCIES.get(data.id());
+        ResourceLocation id;
+
+        if (data != null)
+            id = data.id();
+        else
+            synchronized (API_CURRENCIES) {
+                id = API_CURRENCIES.get(item);
             }
-        }
+
+        if (id != null)
+            synchronized (CURRENCIES) {
+                return CURRENCIES.get(id);
+            }
 
         return RecipeHelper.getCompactingCurrency(item);
     }
@@ -395,7 +451,7 @@ public class CurrencyUtilities {
     }
 
 
-    public static void createShoppingListTooltip(ItemStack stack, List<Component> tooltipComponents, @Nullable Couple<InventorySummary> lists) {
+    public static void createShoppingListTooltip(ItemStack stack, List<Component> tooltipComponents, TooltipFlag tooltipFlag, @Nullable Couple<InventorySummary> lists) {
         if (lists == null)
             return;
 
@@ -412,8 +468,19 @@ public class CurrencyUtilities {
             CreateLang.translate("table_cloth.total_cost").style(ChatFormatting.GOLD).addTo(tooltipComponents);
             for(var entry : currency_cost.entrySet()) {
                 var currency = entry.getKey();
+                Component cmp;
                 if (currency.hasFormatter())
-                    tooltipComponents.add(Component.empty().withStyle(ChatFormatting.YELLOW).append(currency.formatValue(entry.getValue())));
+                    try {
+                        cmp = currency.formatValue(entry.getValue(), tooltipFlag);
+                    } catch(Exception ex) {
+                        CreateAdditionalLogistics.LOGGER.error("Error running currency formatter for {}", currency.getId(), ex);
+                        cmp = null;
+                    }
+                else
+                    cmp = null;
+
+                if (cmp != null)
+                    tooltipComponents.add(Component.empty().withStyle(ChatFormatting.YELLOW).append(cmp));
                 else {
                     for(var item : currency.getStacksWithValue(entry.getValue()))
                         tooltipComponents.add(addTooltipLine(ChatFormatting.YELLOW, item));

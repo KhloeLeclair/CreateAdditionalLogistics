@@ -46,26 +46,28 @@ public abstract class MixinFactoryPanelScreen extends AbstractSimiScreen {
             at = @At("RETURN")
     )
     private void CAL$onInit(CallbackInfo ci) {
-        if (!(behaviour instanceof IPromiseLimit ipl) || !Config.Common.enablePromiseLimits.get())
+        if (!(behaviour instanceof IPromiseLimit ipl))
             return;
 
         int x = guiLeft;
         int y = guiTop;
 
-        CAL$promiseLimit = new ScrollInput(x + 68, y + windowHeight + 1, 56, 16)
-                .withRange(-1, restocker ? (64 * 100 * 20) : 1000);
+        if (Config.Common.enablePromiseLimits.get()) {
+            CAL$promiseLimit = new ScrollInput(x + 68, y + windowHeight + 1, 56, 16)
+                    .withRange(-1, restocker ? (64 * 100 * 20) : 1000);
 
-        if (restocker)
-            CAL$promiseLimit = CAL$promiseLimit.withShiftStep(behaviour.getFilter().getMaxStackSize());
-        else
-            CAL$promiseLimit = CAL$promiseLimit.withShiftStep(10);
+            if (restocker)
+                CAL$promiseLimit = CAL$promiseLimit.withShiftStep(behaviour.getFilter().getMaxStackSize());
+            else
+                CAL$promiseLimit = CAL$promiseLimit.withShiftStep(10);
 
-        CAL$promiseLimit.setState(ipl.getCALPromiseLimit());
-        CAL$updatePromiseLimitLabel();
+            CAL$promiseLimit.setState(ipl.getCALPromiseLimit());
+            CAL$updatePromiseLimitLabel();
 
-        addRenderableWidget(CAL$promiseLimit);
+            addRenderableWidget(CAL$promiseLimit);
+        }
 
-        if (restocker) {
+        if (restocker && Config.Common.enableAdditionalStock.get()) {
             int maxSize = behaviour.getFilter().getMaxStackSize();
 
             CAL$requestAdditional = new ScrollInput(x + 4, y + windowHeight - 24, 47, 16)
@@ -130,20 +132,22 @@ public abstract class MixinFactoryPanelScreen extends AbstractSimiScreen {
             at = @At("RETURN")
     )
     private void CAL$onRenderWindow(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks, CallbackInfo ci) {
-        if (!(behaviour instanceof IPromiseLimit) || CAL$promiseLimit == null)
+        if (!(behaviour instanceof IPromiseLimit))
             return;
 
-        // BG
-        CALGuiTextures.PROMISE_LIMIT_BG.render(graphics, CAL$promiseLimit.getX() - 8, CAL$promiseLimit.getY() - 4);
+        if (CAL$promiseLimit != null) {
+            // BG
+            CALGuiTextures.PROMISE_LIMIT_BG.render(graphics, CAL$promiseLimit.getX() - 8, CAL$promiseLimit.getY() - 4);
 
-        // Label
-        int limit = CAL$promiseLimit.getState();
-        if (limit >= 0 && ! restocker && outputConfig != null)
-            limit *= outputConfig.count;
+            // Label
+            int limit = CAL$promiseLimit.getState();
+            if (limit >= 0 && !restocker && outputConfig != null)
+                limit *= outputConfig.count;
 
-        graphics.drawString(font, CreateLang.text(limit == -1 ? " ---" : " " + limit).component(), CAL$promiseLimit.getX() + 3, CAL$promiseLimit.getY() + 4, 0xffeeeeee, true);
+            graphics.drawString(font, CreateLang.text(limit == -1 ? " ---" : " " + limit).component(), CAL$promiseLimit.getX() + 3, CAL$promiseLimit.getY() + 4, 0xffeeeeee, true);
+        }
 
-        if (!restocker || CAL$requestAdditional == null)
+        if (CAL$requestAdditional == null)
             return;
 
         // BG
@@ -169,7 +173,7 @@ public abstract class MixinFactoryPanelScreen extends AbstractSimiScreen {
         else if (items != 0)
             return String.valueOf(additional);
 
-        return String.valueOf(stacks) + "\u25A4";
+        return stacks + "\u25A4";
     }
 
 

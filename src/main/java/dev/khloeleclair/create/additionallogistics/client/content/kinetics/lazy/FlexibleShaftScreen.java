@@ -3,7 +3,7 @@ package dev.khloeleclair.create.additionallogistics.client.content.kinetics.lazy
 import dev.khloeleclair.create.additionallogistics.client.widgets.BlockPreviewWidget;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.FlexibleShaftBlockEntity;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.EncasedFlexibleShaftBlock;
-import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.FlexibleShaftBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.AbstractFlexibleShaftBlock;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALPackets;
 import net.createmod.catnip.gui.AbstractSimiScreen;
 import net.minecraft.client.Minecraft;
@@ -51,13 +51,13 @@ public class FlexibleShaftScreen extends AbstractSimiScreen {
 
         widget.canSelectDirection(dir -> {
             var state = level.getBlockState(pos);
-            if (!(state.getBlock() instanceof FlexibleShaftBlock))
+            if (!(state.getBlock() instanceof AbstractFlexibleShaftBlock))
                 return false;
 
             if (state.getBlock() instanceof EncasedFlexibleShaftBlock fsb)
                 return !fsb.connectsTo(level, pos, state, dir);
 
-            var prop = FlexibleShaftBlock.SIDES[dir.ordinal()];
+            var prop = AbstractFlexibleShaftBlock.SIDES[dir.ordinal()];
             return ! state.getValue(prop);
         });
 

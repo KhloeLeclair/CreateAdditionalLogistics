@@ -9,7 +9,7 @@ import dev.khloeleclair.create.additionallogistics.client.content.logistics.cash
 import dev.khloeleclair.create.additionallogistics.common.IPromiseLimit;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.FlexibleShaftBlockEntity;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.base.AbstractLazySimpleKineticBlock;
-import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.FlexibleShaftBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.AbstractFlexibleShaftBlock;
 import io.netty.buffer.ByteBuf;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
@@ -154,7 +154,7 @@ public class CALPackets {
                 return;
 
             var state = level.getBlockState(pos);
-            if (!(state.getBlock() instanceof FlexibleShaftBlock fsb))
+            if (!(state.getBlock() instanceof AbstractFlexibleShaftBlock fsb))
                 return;
 
             fsb.setSide(level, pos, message.side, message.mode);

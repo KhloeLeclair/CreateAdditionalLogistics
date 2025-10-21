@@ -32,7 +32,7 @@ import org.jetbrains.annotations.Nullable;
 import java.util.Map;
 import java.util.function.Supplier;
 
-public class EncasedFlexibleShaftBlock extends FlexibleShaftBlock implements SpecialBlockItemRequirement, EncasedBlock {
+public class EncasedFlexibleShaftBlock extends AbstractFlexibleShaftBlock implements SpecialBlockItemRequirement, EncasedBlock {
 
     // Encased Flexible Shafts use the sides properties differently than the base block.
     // If a side is true, that means there's no shaft on that side.
@@ -78,13 +78,12 @@ public class EncasedFlexibleShaftBlock extends FlexibleShaftBlock implements Spe
 
     private final Supplier<Block> casing;
 
-    public EncasedFlexibleShaftBlock(Properties properties, @Nullable DyeColor color, Supplier<Block> casing) {
-        super(properties, color);
-        this.casing = casing;
+    public EncasedFlexibleShaftBlock(Properties properties, Supplier<Block> casing) {
+        this(properties, null, casing);
     }
 
-    public EncasedFlexibleShaftBlock(Properties properties, Supplier<Block> casing) {
-        super(properties);
+    public EncasedFlexibleShaftBlock(Properties properties, @Nullable DyeColor color, Supplier<Block> casing) {
+        super(properties, color);
         this.casing = casing;
     }
 

@@ -13,7 +13,9 @@
     "MixinAbstractContraptionEntity",
     "MixinBlazeBurnerBlockEntity",
     "MixinShoppingListItem",
-    "IStockTickerBlockEntityAccessor"
+    "MixinTableClothBlockEntity",
+    "IStockTickerBlockEntityAccessor",
+    "IStationPeripheralAccessor"
   ],
   "client": [
     "client.MixinPackagerRenderer",
