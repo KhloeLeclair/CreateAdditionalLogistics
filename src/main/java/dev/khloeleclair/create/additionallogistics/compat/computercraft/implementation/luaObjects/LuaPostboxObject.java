@@ -2,6 +2,7 @@ package dev.khloeleclair.create.additionallogistics.compat.computercraft.impleme
 
 import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.content.logistics.packagePort.postbox.PostboxBlockEntity;
+import com.simibubi.create.content.trains.station.GlobalPackagePort;
 import com.simibubi.create.content.trains.station.GlobalStation;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaFunction;
@@ -19,15 +20,15 @@ public class LuaPostboxObject implements LuaComparable {
 
     protected final GlobalStation station;
     protected final BlockPos pos;
-    protected final GlobalStation.GlobalPackagePort port;
+    protected final GlobalPackagePort port;
 
-    protected LuaPostboxObject(GlobalStation station, BlockPos pos, GlobalStation.GlobalPackagePort port) {
+    protected LuaPostboxObject(GlobalStation station, BlockPos pos, GlobalPackagePort port) {
         this.station = station;
         this.pos = pos;
         this.port = port;
     }
 
-    public static LuaPostboxObject of(GlobalStation station, BlockPos pos, GlobalStation.GlobalPackagePort port, boolean writeable) {
+    public static LuaPostboxObject of(GlobalStation station, BlockPos pos, GlobalPackagePort port, boolean writeable) {
         return writeable ? new LuaWriteablePostboxObject(station, pos, port) : new LuaPostboxObject(station, pos, port);
     }
 

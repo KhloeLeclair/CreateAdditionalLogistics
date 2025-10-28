@@ -1,5 +1,6 @@
 package dev.khloeleclair.create.additionallogistics.compat.computercraft.implementation.luaObjects;
 
+import com.simibubi.create.content.trains.station.GlobalPackagePort;
 import com.simibubi.create.content.trains.station.GlobalStation;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaFunction;
@@ -7,7 +8,7 @@ import net.minecraft.core.BlockPos;
 
 public class LuaWriteablePostboxObject extends LuaPostboxObject {
 
-    protected LuaWriteablePostboxObject(GlobalStation station, BlockPos pos, GlobalStation.GlobalPackagePort port) {
+    protected LuaWriteablePostboxObject(GlobalStation station, BlockPos pos, GlobalPackagePort port) {
         super(station, pos, port);
     }
 

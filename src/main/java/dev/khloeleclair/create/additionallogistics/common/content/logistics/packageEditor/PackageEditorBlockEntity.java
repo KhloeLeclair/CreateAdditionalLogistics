@@ -324,7 +324,7 @@ public class PackageEditorBlockEntity extends PackagerBlockEntity implements IHa
     }
 
     @Override
-    protected void updateSignAddress() {
+    public void updateSignAddress() {
         signBasedAddress = "";
     }
 
@@ -376,7 +376,8 @@ public class PackageEditorBlockEntity extends PackagerBlockEntity implements IHa
         }
 
         if (entity instanceof ClipboardBlockEntity cb && isSignOrClipboardAttached(cb.getBlockState(), pos)) {
-            var pages = cb.dataContainer.get(AllDataComponents.CLIPBOARD_PAGES);
+            var data = cb.components().get(AllDataComponents.CLIPBOARD_CONTENT);
+            var pages = data == null ? null : data.pages();
             List<PatternReplacement> result = new ArrayList<>();
             if (pages != null) {
                 for (var page : pages) {

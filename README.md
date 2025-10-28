@@ -243,6 +243,13 @@ the stock ticker. But at least you won't do it by accident.
 
 # Changelog
 
+## 1.4.0
+
+### Changed
+
+* Update to Create 6.0.7.
+
+
 ## 1.3.0
 
 ### Added

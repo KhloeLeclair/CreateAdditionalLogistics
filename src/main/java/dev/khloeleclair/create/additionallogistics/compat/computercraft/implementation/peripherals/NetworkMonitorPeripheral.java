@@ -124,7 +124,7 @@ public class NetworkMonitorPeripheral extends SyncedPeripheral<NetworkMonitorBlo
         Train train = null;
         if (id != null) {
             train = Create.RAILWAYS.trains.get(id);
-            if (train.invalid || !train.graph.equals(pos.graph))
+            if (train == null || train.invalid || !train.graph.equals(pos.graph))
                 train = null;
 
         } else {
