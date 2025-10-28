@@ -5,17 +5,16 @@ import com.simibubi.create.content.contraptions.actors.seat.SeatEntity;
 import com.simibubi.create.foundation.utility.BlockHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.util.FakePlayer;
+import net.minecraftforge.common.util.FakePlayer;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractSeatBlock extends SeatBlock {
@@ -29,20 +28,21 @@ public abstract class AbstractSeatBlock extends SeatBlock {
     public abstract Vec3 getSeatPosition(@Nullable Level level, BlockPos pos);
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (player.isShiftKeyDown() || player instanceof FakePlayer)
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            return InteractionResult.PASS;
 
+        var stack = player.getItemInHand(hand);
         DyeColor color = DyeColor.getColor(stack);
         if (color != null && color != this.color) {
             if (level.isClientSide)
-                return ItemInteractionResult.SUCCESS;
+                return InteractionResult.SUCCESS;
             BlockState newState = BlockHelper.copyProperties(state, getColoredState(color));
             level.setBlockAndUpdate(pos, newState);
-            return ItemInteractionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
 
-        return super.useItemOn(stack, state, level, pos, player, hand, hitResult);
+        return super.use(state, level, pos, player, hand, hit);
     }
 
     public void handleSitDown(Level level, BlockPos pos, Entity entity) {

@@ -90,7 +90,7 @@ public abstract class AbstractFlexibleShaftBlock extends AbstractLowEntityKineti
     }
 
     @Override
-    protected BlockState mirror(BlockState state, Mirror mirror) {
+    public BlockState mirror(BlockState state, Mirror mirror) {
         var newState = state;
 
         for(Direction dir : Iterate.directions) {
@@ -101,7 +101,7 @@ public abstract class AbstractFlexibleShaftBlock extends AbstractLowEntityKineti
     }
 
     @Override
-    protected BlockState rotate(BlockState state, Rotation rotation) {
+    public BlockState rotate(BlockState state, Rotation rotation) {
         var newState = state;
 
         for(Direction dir : Iterate.directions) {
@@ -136,7 +136,7 @@ public abstract class AbstractFlexibleShaftBlock extends AbstractLowEntityKineti
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         byte key = 0;
         for(Direction dir : Iterate.directions) {
             int index = dir.ordinal();
@@ -148,7 +148,7 @@ public abstract class AbstractFlexibleShaftBlock extends AbstractLowEntityKineti
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         var prop = SIDES[direction.ordinal()];
 
         // Do we connect to whatever the new neighbor state is?

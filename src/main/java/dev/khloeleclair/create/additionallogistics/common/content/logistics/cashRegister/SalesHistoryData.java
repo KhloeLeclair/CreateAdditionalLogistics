@@ -2,15 +2,20 @@ package dev.khloeleclair.create.additionallogistics.common.content.logistics.cas
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.simibubi.create.content.equipment.clipboard.ClipboardEntry;
 import com.simibubi.create.content.logistics.BigItemStack;
+import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
 import dev.khloeleclair.create.additionallogistics.common.CALLang;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.UUIDUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.resources.ResourceLocation;
@@ -26,6 +31,42 @@ import java.time.format.FormatStyle;
 import java.util.*;
 
 public record SalesHistoryData(@Nullable Map<String, ResourceLocation> itemMap, @Nullable Map<String, UUID> playerMap, @Nullable List<Sale> saleList) {
+
+    private static final ResourceLocation ID = CreateAdditionalLogistics.asResource("sales_history");
+
+    public static SalesHistoryData getOrEmpty(ItemStack stack) {
+        var result = get(stack);
+        return result == null ? EMPTY : result;
+    }
+
+    @Nullable
+    public static SalesHistoryData get(ItemStack stack) {
+        var tag = stack.getTag();
+        if (tag != null && tag.contains(ID.toString(), Tag.TAG_COMPOUND))
+            return decode(tag.getCompound(ID.toString()));
+        return null;
+    }
+
+    @Nullable
+    public static SalesHistoryData decode(CompoundTag tag) {
+        var result = CODEC.decode(NbtOps.INSTANCE, tag).result();
+        return result.map(Pair::getFirst).orElse(null);
+    }
+
+    public void save(ItemStack stack) {
+        var tag = stack.getTag();
+        if (tag == null)
+            tag = new CompoundTag();
+
+        var result = CODEC.encode(this, NbtOps.INSTANCE, NbtOps.INSTANCE.empty()).result().orElse(null);
+        if (result != null)
+            tag.put(ID.toString(), result);
+        else
+            tag.remove(ID.toString());
+
+        stack.setTag(tag);
+    }
+
 
     public static final SalesHistoryData EMPTY = new SalesHistoryData(null, null, null);
 
@@ -125,8 +166,8 @@ public record SalesHistoryData(@Nullable Map<String, ResourceLocation> itemMap, 
         if (saleList == null || saleList.isEmpty())
             return null;
 
-        var start_instant = saleList.getFirst().toInstant();
-        var end_instant = saleList.getLast().toInstant();
+        var start_instant = saleList.get(0).toInstant();
+        var end_instant = saleList.get(saleList.size() - 1).toInstant();
 
         var where = ZoneId.systemDefault();
 
@@ -144,12 +185,12 @@ public record SalesHistoryData(@Nullable Map<String, ResourceLocation> itemMap, 
 
     @Nullable
     public Sale firstSale() {
-        return saleList != null && ! saleList.isEmpty() ? saleList.getFirst() : null;
+        return saleList != null && ! saleList.isEmpty() ? saleList.get(0) : null;
     }
 
     @Nullable
     public Sale lastSale() {
-        return saleList != null && ! saleList.isEmpty() ? saleList.getLast() : null;
+        return saleList != null && ! saleList.isEmpty() ? saleList.get(saleList.size() - 1) : null;
     }
 
     public int saleCount() {
@@ -168,7 +209,7 @@ public record SalesHistoryData(@Nullable Map<String, ResourceLocation> itemMap, 
 
     @Nullable
     private static String memorizeItem(BiMap<String, ResourceLocation> workingItems, @Nullable Item item) {
-        var location = item == null ? null : BuiltInRegistries.ITEM.getKeyOrNull(item);
+        var location = item == null ? null : BuiltInRegistries.ITEM.getKey(item);
         if (location == null)
             return null;
 

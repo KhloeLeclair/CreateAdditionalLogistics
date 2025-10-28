@@ -11,7 +11,6 @@ import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.
 import net.createmod.catnip.data.Iterate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Mirror;
@@ -41,8 +40,8 @@ public class FlexibleShaftBlockEntity extends AbstractLowEntityKineticBlockEntit
     }
 
     @Override
-    protected void read(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-        super.read(compound, registries, clientPacket);
+    protected void read(CompoundTag compound, boolean clientPacket) {
+        super.read(compound, clientPacket);
 
         Arrays.fill(sideActive, (byte)0);
         if (compound.contains("Sides", CompoundTag.TAG_BYTE_ARRAY)) {
@@ -52,14 +51,14 @@ public class FlexibleShaftBlockEntity extends AbstractLowEntityKineticBlockEntit
     }
 
     @Override
-    public void writeSafe(CompoundTag tag, HolderLookup.Provider registries) {
-        super.writeSafe(tag, registries);
+    public void writeSafe(CompoundTag tag) {
+        super.writeSafe(tag);
         tag.putByteArray("Sides", Arrays.copyOf(sideActive, sideActive.length));
     }
 
     @Override
-    protected void write(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-        super.write(compound, registries, clientPacket);
+    protected void write(CompoundTag compound, boolean clientPacket) {
+        super.write(compound, clientPacket);
         compound.putByteArray("Sides", Arrays.copyOf(sideActive, sideActive.length));
     }
 
@@ -114,7 +113,7 @@ public class FlexibleShaftBlockEntity extends AbstractLowEntityKineticBlockEntit
         int particleSpeed = speedLevel.getParticleSpeed();
         particleSpeed *= Math.signum(speed);
 
-        var particleData = new RotationIndicatorParticleData(color, particleSpeed, .75f, .65f, 5, side.getAxis());
+        var particleData = new RotationIndicatorParticleData(color, particleSpeed, .75f, .65f, 5, side.getAxis().getName().charAt(0));
 
         sl.sendParticles(particleData, position.x, position.y, position.z, 20, 0, 0, 0, 1);
     }

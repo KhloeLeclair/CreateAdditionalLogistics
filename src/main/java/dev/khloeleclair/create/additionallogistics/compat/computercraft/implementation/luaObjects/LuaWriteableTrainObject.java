@@ -1,5 +1,6 @@
 package dev.khloeleclair.create.additionallogistics.compat.computercraft.implementation.luaObjects;
 
+import com.simibubi.create.AllPackets;
 import com.simibubi.create.compat.computercraft.implementation.CreateLuaTable;
 import com.simibubi.create.content.trains.entity.Train;
 import com.simibubi.create.content.trains.schedule.Schedule;
@@ -8,9 +9,9 @@ import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaFunction;
 import dev.khloeleclair.create.additionallogistics.mixin.IStationPeripheralAccessor;
-import net.createmod.catnip.platform.CatnipServices;
 import net.minecraft.network.chat.Component;
 import net.minecraft.util.Mth;
+import net.minecraftforge.network.PacketDistributor;
 
 public class LuaWriteableTrainObject extends LuaTrainObject {
 
@@ -34,7 +35,7 @@ public class LuaWriteableTrainObject extends LuaTrainObject {
             return;
 
         train.name = Component.literal(name);
-        CatnipServices.NETWORK.sendToAllClients(new TrainEditPacket.TrainEditReturnPacket(train.id, name, train.icon.getId(), train.mapColorIndex));
+        AllPackets.getChannel().send(PacketDistributor.ALL.noArg(), new TrainEditPacket.TrainEditReturnPacket(train.id, name, train.icon.getId(), train.mapColorIndex));
     }
 
     @LuaFunction(mainThread = true)
@@ -43,7 +44,7 @@ public class LuaWriteableTrainObject extends LuaTrainObject {
         if (level == null)
             throw new LuaException("train in unknown dimension");
 
-        Schedule schedule = Schedule.fromTag(level.registryAccess(), IStationPeripheralAccessor.callToCompoundTag(new CreateLuaTable(arguments.getTable(0))));
+        Schedule schedule = Schedule.fromTag(IStationPeripheralAccessor.callToCompoundTag(new CreateLuaTable(arguments.getTable(0))));
         if (schedule.entries.isEmpty())
             throw new LuaException("Schedule must have at least one entry");
 

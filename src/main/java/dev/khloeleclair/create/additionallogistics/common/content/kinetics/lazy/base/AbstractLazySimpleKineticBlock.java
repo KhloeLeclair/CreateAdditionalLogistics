@@ -73,7 +73,7 @@ public abstract class AbstractLazySimpleKineticBlock<T extends AbstractLowEntity
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         byte key = 0;
         final var axis = state.getValue(AXIS);
         final boolean positive = state.getValue(POSITIVE);
@@ -88,7 +88,7 @@ public abstract class AbstractLazySimpleKineticBlock<T extends AbstractLowEntity
     }
 
     @Override
-    protected BlockState rotate(BlockState state, Rotation rotation) {
+    public BlockState rotate(BlockState state, Rotation rotation) {
         switch(rotation) {
             case COUNTERCLOCKWISE_90:
             case CLOCKWISE_90:
@@ -165,7 +165,7 @@ public abstract class AbstractLazySimpleKineticBlock<T extends AbstractLowEntity
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         if (this instanceof ProperWaterloggedBlock wlb)
             wlb.updateWater(level, state, pos);
 

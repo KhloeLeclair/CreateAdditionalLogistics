@@ -5,18 +5,18 @@ import dev.khloeleclair.create.additionallogistics.common.registries.CALItems;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALMenuTypes;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.SlotItemHandler;
+import net.minecraftforge.items.SlotItemHandler;
 
 public class CashRegisterMenu extends MenuBase<CashRegisterBlockEntity> {
 
-    public CashRegisterMenu(MenuType<?> type, int id, Inventory inv, RegistryFriendlyByteBuf extraData) {
+    public CashRegisterMenu(MenuType<?> type, int id, Inventory inv, FriendlyByteBuf extraData) {
         super(type, id, inv, extraData);
     }
 
@@ -30,7 +30,7 @@ public class CashRegisterMenu extends MenuBase<CashRegisterBlockEntity> {
     }
 
     @Override
-    protected CashRegisterBlockEntity createOnClient(RegistryFriendlyByteBuf extraData) {
+    protected CashRegisterBlockEntity createOnClient(FriendlyByteBuf extraData) {
         BlockPos pos = extraData.readBlockPos();
         final var level = Minecraft.getInstance().level;
         if (level != null && level.getBlockEntity(pos) instanceof CashRegisterBlockEntity be)
@@ -45,7 +45,7 @@ public class CashRegisterMenu extends MenuBase<CashRegisterBlockEntity> {
             return ItemStack.EMPTY;
 
         ItemStack stack = clickedSlot.getItem();
-        if (clickedSlot.container == playerInventory && stack.is(CALItems.SALES_LEDGER)) {
+        if (clickedSlot.container == playerInventory && stack.is(CALItems.SALES_LEDGER.get())) {
             int idx = contentHolder.invWrapper.getSlots() - 1;
             if (contentHolder.invWrapper.getStackInSlot(idx).isEmpty() && moveItemStackTo(stack, idx, idx+1, false)) {
                 return ItemStack.EMPTY;
@@ -91,5 +91,10 @@ public class CashRegisterMenu extends MenuBase<CashRegisterBlockEntity> {
         super.removed(playerIn);
         if (!playerIn.level().isClientSide)
             contentHolder.stopOpen(playerIn);
+    }
+
+    @Override
+    public boolean stillValid(Player player) {
+        return !contentHolder.isRemoved();
     }
 }

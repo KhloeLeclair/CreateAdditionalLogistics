@@ -1,11 +1,9 @@
 package dev.khloeleclair.create.additionallogistics.client;
 
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.client.gui.ConfigurationScreen;
-import net.neoforged.neoforge.client.gui.IConfigScreenFactory;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.common.Mod;
 
 @Mod(value = CreateAdditionalLogistics.MODID, dist = Dist.CLIENT)
 public class CreateAdditionalLogisticsClient {

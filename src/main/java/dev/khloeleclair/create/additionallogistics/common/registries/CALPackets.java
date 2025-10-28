@@ -6,234 +6,290 @@ import com.simibubi.create.foundation.utility.AdventureUtil;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
 import dev.khloeleclair.create.additionallogistics.client.content.kinetics.lazy.FlexibleShaftScreen;
 import dev.khloeleclair.create.additionallogistics.client.content.logistics.cashRegister.SalesLedgerScreen;
-import dev.khloeleclair.create.additionallogistics.common.utilities.IPromiseLimit;
-import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.FlexibleShaftBlockEntity;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.base.AbstractLazySimpleKineticBlock;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.AbstractFlexibleShaftBlock;
-import io.netty.buffer.ByteBuf;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.SalesHistoryData;
+import dev.khloeleclair.create.additionallogistics.common.utilities.IPromiseLimit;
+import net.createmod.catnip.net.ClientboundPacket;
+import net.createmod.catnip.net.ServerboundPacket;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.UUIDUtil;
 import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.RegistryFriendlyByteBuf;
-import net.minecraft.network.codec.ByteBufCodecs;
-import net.minecraft.network.codec.StreamCodec;
-import net.minecraft.network.protocol.common.custom.CustomPacketPayload;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.network.PacketDistributor;
-import net.neoforged.neoforge.network.event.RegisterPayloadHandlersEvent;
-import net.neoforged.neoforge.network.handling.IPayloadContext;
-import net.neoforged.neoforge.network.registration.HandlerThread;
-import net.neoforged.neoforge.network.registration.PayloadRegistrar;
+import net.minecraftforge.network.NetworkDirection;
+import net.minecraftforge.network.NetworkEvent;
+import net.minecraftforge.network.NetworkRegistry;
+import net.minecraftforge.network.PacketDistributor;
+import net.minecraftforge.network.simple.SimpleChannel;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiConsumer;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public class CALPackets {
 
-    public static void register(final RegisterPayloadHandlersEvent event) {
-        final PayloadRegistrar registrar = event.registrar("3")
-                .executesOn(HandlerThread.MAIN);
+    public interface CALPacket {
+        default boolean runOnMainThread() {
+            return true;
+        }
+    }
 
-        registrar.playToServer(UpdateGaugePromiseLimit.TYPE, UpdateGaugePromiseLimit.STREAM_CODEC, UpdateGaugePromiseLimit::handle);
-        registrar.playToServer(ConfigureFlexibleShaft.TYPE, ConfigureFlexibleShaft.STREAM_CODEC, ConfigureFlexibleShaft::handle);
-        registrar.playToServer(FinishedConfiguringFlexibleShaft.TYPE, FinishedConfiguringFlexibleShaft.STREAM_CODEC, FinishedConfiguringFlexibleShaft::handle);
+    private static int index = 0;
 
-        registrar.playToClient(OpenSalesLedgerScreen.TYPE, OpenSalesLedgerScreen.STREAM_CODEC, (message, access) -> OpenSalesLedgerScreen.handle(message));
-        registrar.playToClient(OpenFlexibleShaftScreen.TYPE, OpenFlexibleShaftScreen.STREAM_CODEC, (message, access) -> OpenFlexibleShaftScreen.handle(message));
-        registrar.playToClient(ServerToClientEvent.TYPE, ServerToClientEvent.STREAM_CODEC, (message, access) -> ServerToClientEvent.handle(message, access));
+    public static final String PROTOCOL_VERSION = "3";
+
+    public static final SimpleChannel INSTANCE = NetworkRegistry.ChannelBuilder
+            .named(CreateAdditionalLogistics.asResource("main"))
+            .serverAcceptedVersions(PROTOCOL_VERSION::equals)
+            .clientAcceptedVersions(PROTOCOL_VERSION::equals)
+            .simpleChannel();
+
+    protected static <T extends ClientboundPacket> void registerClientbound(Class<T> type, Function<FriendlyByteBuf, T> factory, Consumer<T> handler) {
+        INSTANCE.messageBuilder(type, index++, NetworkDirection.PLAY_TO_CLIENT)
+                .encoder(T::write)
+                .decoder(factory)
+                .consumerNetworkThread(clientHandler(handler))
+                .add();
+    }
+
+    private static <T extends ClientboundPacket>BiConsumer<T, Supplier<NetworkEvent.Context>> clientHandler(Consumer<T> handler) {
+        return (t, contextSupplier) -> {
+            if (t instanceof CALPacket cp && cp.runOnMainThread()) {
+                Minecraft.getInstance().execute(() -> handler.accept(t));
+            } else
+                handler.accept(t);
+            contextSupplier.get().setPacketHandled(true);
+        };
+    }
+
+    private static <T extends ServerboundPacket> void registerServerbound(Class<T> type, Function<FriendlyByteBuf, T> factory) {
+        INSTANCE.messageBuilder(type, index++, NetworkDirection.PLAY_TO_SERVER)
+                .encoder(T::write)
+                .decoder(factory)
+                .consumerNetworkThread(serverHandler())
+                .add();
+    }
+
+    private static <T extends ServerboundPacket> BiConsumer<T, Supplier<NetworkEvent.Context>> serverHandler() {
+        return (t, contextSupplier) -> {
+            ServerPlayer sender = contextSupplier.get().getSender();
+            var server = sender == null ? null : sender.getServer();
+            if (t instanceof CALPacket cp && cp.runOnMainThread()) {
+                if (server != null)
+                    server.execute(() -> t.handle(server, sender));
+            } else
+                t.handle(sender != null ? sender.getServer() : null, sender);
+
+            contextSupplier.get().setPacketHandled(true);
+        };
+    }
+
+    public static void register() {
+
+        registerClientbound(ServerToClientEvent.class, ServerToClientEvent::new, ServerToClientEvent.Handler::handle);
+        registerClientbound(OpenFlexibleShaftScreen.class, OpenFlexibleShaftScreen::new, OpenFlexibleShaftScreen.Handler::handle);
+        registerClientbound(OpenSalesLedgerScreen.class, OpenSalesLedgerScreen::new, OpenSalesLedgerScreen.Handler::handle);
+
+        registerServerbound(ConfigureFlexibleShaft.class, ConfigureFlexibleShaft::new);
+        registerServerbound(UpdateGaugePromiseLimit.class, UpdateGaugePromiseLimit::new);
 
     }
 
-    public record ServerToClientEvent(String key) implements CustomPacketPayload {
-
-        public static final CustomPacketPayload.Type<ServerToClientEvent> TYPE = new CustomPacketPayload.Type<>(
-                CreateAdditionalLogistics.asResource("server_event")
-        );
-
-        public static final StreamCodec<FriendlyByteBuf, ServerToClientEvent> STREAM_CODEC = StreamCodec.composite(
-                ByteBufCodecs.STRING_UTF8,
-                ServerToClientEvent::key,
-                ServerToClientEvent::new
-        );
-
-        @Override
-        public Type<? extends CustomPacketPayload> type() { return TYPE; }
+    public static class ServerToClientEvent implements ClientboundPacket, CALPacket {
+        public static final ResourceLocation ID = CreateAdditionalLogistics.asResource("server_to_client_event");
+        private final String key;
 
         public static final ServerToClientEvent CLEAR_INFORMATION = new ServerToClientEvent("clear_information");
 
-        @OnlyIn(Dist.CLIENT)
-        public static void handle(ServerToClientEvent message, IPayloadContext context) {
-            if (message.key.equals("clear_information"))
-                AbstractLazySimpleKineticBlock.clearInformationWalkCache();
+        public ServerToClientEvent(String key) {
+            this.key = key;
+        }
+
+        public ServerToClientEvent(FriendlyByteBuf buffer) {
+            key = buffer.readUtf(32767);
+        }
+
+        @Override
+        public void write(FriendlyByteBuf buffer) {
+            buffer.writeUtf(key);
+        }
+
+        @Override
+        public ResourceLocation getId() {
+            return ID;
         }
 
         public void send(ServerLevel level) {
-            PacketDistributor.sendToPlayersInDimension(level, this);
+            INSTANCE.send(PacketDistributor.DIMENSION.with(level::dimension), this);
         }
 
         public void send(ServerLevel level, BlockPos pos) {
-            PacketDistributor.sendToPlayersNear(level, null, pos.getX(), pos.getY(), pos.getZ(), 160, this);
+            INSTANCE.send(PacketDistributor.NEAR.with(PacketDistributor.TargetPoint.p(pos.getX(), pos.getY(), pos.getZ(), 160, level.dimension())), this);
+        }
+
+        public static class Handler {
+            public static void handle(ServerToClientEvent packet) {
+                if (packet.key.equals("clear_information"))
+                    AbstractLazySimpleKineticBlock.clearInformationWalkCache();
+            }
         }
     }
 
-    public record FinishedConfiguringFlexibleShaft(BlockPos pos) implements CustomPacketPayload {
-        public static final CustomPacketPayload.Type<FinishedConfiguringFlexibleShaft> TYPE = new CustomPacketPayload.Type<>(
-                CreateAdditionalLogistics.asResource("finished_configuring_flexible_shaft")
-        );
+    public static class ConfigureFlexibleShaft implements ServerboundPacket, CALPacket {
 
-        public static final StreamCodec<FriendlyByteBuf, FinishedConfiguringFlexibleShaft> STREAM_CODEC = StreamCodec.composite(
-                BlockPos.STREAM_CODEC,
-                FinishedConfiguringFlexibleShaft::pos,
-                FinishedConfiguringFlexibleShaft::new
-        );
+        public static final ResourceLocation ID = CreateAdditionalLogistics.asResource("configure_flexible_shaft");
+
+        public final BlockPos pos;
+        public final Direction side;
+        public final byte mode;
+
+        public static ConfigureFlexibleShaft of(BlockPos pos, Direction side, byte mode) {
+            return new ConfigureFlexibleShaft(pos, side, mode);
+        }
+
+        public ConfigureFlexibleShaft(BlockPos pos, Direction side, byte mode) {
+            this.pos = pos;
+            this.side = side;
+            this.mode = mode;
+        }
+
+        public ConfigureFlexibleShaft(FriendlyByteBuf buffer) {
+            pos = buffer.readBlockPos();
+            side = buffer.readEnum(Direction.class);
+            mode = buffer.readByte();
+        }
 
         @Override
-        public Type<? extends CustomPacketPayload> type() { return TYPE; }
+        public void write(FriendlyByteBuf buffer) {
+            buffer.writeBlockPos(pos);
+            buffer.writeEnum(side);
+            buffer.writeByte(mode);
+        }
 
-        public static void handle(FinishedConfiguringFlexibleShaft message, IPayloadContext access) {
-            var player = access.player();
+        @Override
+        public ResourceLocation getId() {
+            return ID;
+        }
+
+        @Override
+        public void handle(@Nullable MinecraftServer server, @Nullable ServerPlayer player) {
             if (player == null || player.isSpectator() || AdventureUtil.isAdventure(player))
                 return;
 
-            var pos = message.pos;
-
-            var level = player.level();
-            if (!level.isLoaded(pos) || !(level.getBlockEntity(pos) instanceof FlexibleShaftBlockEntity fsb))
-                return;
-
-            if (!fsb.shouldBeActive())
-                fsb.deactivateSelf();
-        }
-
-        public static FinishedConfiguringFlexibleShaft of(BlockPos pos) {
-            return new FinishedConfiguringFlexibleShaft(pos);
-        }
-
-        public void send() {
-            PacketDistributor.sendToServer(this);
-        }
-
-    }
-
-    public record ConfigureFlexibleShaft(BlockPos pos, Direction side, byte mode) implements CustomPacketPayload {
-
-        public static final CustomPacketPayload.Type<ConfigureFlexibleShaft> TYPE = new CustomPacketPayload.Type<>(
-                CreateAdditionalLogistics.asResource("configure_flexible_shaft")
-        );
-
-        public static final StreamCodec<FriendlyByteBuf, ConfigureFlexibleShaft> STREAM_CODEC = StreamCodec.composite(
-                BlockPos.STREAM_CODEC,
-                ConfigureFlexibleShaft::pos,
-                Direction.STREAM_CODEC,
-                ConfigureFlexibleShaft::side,
-                ByteBufCodecs.BYTE,
-                ConfigureFlexibleShaft::mode,
-                ConfigureFlexibleShaft::new
-        );
-
-        @Override
-        public Type<? extends CustomPacketPayload> type() { return TYPE; }
-
-        public static void handle(ConfigureFlexibleShaft message, IPayloadContext access) {
-            var player = access.player();
-            if (player == null || player.isSpectator() || AdventureUtil.isAdventure(player))
-                return;
-
-            var pos = message.pos;
-
-            var level = player.level();
-            if (!level.isLoaded(pos))
+            var level = player.serverLevel();
+            if (level == null || !level.isLoaded(pos))
                 return;
 
             var state = level.getBlockState(pos);
             if (!(state.getBlock() instanceof AbstractFlexibleShaftBlock fsb))
                 return;
 
-            fsb.setSide(level, pos, message.side, message.mode);
-        }
-
-        public static ConfigureFlexibleShaft of(BlockPos pos, Direction side, byte mode) {
-            return new ConfigureFlexibleShaft(pos, side, mode);
-        }
-
-        public static ConfigureFlexibleShaft of(FlexibleShaftBlockEntity be, Direction side) {
-            return new ConfigureFlexibleShaft(be.getBlockPos(), side, be.getSide(side));
+            fsb.setSide(level, pos, side, mode);
         }
 
         public void send() {
-            PacketDistributor.sendToServer(this);
+            INSTANCE.sendToServer(this);
         }
 
     }
 
-    public record OpenFlexibleShaftScreen(BlockPos pos) implements CustomPacketPayload {
 
-        public static final CustomPacketPayload.Type<OpenFlexibleShaftScreen> TYPE = new CustomPacketPayload.Type<>(
-                CreateAdditionalLogistics.asResource("open_flexible_shaft_screen")
-        );
+    public static class OpenFlexibleShaftScreen implements ClientboundPacket, CALPacket {
 
-        public static final StreamCodec<FriendlyByteBuf, OpenFlexibleShaftScreen> STREAM_CODEC = StreamCodec.composite(
-                BlockPos.STREAM_CODEC,
-                OpenFlexibleShaftScreen::pos,
-                OpenFlexibleShaftScreen::new
-        );
+        public static final ResourceLocation ID = CreateAdditionalLogistics.asResource("open_flexible_shaft_screen");
 
-        @Override
-        public Type<? extends CustomPacketPayload> type() { return TYPE; }
-
-        @OnlyIn(Dist.CLIENT)
-        public static void handle(OpenFlexibleShaftScreen message) {
-            Minecraft.getInstance().setScreen(new FlexibleShaftScreen(message.pos));
-        }
+        public final BlockPos pos;
 
         public static OpenFlexibleShaftScreen of(BlockPos pos) {
             return new OpenFlexibleShaftScreen(pos);
         }
 
+        public OpenFlexibleShaftScreen(BlockPos pos) {
+            this.pos = pos;
+        }
+
+        public OpenFlexibleShaftScreen(FriendlyByteBuf buffer) {
+            pos = buffer.readBlockPos();
+        }
+
+        @Override
+        public void write(FriendlyByteBuf buffer) {
+            buffer.writeBlockPos(pos);
+        }
+
+        @Override
+        public ResourceLocation getId() {
+            return ID;
+        }
+
         public void send(ServerPlayer player) {
-            PacketDistributor.sendToPlayer(player, this);
+            INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), this);
+        }
+
+        public static class Handler {
+            public static void handle(OpenFlexibleShaftScreen packet) {
+                if (Minecraft.getInstance().player == null)
+                    return;
+
+                Minecraft.getInstance().setScreen(new FlexibleShaftScreen(packet.pos));
+            }
         }
 
     }
 
+    public static class OpenSalesLedgerScreen implements ClientboundPacket, CALPacket {
 
-    public record OpenSalesLedgerScreen(ItemStack stack, Map<UUID, String> playerNames) implements CustomPacketPayload {
+        public static final ResourceLocation ID = CreateAdditionalLogistics.asResource("open_sales_ledger_screen");
 
-        public static final CustomPacketPayload.Type<OpenSalesLedgerScreen> TYPE = new CustomPacketPayload.Type<>(
-                CreateAdditionalLogistics.asResource("open_sales_ledger_screen")
-        );
+        public final ItemStack stack;
+        public final Map<UUID, String> playerNames;
 
-        public static final StreamCodec<RegistryFriendlyByteBuf, OpenSalesLedgerScreen> STREAM_CODEC = StreamCodec.composite(
-                ItemStack.STREAM_CODEC,
-                OpenSalesLedgerScreen::stack,
-                ByteBufCodecs.map(HashMap::new, UUIDUtil.STREAM_CODEC, ByteBufCodecs.STRING_UTF8),
-                OpenSalesLedgerScreen::playerNames,
-                OpenSalesLedgerScreen::new
-        );
-
-        @Override
-        public Type<? extends CustomPacketPayload> type() {
-            return TYPE;
+        public OpenSalesLedgerScreen(ItemStack stack, Map<UUID, String> playerNames) {
+            this.stack = stack;
+            this.playerNames = playerNames;
         }
 
-        @OnlyIn(Dist.CLIENT)
-        public static void handle(OpenSalesLedgerScreen message) {
-            Minecraft.getInstance().setScreen(new SalesLedgerScreen(message.stack, message.playerNames));
+        public OpenSalesLedgerScreen(FriendlyByteBuf buffer) {
+            stack = buffer.readItem();
+            playerNames = buffer.readMap(HashMap::new, FriendlyByteBuf::readUUID, FriendlyByteBuf::readUtf);
+        }
+
+        @Override
+        public void write(FriendlyByteBuf buffer) {
+            buffer.writeItem(stack);
+            buffer.writeMap(playerNames, FriendlyByteBuf::writeUUID, FriendlyByteBuf::writeUtf);
+        }
+
+        @Override
+        public ResourceLocation getId() {
+            return ID;
+        }
+
+        public static class Handler {
+            public static void handle(OpenSalesLedgerScreen packet) {
+                if (Minecraft.getInstance().player == null)
+                    return;
+
+                Minecraft.getInstance().setScreen(new SalesLedgerScreen(packet.stack, packet.playerNames));
+            }
         }
 
         public static Optional<OpenSalesLedgerScreen> create(ItemStack stack) {
-            if (stack.isEmpty() || !stack.is(CALItems.SALES_LEDGER))
+            if (stack.isEmpty() || !stack.is(CALItems.SALES_LEDGER.get()))
                 return Optional.empty();
 
-            var history = stack.get(CALDataComponents.SALES_HISTORY);
+            var history = SalesHistoryData.get(stack);
             var server = CreateAdditionalLogistics.getServer();
             Map<UUID, String> playerNames = new HashMap<>();
 
@@ -253,41 +309,48 @@ public class CALPackets {
         }
 
         public void send(ServerPlayer player) {
-            PacketDistributor.sendToPlayer(player, this);
+            INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), this);
         }
-
     }
 
+    public static class UpdateGaugePromiseLimit implements ServerboundPacket, CALPacket {
 
-    public record UpdateGaugePromiseLimit(FactoryPanelPosition pos, int limit, int additionalStock) implements CustomPacketPayload {
+        public static final ResourceLocation ID = CreateAdditionalLogistics.asResource("update_gauge_promise_limit");
 
-        public static final CustomPacketPayload.Type<UpdateGaugePromiseLimit> TYPE = new CustomPacketPayload.Type<>(
-                CreateAdditionalLogistics.asResource("update_gauge_promise_limit")
-        );
+        public final FactoryPanelPosition pos;
+        public final int limit;
+        public final int additionalStock;
 
-        public static final StreamCodec<ByteBuf, UpdateGaugePromiseLimit> STREAM_CODEC = StreamCodec.composite(
-                FactoryPanelPosition.STREAM_CODEC,
-                UpdateGaugePromiseLimit::pos,
-                ByteBufCodecs.INT,
-                UpdateGaugePromiseLimit::limit,
-                ByteBufCodecs.INT,
-                UpdateGaugePromiseLimit::additionalStock,
-                UpdateGaugePromiseLimit::new
-        );
-
-        @Override
-        public Type<? extends CustomPacketPayload> type() {
-            return TYPE;
+        public UpdateGaugePromiseLimit(FactoryPanelPosition pos, int limit, int additionalStock) {
+            this.pos = pos;
+            this.limit = limit;
+            this.additionalStock = additionalStock;
         }
 
-        public static void handle(UpdateGaugePromiseLimit message, IPayloadContext access) {
-            var player = access.player();
+        public UpdateGaugePromiseLimit(FriendlyByteBuf buffer) {
+            pos = FactoryPanelPosition.receive(buffer);
+            limit = buffer.readInt();
+            additionalStock = buffer.readInt();
+        }
+
+        @Override
+        public void write(FriendlyByteBuf buffer) {
+            pos.send(buffer);
+            buffer.writeInt(limit);
+            buffer.writeInt(additionalStock);
+        }
+
+        @Override
+        public ResourceLocation getId() {
+            return ID;
+        }
+
+        @Override
+        public void handle(@Nullable MinecraftServer server, @Nullable ServerPlayer player) {
             if (player == null || player.isSpectator() || AdventureUtil.isAdventure(player))
                 return;
 
-            var pos = message.pos;
-
-            var level = player.level();
+            var level = player.serverLevel();
             if (!level.isLoaded(pos.pos()))
                 return;
 
@@ -300,14 +363,14 @@ public class CALPackets {
 
             boolean changed = false;
 
-            if (ipl.getCALPromiseLimit() != message.limit) {
+            if (ipl.getCALPromiseLimit() != limit) {
                 changed = true;
-                ipl.setCALPromiseLimit(message.limit);
+                ipl.setCALPromiseLimit(limit);
             }
 
-            if (ipl.getCALAdditionalStock() != message.additionalStock) {
+            if (ipl.getCALAdditionalStock() != additionalStock) {
                 changed = true;
-                ipl.setCALAdditionalStock(message.additionalStock);
+                ipl.setCALAdditionalStock(additionalStock);
             }
 
             if (changed)
@@ -315,7 +378,7 @@ public class CALPackets {
         }
 
         public void send() {
-            PacketDistributor.sendToServer(this);
+            INSTANCE.sendToServer(this);
         }
 
     }

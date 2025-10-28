@@ -95,13 +95,6 @@ public class FlexibleShaftScreen extends AbstractSimiScreen {
     }
 
     @Override
-    public void onClose() {
-        super.onClose();
-
-        CALPackets.FinishedConfiguringFlexibleShaft.of(pos).send();
-    }
-
-    @Override
     public boolean mouseDragged(double mouseX, double mouseY, int button, double dragX, double dragY) {
         if (widget.visible && widget.isMouseOver(mouseX, mouseY))
             return widget.mouseDragged(mouseX, mouseY, button, dragX, dragY);
@@ -110,11 +103,11 @@ public class FlexibleShaftScreen extends AbstractSimiScreen {
     }
 
     @Override
-    public boolean mouseScrolled(double mouseX, double mouseY, double scrollX, double scrollY) {
+    public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
         if (widget.visible && widget.isMouseOver(mouseX, mouseY))
-            return widget.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+            return widget.mouseScrolled(mouseX, mouseY, delta);
 
-        return super.mouseScrolled(mouseX, mouseY, scrollX, scrollY);
+        return super.mouseScrolled(mouseX, mouseY, delta);
     }
 
     @Override

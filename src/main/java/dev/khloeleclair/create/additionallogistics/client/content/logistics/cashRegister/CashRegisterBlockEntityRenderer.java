@@ -25,11 +25,11 @@ public class CashRegisterBlockEntityRenderer extends SmartBlockEntityRenderer<Ca
 
         if (blockEntity.hadRecentSale()) {
             SuperByteBuffer sale = CachedBuffers.partialFacing(CALPartialModels.CASH_REGISTER_SALE_NOTICE, state, dir);
-            sale.light(light).renderInto(ms, buffer.getBuffer(RenderType.CUTOUT_MIPPED));
+            sale.light(light).renderInto(ms, buffer.getBuffer(RenderType.cutoutMipped()));
         }
 
         SuperByteBuffer glass = CachedBuffers.partialFacing(CALPartialModels.CASH_REGISTER_GLASS, state, dir);
-        glass.light(light).renderInto(ms, buffer.getBuffer(RenderType.TRANSLUCENT));
+        glass.light(light).renderInto(ms, buffer.getBuffer(RenderType.translucent()));
 
     }
 

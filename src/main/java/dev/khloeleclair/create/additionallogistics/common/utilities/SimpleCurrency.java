@@ -102,7 +102,7 @@ public class SimpleCurrency implements ICurrency {
             int item_amount = Math.floorDiv(remaining, item_value);
             remaining -= (item_amount * item_value);
 
-            int max_stack = item.getDefaultMaxStackSize();
+            int max_stack = item.getMaxStackSize();
             while (item_amount > 0) {
                 int count = Math.min(max_stack, item_amount);
                 item_amount -= count;

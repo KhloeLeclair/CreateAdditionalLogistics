@@ -11,28 +11,28 @@ import com.simibubi.create.foundation.item.TooltipModifier;
 import com.tterrag.registrate.util.nullness.NonNullSupplier;
 import dev.khloeleclair.create.additionallogistics.common.Config;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.base.AbstractLowEntityKineticBlockEntity;
-import dev.khloeleclair.create.additionallogistics.common.utilities.CurrencyUtilities;
 import dev.khloeleclair.create.additionallogistics.common.datagen.DataGen;
 import dev.khloeleclair.create.additionallogistics.common.registries.*;
+import dev.khloeleclair.create.additionallogistics.common.utilities.CurrencyUtilities;
 import dev.khloeleclair.create.additionallogistics.common.utilities.RecipeHelper;
 import dev.khloeleclair.create.additionallogistics.compat.computercraft.CALComputerCraftProxy;
 import net.createmod.catnip.lang.FontHelper;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.phys.AABB;
-import net.neoforged.bus.api.EventPriority;
-import net.neoforged.bus.api.IEventBus;
-import net.neoforged.bus.api.SubscribeEvent;
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.common.Mod;
-import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.neoforged.neoforge.event.server.ServerStartingEvent;
-import net.neoforged.neoforge.event.server.ServerStoppedEvent;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.player.PlayerInteractEvent;
+import net.minecraftforge.event.server.ServerStartingEvent;
+import net.minecraftforge.event.server.ServerStoppedEvent;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.common.Mod;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
-// The value here should match an entry in the META-INF/neoforge.mods.toml file
+// The value here should match an entry in the META-INF/mods.toml file
 @Mod(CreateAdditionalLogistics.MODID)
 public class CreateAdditionalLogistics {
 
@@ -51,7 +51,7 @@ public class CreateAdditionalLogistics {
     );
 
     public static ResourceLocation asResource(String path) {
-        return ResourceLocation.fromNamespaceAndPath(MODID, path);
+        return new ResourceLocation(MODID, path);
     }
 
     @Nullable
@@ -79,16 +79,15 @@ public class CreateAdditionalLogistics {
         CALComputerCraftProxy.register();
 
         CALDataComponents.register(modEventBus);
-        CALDataMaps.register(modEventBus);
 
-        modEventBus.addListener(CALPackets::register);
+        CALPackets.register();
 
         modEventBus.addListener(EventPriority.HIGHEST, DataGen::gatherData);
 
-        NeoForge.EVENT_BUS.register(this);
-        NeoForge.EVENT_BUS.addListener(CurrencyUtilities::onDataMapUpdated);
-        NeoForge.EVENT_BUS.addListener(RecipeHelper::onRecipesUpdated);
-        NeoForge.EVENT_BUS.addListener(AbstractLowEntityKineticBlockEntity::onTick);
+        MinecraftForge.EVENT_BUS.register(this);
+        //MinecraftForge.EVENT_BUS.addListener(CurrencyUtilities::onDataMapUpdated);
+        MinecraftForge.EVENT_BUS.addListener(RecipeHelper::onRecipesUpdated);
+        MinecraftForge.EVENT_BUS.addListener(AbstractLowEntityKineticBlockEntity::onTick);
 
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
         Config.register(modContainer);
@@ -115,9 +114,9 @@ public class CreateAdditionalLogistics {
         if (level.getBlockState(pos).getBlock() instanceof SeatBlock) {
             var seats = level.getEntitiesOfClass(SeatEntity.class, new AABB(pos));
             if (!seats.isEmpty()) {
-                var passengers = seats.getFirst().getPassengers();
+                var passengers = seats.get(0).getPassengers();
                 if (! passengers.isEmpty()) {
-                    var passenger = passengers.getFirst();
+                    var passenger = passengers.get(0);
                     var ticker = StockTickerInteractionHandler.getStockTickerPosition(passenger);
                     if (ticker != null)
                         event.setCanceled(true);

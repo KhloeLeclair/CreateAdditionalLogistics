@@ -30,7 +30,7 @@ public class MixinBlazeBurnerBlockEntity {
             for(Direction dir : Iterate.horizontalDirections) {
                 var dpos = pos.relative(dir);
                 BlockState state = level.getBlockState(dpos);
-                if (state.is(CALBlocks.CASH_REGISTER) && level.getBlockEntity(dpos) instanceof StockTickerBlockEntity stbe) {
+                if (state.is(CALBlocks.CASH_REGISTER.get()) && level.getBlockEntity(dpos) instanceof StockTickerBlockEntity stbe) {
                     ci.setReturnValue(stbe);
                     return;
                 }

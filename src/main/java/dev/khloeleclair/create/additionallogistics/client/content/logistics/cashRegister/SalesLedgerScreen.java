@@ -2,7 +2,6 @@ package dev.khloeleclair.create.additionallogistics.client.content.logistics.cas
 
 import com.simibubi.create.content.logistics.BigItemStack;
 import dev.khloeleclair.create.additionallogistics.common.CALLang;
-import dev.khloeleclair.create.additionallogistics.common.registries.CALDataComponents;
 import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.SalesHistoryData;
 import it.unimi.dsi.fastutil.objects.Object2ObjectArrayMap;
 import net.createmod.catnip.gui.AbstractSimiScreen;
@@ -13,6 +12,7 @@ import net.minecraft.client.gui.components.StringWidget;
 import net.minecraft.client.gui.layouts.FrameLayout;
 import net.minecraft.client.gui.layouts.GridLayout;
 import net.minecraft.client.gui.layouts.SpacerElement;
+import net.minecraft.util.Mth;
 import net.minecraft.world.item.ItemStack;
 import org.jetbrains.annotations.Nullable;
 
@@ -38,7 +38,7 @@ public class SalesLedgerScreen extends AbstractSimiScreen {
 
     public SalesLedgerScreen(ItemStack stack, Map<UUID, String> playerNames) {
         super(stack.getHoverName());
-        Data = stack.getOrDefault(CALDataComponents.SALES_HISTORY, SalesHistoryData.EMPTY);
+        Data = SalesHistoryData.getOrEmpty(stack);
         PlayerNames = playerNames;
 
         query = "";
@@ -66,7 +66,7 @@ public class SalesLedgerScreen extends AbstractSimiScreen {
         } else
             filteredSales.addAll(Data.getSales());
 
-        pages = Math.max(1, Math.ceilDiv(filteredSales.size(), perPage));
+        pages = Math.max(1, Mth.positiveCeilDiv(filteredSales.size(), perPage));
     }
 
     @Override
@@ -85,9 +85,9 @@ public class SalesLedgerScreen extends AbstractSimiScreen {
         perPage = 10;
 
         if (height < 360)
-            perPage = Math.clamp((height - 86) / 22, 2, 10);
+            perPage = Mth.clamp((height - 86) / 22, 2, 10);
 
-        pages = Math.max(1, Math.ceilDiv(filteredSales.size(), perPage));
+        pages = Math.max(1, Mth.positiveCeilDiv(filteredSales.size(), perPage));
     }
 
     private void changePage(int p) {

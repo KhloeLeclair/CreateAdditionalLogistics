@@ -36,7 +36,7 @@ public abstract class MixinTableClothBlockEntity extends SmartBlockEntity {
     private void CAL$onUseShop(Player player, CallbackInfoReturnable<ItemInteractionResult> ci) {
 
         ItemStack itemInHand = player.getItemInHand(InteractionHand.MAIN_HAND);
-        if (! itemInHand.is(AllItems.SHOPPING_LIST) || ci.getReturnValue() != ItemInteractionResult.SUCCESS)
+        if (! itemInHand.is(AllItems.SHOPPING_LIST.get()) || ci.getReturnValue() != ItemInteractionResult.SUCCESS)
             return;
 
         BlockPos tickerPos = requestData.targetOffset().offset(worldPosition);

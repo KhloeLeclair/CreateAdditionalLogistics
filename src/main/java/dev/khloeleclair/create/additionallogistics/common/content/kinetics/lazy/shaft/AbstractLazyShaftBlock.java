@@ -41,7 +41,7 @@ public abstract class AbstractLazyShaftBlock extends AbstractLazySimpleKineticBl
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         final var axis = state.getValue(AXIS);
         final boolean positive = state.getValue(POSITIVE);
         final boolean negative = state.getValue(NEGATIVE);
@@ -101,7 +101,7 @@ public abstract class AbstractLazyShaftBlock extends AbstractLazySimpleKineticBl
         public PlacementOffset getOffsetFlexible(Player player, Level world, BlockState state, BlockPos pos, BlockHitResult ray) {
             List<Direction> directions = IPlacementHelper.orderedByDistance(pos, ray.getLocation());
 
-            final Direction side = directions.getFirst();
+            final Direction side = directions.get(0);
             BlockPos newPos = pos.relative(side);
             BlockState newState = world.getBlockState(newPos);
             if (newState.canBeReplaced())

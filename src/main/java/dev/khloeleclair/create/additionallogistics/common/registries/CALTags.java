@@ -21,7 +21,7 @@ public class CALTags {
     }
 
     public static <T> TagKey<T> commonTag(Registry<T> registry, String path) {
-        return optionalTag(registry, ResourceLocation.fromNamespaceAndPath("c", path));
+        return optionalTag(registry, new ResourceLocation("c", path));
     }
 
     public static TagKey<Block> commonBlockTag(String path) { return commonTag(BuiltInRegistries.BLOCK, path); }
@@ -80,7 +80,7 @@ public class CALTags {
         }
 
         CALBlockTags(CALTags.NameSpace namespace, String path, boolean optional, boolean alwaysDatagen) {
-            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(namespace.id, path == null ? Lang.asId(name()) : path);
+            ResourceLocation id = new ResourceLocation(namespace.id, path == null ? Lang.asId(name()) : path);
             if (optional) {
                 tag = optionalTag(BuiltInRegistries.BLOCK, id);
             } else {
@@ -141,7 +141,7 @@ public class CALTags {
         }
 
         CALItemTags(CALTags.NameSpace namespace, String path, boolean optional, boolean alwaysDatagen) {
-            ResourceLocation id = ResourceLocation.fromNamespaceAndPath(namespace.id, path == null ? Lang.asId(name()) : path);
+            ResourceLocation id = new ResourceLocation(namespace.id, path == null ? Lang.asId(name()) : path);
             if (optional) {
                 tag = optionalTag(BuiltInRegistries.ITEM, id);
             } else {

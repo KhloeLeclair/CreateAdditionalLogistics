@@ -17,7 +17,7 @@ public class CALStress {
     public static DoubleSupplier getImpact(Block block) {
 
         if (CALBlocks.PACKAGE_ACCELERATOR.is(block))
-            return Config.Common.acceleratorStressImpact;
+            return Config.Common.acceleratorStressImpact::get;
 
         return null;
 

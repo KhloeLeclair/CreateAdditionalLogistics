@@ -50,7 +50,7 @@ public class LuaTrainObject implements LuaComparable {
             if (dimensions.isEmpty())
                 continue;
 
-            return dimensions.getFirst();
+            return dimensions.get(0);
         }
 
         return null;
@@ -67,7 +67,7 @@ public class LuaTrainObject implements LuaComparable {
             if (dimensions.isEmpty())
                 continue;
 
-            var level = server.getLevel(dimensions.getFirst());
+            var level = server.getLevel(dimensions.get(0));
             if (level != null)
                 return level;
         }

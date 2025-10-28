@@ -14,7 +14,7 @@ public class LazyCogWheelBlock extends AbstractLazyCogWheelBlock implements Prop
     public static LazyCogWheelBlock large(Properties properties) { return new LazyCogWheelBlock(true, properties); }
 
     @Override
-    protected FluidState getFluidState(BlockState state) {
+    public FluidState getFluidState(BlockState state) {
         return fluidState(state);
     }
 }

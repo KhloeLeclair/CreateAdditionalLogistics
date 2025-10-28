@@ -1,7 +1,6 @@
 package dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister;
 
 import dev.khloeleclair.create.additionallogistics.common.CALLang;
-import dev.khloeleclair.create.additionallogistics.common.registries.CALDataComponents;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALPackets;
 import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
@@ -15,6 +14,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 
@@ -25,10 +25,10 @@ public class SalesLedgerItem extends Item {
     }
 
     @Override
-    public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag) {
-        super.appendHoverText(stack, context, tooltipComponents, tooltipFlag);
+    public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltipComponents, TooltipFlag isAdvanced) {
+        super.appendHoverText(stack, level, tooltipComponents, isAdvanced);
 
-        var data = stack.get(CALDataComponents.SALES_HISTORY);
+        var data = SalesHistoryData.get(stack);
         if (data == null)
             return;
 
@@ -61,7 +61,7 @@ public class SalesLedgerItem extends Item {
 
     @Override
     public int getDamage(ItemStack stack) {
-        var history = stack.get(CALDataComponents.SALES_HISTORY);
+        var history = SalesHistoryData.get(stack);
         return history == null ? 0 : history.saleCount();
     }
 

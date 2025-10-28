@@ -1,17 +1,18 @@
 package dev.khloeleclair.create.additionallogistics.common.content.trains.networkMonitor;
 
-import com.simibubi.create.compat.Mods;
 import com.simibubi.create.content.trains.track.TrackTargetingBehaviour;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
-import dan200.computercraft.api.peripheral.PeripheralCapability;
-import dev.khloeleclair.create.additionallogistics.common.registries.CALBlockEntityTypes;
 import dev.khloeleclair.create.additionallogistics.compat.computercraft.AbstractEventfulComputerBehavior;
 import dev.khloeleclair.create.additionallogistics.compat.computercraft.CALComputerCraftProxy;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
+import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
 import java.util.UUID;
@@ -37,14 +38,12 @@ public class NetworkMonitorBlockEntity extends SmartBlockEntity {
         computerBehavior.removePeripheral();
     }
 
-    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-        if (Mods.COMPUTERCRAFT.isLoaded()) {
-            event.registerBlockEntity(
-                    PeripheralCapability.get(),
-                    CALBlockEntityTypes.NETWORK_MONITOR.get(),
-                    (be, context) -> be.computerBehavior.getPeripheralCapability()
-            );
-        }
+    @Override
+    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
+        if (computerBehavior.isPeripheralCap(cap))
+            return computerBehavior.getPeripheralCapability();
+
+        return super.getCapability(cap, side);
     }
 
     public void onTrainArrival(UUID train, UUID station) {

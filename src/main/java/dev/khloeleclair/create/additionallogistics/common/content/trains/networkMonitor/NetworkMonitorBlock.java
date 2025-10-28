@@ -25,7 +25,7 @@ public class NetworkMonitorBlock extends Block implements IBE<NetworkMonitorBloc
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return SHAPE;
     }
 
@@ -40,7 +40,7 @@ public class NetworkMonitorBlock extends Block implements IBE<NetworkMonitorBloc
     }
 
     @Override
-    protected void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
+    public void onRemove(BlockState state, Level level, BlockPos pos, BlockState newState, boolean movedByPiston) {
         IBE.onRemove(state, level, pos, newState);
     }
 }

@@ -53,7 +53,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.material.MapColor;
-import net.neoforged.neoforge.common.Tags;
+import net.minecraftforge.common.Tags;
 import org.jetbrains.annotations.Nullable;
 
 import static com.simibubi.create.api.behaviour.display.DisplaySource.displaySource;
@@ -357,7 +357,7 @@ public class CALBlocks {
                 .properties(p -> p.mapColor(color))
                 .transform(axeOrPickaxe())
                 .lang(RegistrateLangProvider.toEnglishName(colorName + "_flexible_lazy_shaft"))
-                .blockstate(CALBlockStateGen.flexibleShaft("flexible_shaft", ResourceLocation.withDefaultNamespace("block/" + color.getSerializedName() + "_concrete")))
+                .blockstate(CALBlockStateGen.flexibleShaft("flexible_shaft", new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "block/" + color.getSerializedName() + "_concrete")))
                 .tag(CALTags.CALBlockTags.LAZY.tag)
                 .tag(CALTags.CALBlockTags.FLEXIBLE_SHAFTS.tag)
                 .tag(AllTags.AllBlockTags.SAFE_NBT.tag)
@@ -501,7 +501,7 @@ public class CALBlocks {
                     .blockstate((c, p) -> p.simpleBlock(c.get(), p.models().getExistingFile(p.modLoc("block/" + c.getName() + "/block"))))
                     .lang("Train Network Monitor Peripheral")
                     .recipe((c,p) -> {
-                        var ender_modem = BuiltInRegistries.ITEM.getOptional(ResourceLocation.fromNamespaceAndPath("computercraft", "wireless_modem_advanced"));
+                        var ender_modem = BuiltInRegistries.ITEM.getOptional(new ResourceLocation("computercraft", "wireless_modem_advanced"));
                         if (ender_modem.isEmpty())
                             return;
 
@@ -552,7 +552,7 @@ public class CALBlocks {
                                 .pattern(" G ")
                                 .pattern("BLO")
                                 .pattern(" C ")
-                                .define('G', Tags.Items.GLASS_BLOCKS)
+                                .define('G', Tags.Items.GLASS)
                                 .define('B', AllItems.BRASS_SHEET.get())
                                 .define('O', Items.BOOK)
                                 .define('C', Tags.Items.CHESTS)

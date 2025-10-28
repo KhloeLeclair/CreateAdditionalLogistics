@@ -11,7 +11,7 @@ public class LazyShaftBlock extends AbstractLazyShaftBlock implements ProperWate
     }
 
     @Override
-    protected FluidState getFluidState(BlockState state) {
+    public FluidState getFluidState(BlockState state) {
         return fluidState(state);
     }
 

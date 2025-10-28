@@ -8,14 +8,13 @@ import dev.khloeleclair.create.additionallogistics.common.registries.CALPackets;
 import it.unimi.dsi.fastutil.objects.ObjectOpenHashSet;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.neoforge.event.tick.ServerTickEvent;
+import net.minecraftforge.event.TickEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -36,8 +35,8 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
     }
 
     @Override
-    protected void read(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-        super.read(compound, registries, clientPacket);
+    protected void read(CompoundTag compound, boolean clientPacket) {
+        super.read(compound, clientPacket);
         connections = null;
         if (compound.contains("Connected", CompoundTag.TAG_LONG_ARRAY)) {
             var cache = compound.getLongArray("Connected");
@@ -50,8 +49,8 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
     }
 
     @Override
-    protected void write(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
-        super.write(compound, registries, clientPacket);
+    protected void write(CompoundTag compound, boolean clientPacket) {
+        super.write(compound, clientPacket);
         if (connections != null) {
             var cache = new long[connections.size()];
             int i = 0;
@@ -113,7 +112,6 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
             }
     }
 
-    @Override
     public boolean isValidBlockState(BlockState state) {
         return state.getBlock() instanceof AbstractLowEntityKineticBlock<?> lek && lek.isActive(state);
     }
@@ -254,7 +252,7 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
         addToDirtyList(level, pos, state, block, visited, queue);
 
         while (!queue.isEmpty()) {
-            BlockPos qpos = queue.removeFirst();
+            BlockPos qpos = queue.remove(0);
             if (level.isLoaded(qpos)) {
                 var qstate = level.getBlockState(qpos);
                 if (qstate.getBlock() instanceof AbstractLowEntityKineticBlock<?> qblock) {
@@ -337,8 +335,8 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
             CALPackets.ServerToClientEvent.CLEAR_INFORMATION.send(level);
     }
 
-    public static void onTick(ServerTickEvent.Post event) {
-        if (!dirtyPositions.isEmpty())
+    public static void onTick(TickEvent.ServerTickEvent event) {
+        if (event.phase == TickEvent.Phase.END && !dirtyPositions.isEmpty())
             updateDirty();
     }
 

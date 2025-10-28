@@ -81,7 +81,7 @@ public class SafeRegex {
                 var matcher = pattern.matcher("");
 
                 int groups = matcher.groupCount();
-                Set<String> named = pattern.namedGroups().keySet();
+                Set<String> named = Set.of(); // pattern.namedGroups().keySet();
 
                 int pos = 0;
                 while (pos < replacement.length()) {

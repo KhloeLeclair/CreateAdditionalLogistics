@@ -4,9 +4,9 @@ import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.fml.util.thread.SidedThreadGroups;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.fml.util.thread.SidedThreadGroups;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.Map;

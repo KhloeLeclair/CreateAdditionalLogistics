@@ -11,11 +11,11 @@ import net.createmod.catnip.placement.IPlacementHelper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.DyeColor;
-import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
@@ -137,7 +137,7 @@ public abstract class AbstractLowEntityKineticBlock<T extends AbstractLowEntityK
     }
 
     @Override
-    protected boolean isPathfindable(BlockState state, PathComputationType pathComputationType) {
+    public boolean isPathfindable(BlockState state, BlockGetter level, BlockPos pos, PathComputationType type) {
         return false;
     }
 
@@ -147,22 +147,24 @@ public abstract class AbstractLowEntityKineticBlock<T extends AbstractLowEntityK
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
         if (player.isShiftKeyDown() || !player.mayBuild())
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            return InteractionResult.PASS;
+
+        var stack = player.getItemInHand(hand);
 
         if (this instanceof EncasableBlock encasable) {
-            ItemInteractionResult result = encasable.tryEncase(state, level, pos, stack, player, hand, hitResult);
+            var result = encasable.tryEncase(state, level, pos, stack, player, hand, hit);
             if (result.consumesAction())
                 return result;
         }
 
         var helper = getPlacementHelper();
         if (helper != null && helper.matchesItem(stack))
-            return helper.getOffset(player, level, state, pos, hitResult)
-                    .placeInWorld(level, (BlockItem) stack.getItem(), player, hand, hitResult);
+            return helper.getOffset(player, level, state, pos, hit)
+                    .placeInWorld(level, (BlockItem) stack.getItem(), player, hand, hit);
 
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return InteractionResult.PASS;
     }
 
     /// Determine if this low entity kinetic block can connect to another one.

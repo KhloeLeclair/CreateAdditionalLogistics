@@ -4,7 +4,7 @@ import com.simibubi.create.content.equipment.clipboard.ClipboardEntry;
 import com.simibubi.create.content.logistics.stockTicker.StockKeeperRequestMenu;
 import com.simibubi.create.content.logistics.stockTicker.StockKeeperRequestScreen;
 import com.simibubi.create.foundation.gui.menu.AbstractSimiContainerScreen;
-import dev.khloeleclair.create.additionallogistics.common.registries.CALDataComponents;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.SalesHistoryData;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALItems;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
@@ -34,8 +34,8 @@ public abstract class MixinStockKeeperRequestScreen extends AbstractSimiContaine
     )
     private void onConstructed(CallbackInfo ci) {
         var stack = menu.player.getMainHandItem();
-        if (clipboardItem == null && stack.is(CALItems.SALES_LEDGER)) {
-            var history = stack.get(CALDataComponents.SALES_HISTORY);
+        if (clipboardItem == null && stack.is(CALItems.SALES_LEDGER.get())) {
+            var history = SalesHistoryData.get(stack);
             if (history != null)
                 clipboardItem = history.toPurchaseClipboardEntries();
         }

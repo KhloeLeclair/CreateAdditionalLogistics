@@ -99,7 +99,7 @@ public class RegexTokenizer {
         while (consumeIf('|')) {
             branches.add(parseSequence());
         }
-        if (branches.size() == 1) return branches.getFirst();
+        if (branches.size() == 1) return branches.get(0);
         return new AlternationNode(branches);
     }
 
@@ -116,7 +116,7 @@ public class RegexTokenizer {
         if (sequence.isEmpty())
             return EmptyNode.INSTANCE;
         if (sequence.size() == 1)
-            return sequence.getFirst();
+            return sequence.get(0);
         return new SequenceNode(sequence);
     }
 

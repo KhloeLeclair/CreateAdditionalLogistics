@@ -11,8 +11,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 
 public class CustomSeatEntity extends SeatEntity {
 
@@ -33,7 +33,7 @@ public class CustomSeatEntity extends SeatEntity {
 
     @Override
     protected void positionRider(Entity pEntity, MoveFunction pCallback) {
-        double heightOffset = (getY() - pEntity.getVehicleAttachmentPoint(this).y);
+        double heightOffset = (getY() - pEntity.getMyRidingOffset());
 
         pCallback.accept(pEntity, getX(), heightOffset + getCustomEntitySeatOffset(pEntity), getZ());
     }

@@ -11,8 +11,8 @@ import dev.khloeleclair.create.additionallogistics.common.content.logistics.cash
 import dev.khloeleclair.create.additionallogistics.common.registries.CALDataComponents;
 import dev.khloeleclair.create.additionallogistics.compat.computercraft.implementation.ComputerUtil;
 import dev.khloeleclair.create.additionallogistics.compat.computercraft.implementation.luaObjects.LuaSalesHistoryObject;
-import org.jspecify.annotations.Nullable;
 
+import javax.annotation.Nullable;
 import java.util.*;
 
 public class CashRegisterPeripheral extends SyncedPeripheral<CashRegisterBlockEntity> {

@@ -45,7 +45,7 @@ public abstract class AbstractLazyCogWheelBlock extends AbstractLazySimpleKineti
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return super.getShape(state, level, pos, context);
 
         // TODO: Large Cog Shape + Caching
@@ -57,7 +57,7 @@ public abstract class AbstractLazyCogWheelBlock extends AbstractLazySimpleKineti
     }
 
     @Override
-    protected boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
+    public boolean canSurvive(BlockState state, LevelReader level, BlockPos pos) {
         return CogWheelBlock.isValidCogwheelPosition(ICogWheel.isLargeCog(state), level, pos, state.getValue(AXIS));
     }
 

@@ -1,6 +1,5 @@
 package dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister;
 
-import com.mojang.serialization.MapCodec;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBlockItem;
 import com.simibubi.create.content.logistics.stockTicker.StockTickerBlock;
 import com.simibubi.create.content.logistics.stockTicker.StockTickerBlockEntity;
@@ -12,13 +11,11 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.HorizontalDirectionalBlock;
 import net.minecraft.world.level.block.RenderShape;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
@@ -29,12 +26,11 @@ import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.network.NetworkHooks;
 
 public class CashRegisterBlock extends StockTickerBlock {
 
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
-
-    public static final MapCodec<CashRegisterBlock> CODEC = simpleCodec(CashRegisterBlock::new);
 
     public static VoxelShape[] SHAPES;
 
@@ -66,28 +62,28 @@ public class CashRegisterBlock extends StockTickerBlock {
         double x1, x2, z1, z2;
 
         switch(facing) {
-            case Direction.NORTH:
+            case NORTH:
                 x1 = 0;
                 z1 = 10/16.0;
                 x2 = 1;
                 z2 = 1f;
                 break;
 
-            case Direction.EAST:
+            case EAST:
                 x1 = 0;
                 z1 = 0;
                 x2 = 6/16.0;
                 z2 = 1;
                 break;
 
-            case Direction.WEST:
+            case WEST:
                 x1 = 10/16.0;
                 z1 = 0;
                 x2 = 1;
                 z2 = 1;
                 break;
 
-            case Direction.SOUTH:
+            case SOUTH:
             default:
                 x1 = 0;
                 z1 = 0;
@@ -113,37 +109,33 @@ public class CashRegisterBlock extends StockTickerBlock {
     }
 
     @Override
-    protected void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
+    public void tick(BlockState state, ServerLevel level, BlockPos pos, RandomSource random) {
         if (level.getBlockEntity(pos) instanceof CashRegisterBlockEntity cbe)
             cbe.recheckOpen();
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
-        if (stack.getItem() instanceof LogisticallyLinkedBlockItem)
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (player != null && player.getItemInHand(hand).getItem() instanceof LogisticallyLinkedBlockItem)
+            return InteractionResult.PASS;
 
         if (!(level.getBlockEntity(pos) instanceof CashRegisterBlockEntity be))
-            return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+            return InteractionResult.PASS;
 
-        if (! be.behaviour.mayInteractMessage(player))
-            return ItemInteractionResult.SUCCESS;
+        if (!be.behaviour.mayInteractMessage(player))
+            return InteractionResult.SUCCESS;
 
         // Unlike the default stock ticker, players can't extract payments just by clicking.
         // Instead, we use a menu. Or they extract items in the world with hoppers, funnels, etc.
         if (player instanceof ServerPlayer sp)
-            sp.openMenu(be.new CashRegisterMenuProvider(), be.getBlockPos());
+            NetworkHooks.openScreen(sp, be.new CashRegisterMenuProvider(), be.getBlockPos());
 
-        return ItemInteractionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    protected RenderShape getRenderShape(BlockState state) {
+    public RenderShape getRenderShape(BlockState state) {
         return RenderShape.MODEL;
     }
 
-    @Override
-    protected MapCodec<? extends HorizontalDirectionalBlock> codec() {
-        return CODEC;
-    }
 }

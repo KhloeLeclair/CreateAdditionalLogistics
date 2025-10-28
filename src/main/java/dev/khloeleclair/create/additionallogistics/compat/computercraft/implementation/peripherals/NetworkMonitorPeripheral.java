@@ -15,7 +15,7 @@ import dev.khloeleclair.create.additionallogistics.common.content.trains.network
 import dev.khloeleclair.create.additionallogistics.compat.computercraft.implementation.luaObjects.LuaStationObject;
 import dev.khloeleclair.create.additionallogistics.compat.computercraft.implementation.luaObjects.LuaTrainObject;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.items.IItemHandlerModifiable;
+import net.minecraftforge.items.IItemHandlerModifiable;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;

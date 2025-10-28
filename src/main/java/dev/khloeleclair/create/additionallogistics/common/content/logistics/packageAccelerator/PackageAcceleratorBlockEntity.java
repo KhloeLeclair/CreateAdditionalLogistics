@@ -26,7 +26,7 @@ public class PackageAcceleratorBlockEntity extends KineticBlockEntity {
 
     @Override
     public float calculateStressApplied() {
-        float impact = (float) Config.Common.acceleratorStressImpact.getAsDouble();
+        float impact = (float) Config.Common.acceleratorStressImpact.get().floatValue();
         lastStressApplied = impact;
         return impact;
     }

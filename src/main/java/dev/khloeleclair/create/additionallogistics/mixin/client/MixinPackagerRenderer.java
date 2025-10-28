@@ -19,7 +19,7 @@ public class MixinPackagerRenderer {
             cancellable = true
     )
     private static void CAL$getTrayModel(BlockState blockState, CallbackInfoReturnable<PartialModel> ci) {
-        if (blockState.is(CALBlocks.PACKAGE_EDITOR))
+        if (blockState.is(CALBlocks.PACKAGE_EDITOR.get()))
             ci.setReturnValue(AllPartialModels.PACKAGER_TRAY_REGULAR);
     }
 

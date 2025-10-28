@@ -1,5 +1,6 @@
 package dev.khloeleclair.create.additionallogistics.compat.computercraft.implementation.peripherals;
 
+import com.simibubi.create.AllPackets;
 import com.simibubi.create.compat.computercraft.AttachedComputerPacket;
 import com.simibubi.create.compat.computercraft.implementation.ComputerBehaviour;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
@@ -7,7 +8,7 @@ import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dan200.computercraft.api.peripheral.NotAttachedException;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
-import net.createmod.catnip.platform.CatnipServices;
+import net.minecraftforge.network.PacketDistributor;
 
 import javax.annotation.Nullable;
 import java.util.Map;
@@ -77,7 +78,7 @@ public abstract class SyncedPeripheral<T extends SmartBlockEntity> implements IP
         boolean hasAttachedComputer = ! computers.isEmpty();
 
         blockEntity.getBehaviour(ComputerBehaviour.TYPE).setHasAttachedComputer(hasAttachedComputer);
-        CatnipServices.NETWORK.sendToAllClients(new AttachedComputerPacket(blockEntity.getBlockPos(), hasAttachedComputer));
+        AllPackets.getChannel().send(PacketDistributor.ALL.noArg(), new AttachedComputerPacket(blockEntity.getBlockPos(), hasAttachedComputer));
     }
 
     @Override

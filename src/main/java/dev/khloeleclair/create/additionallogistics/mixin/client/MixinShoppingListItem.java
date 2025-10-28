@@ -8,9 +8,9 @@ import dev.khloeleclair.create.additionallogistics.common.utilities.CurrencyUtil
 import net.createmod.catnip.data.Couple;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -31,8 +31,8 @@ public class MixinShoppingListItem {
             ),
             cancellable = true
     )
-    private void CAL$appendHoverText(ItemStack stack, Item.TooltipContext context, List<Component> tooltipComponents, TooltipFlag tooltipFlag, CallbackInfo ci, @Nullable @Local Couple<InventorySummary> lists) {
-        if (lists == null || ! CurrencyUtilities.isConversionEnabled(stack.get(CALDataComponents.CASH_REGISTER_POS) != null))
+    private void CAL$appendHoverText(ItemStack pStack, Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced, CallbackInfo ci, @Nullable @Local Couple<InventorySummary> lists) {
+        if (lists == null || ! CurrencyUtilities.isConversionEnabled(pStack.get(CALDataComponents.CASH_REGISTER_POS) != null))
             return;
 
         var items = lists.getSecond();
@@ -40,7 +40,7 @@ public class MixinShoppingListItem {
         for(var item : items.getStacks()) {
             if (CurrencyUtilities.getForItem(item.stack.getItem()) != null) {
                 ci.cancel();
-                CurrencyUtilities.createShoppingListTooltip(Minecraft.getInstance().player, stack, tooltipComponents, tooltipFlag, lists);
+                CurrencyUtilities.createShoppingListTooltip(Minecraft.getInstance().player, pStack, pTooltipComponents, pIsAdvanced, lists);
                 return;
             }
         }

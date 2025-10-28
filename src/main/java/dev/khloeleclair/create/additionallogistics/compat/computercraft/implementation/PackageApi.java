@@ -6,8 +6,8 @@ import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaFunction;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
 import net.createmod.catnip.data.Glob;
-import org.jspecify.annotations.Nullable;
 
+import javax.annotation.Nullable;
 import java.util.regex.PatternSyntaxException;
 
 public class PackageApi implements ILuaAPI {

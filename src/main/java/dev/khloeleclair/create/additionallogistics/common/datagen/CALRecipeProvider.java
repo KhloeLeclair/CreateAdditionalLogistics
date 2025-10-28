@@ -16,12 +16,12 @@ public final class CALRecipeProvider extends RecipeProvider {
 
     static final List<ProcessingRecipeGen<?, ?, ?>> GENERATORS = new ArrayList<>();
 
-    public CALRecipeProvider(PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-        super(output, registries);
+    public CALRecipeProvider(PackOutput output) {
+        super(output);
     }
 
     public static void registerAllProcessing(DataGenerator gen, PackOutput output, CompletableFuture<HolderLookup.Provider> registries) {
-        GENERATORS.add(new CALWashingRecipeGen(output, registries));
+        GENERATORS.add(new CALWashingRecipeGen(output));
 
         gen.addProvider(true, new DataProvider() {
             @Override

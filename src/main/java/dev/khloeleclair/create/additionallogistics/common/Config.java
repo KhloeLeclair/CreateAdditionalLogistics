@@ -1,8 +1,10 @@
 package dev.khloeleclair.create.additionallogistics.common;
 
-import net.neoforged.fml.ModContainer;
-import net.neoforged.fml.config.ModConfig;
-import net.neoforged.neoforge.common.ModConfigSpec;
+import net.minecraftforge.common.ForgeConfigSpec;
+import net.minecraftforge.fml.ModContainer;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.config.IConfigSpec;
+import net.minecraftforge.fml.config.ModConfig;
 
 // An example config class. This is not required, but it's a good idea to have one to keep your config organized.
 // Demonstrates how to use Neo's config APIs
@@ -19,20 +21,20 @@ public class Config {
     }
 
     public static void register(ModContainer modContainer) {
-        modContainer.registerConfig(ModConfig.Type.CLIENT, clientSpec);
-        modContainer.registerConfig(ModConfig.Type.COMMON, commonSpec);
-        modContainer.registerConfig(ModConfig.Type.SERVER, serverSpec);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, clientSpec);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, commonSpec);
+        ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, serverSpec);
     }
 
     public static class _Server {
-        public final ModConfigSpec.BooleanValue currencyCompression;
-        public final ModConfigSpec.BooleanValue currencyStockTicker;
+        public final ForgeConfigSpec.BooleanValue currencyCompression;
+        public final ForgeConfigSpec.BooleanValue currencyStockTicker;
 
-        public final ModConfigSpec.BooleanValue trainInventoryAccess;
-        public final ModConfigSpec.BooleanValue trainWriting;
-        public final ModConfigSpec.BooleanValue trainArrivalEvents;
+        public final ForgeConfigSpec.BooleanValue trainInventoryAccess;
+        public final ForgeConfigSpec.BooleanValue trainWriting;
+        public final ForgeConfigSpec.BooleanValue trainArrivalEvents;
 
-        _Server(ModConfigSpec.Builder builder) {
+        _Server(ForgeConfigSpec.Builder builder) {
             builder.comment("Currency Conversion").push("currencyConversion");
 
             currencyCompression = builder
@@ -70,18 +72,18 @@ public class Config {
 
 
     public static class _Common {
-        public final ModConfigSpec.BooleanValue enablePromiseLimits;
-        public final ModConfigSpec.BooleanValue enableAdditionalStock;
-        public final ModConfigSpec.BooleanValue protectStockKeeperSeats;
-        public final ModConfigSpec.BooleanValue globAllowRegex;
-        public final ModConfigSpec.BooleanValue globOptimize;
-        public final ModConfigSpec.IntValue maxStarHeight;
-        public final ModConfigSpec.IntValue maxRepetitions;
-        public final ModConfigSpec.BooleanValue allowBackrefs;
+        public final ForgeConfigSpec.BooleanValue enablePromiseLimits;
+        public final ForgeConfigSpec.BooleanValue enableAdditionalStock;
+        public final ForgeConfigSpec.BooleanValue protectStockKeeperSeats;
+        public final ForgeConfigSpec.BooleanValue globAllowRegex;
+        public final ForgeConfigSpec.BooleanValue globOptimize;
+        public final ForgeConfigSpec.IntValue maxStarHeight;
+        public final ForgeConfigSpec.IntValue maxRepetitions;
+        public final ForgeConfigSpec.BooleanValue allowBackrefs;
 
-        public final ModConfigSpec.DoubleValue acceleratorStressImpact;
+        public final ForgeConfigSpec.DoubleValue acceleratorStressImpact;
 
-        _Common(ModConfigSpec.Builder builder) {
+        _Common(ForgeConfigSpec.Builder builder) {
 
             enablePromiseLimits = builder
                     .comment("Adds a new configurable value to factory gauges that allows configuring how many promises each gauge can have at a time.")
@@ -148,34 +150,34 @@ public class Config {
     }
 
     public static class _Client {
-        _Client(ModConfigSpec.Builder builder) {
+        _Client(ForgeConfigSpec.Builder builder) {
 
         }
     }
 
-    static final ModConfigSpec commonSpec;
+    static final IConfigSpec commonSpec;
     public static final _Common Common;
 
     static {
-        var pair = new ModConfigSpec.Builder().configure(_Common::new);
+        var pair = new ForgeConfigSpec.Builder().configure(_Common::new);
         commonSpec = pair.getRight();
         Common = pair.getLeft();
     }
 
-    static final ModConfigSpec clientSpec;
+    static final ForgeConfigSpec clientSpec;
     public static final _Client Client;
 
     static {
-        var pair = new ModConfigSpec.Builder().configure(_Client::new);
+        var pair = new ForgeConfigSpec.Builder().configure(_Client::new);
         clientSpec = pair.getRight();
         Client = pair.getLeft();
     }
 
-    static final ModConfigSpec serverSpec;
+    static final ForgeConfigSpec serverSpec;
     public static final _Server Server;
 
     static {
-        var pair = new ModConfigSpec.Builder().configure(_Server::new);
+        var pair = new ForgeConfigSpec.Builder().configure(_Server::new);
         serverSpec = pair.getRight();
         Server = pair.getLeft();
     }

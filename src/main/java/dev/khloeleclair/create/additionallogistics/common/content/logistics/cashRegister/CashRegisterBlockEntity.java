@@ -1,7 +1,6 @@
 package dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister;
 
 import com.simibubi.create.AllSoundEvents;
-import com.simibubi.create.compat.Mods;
 import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
 import com.simibubi.create.content.logistics.BigItemStack;
 import com.simibubi.create.content.logistics.packager.InventorySummary;
@@ -11,12 +10,9 @@ import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour
 import com.simibubi.create.foundation.item.ItemHelper;
 import com.simibubi.create.foundation.item.SmartInventory;
 import com.simibubi.create.foundation.utility.CreateLang;
-import dan200.computercraft.api.peripheral.PeripheralCapability;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
 import dev.khloeleclair.create.additionallogistics.api.ICurrency;
 import dev.khloeleclair.create.additionallogistics.common.CALLang;
-import dev.khloeleclair.create.additionallogistics.common.registries.CALBlockEntityTypes;
-import dev.khloeleclair.create.additionallogistics.common.registries.CALDataComponents;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALItems;
 import dev.khloeleclair.create.additionallogistics.common.utilities.CurrencyUtilities;
 import dev.khloeleclair.create.additionallogistics.compat.computercraft.AbstractEventfulComputerBehavior;
@@ -28,7 +24,6 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -45,14 +40,15 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
 import net.minecraft.world.level.block.state.BlockState;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.client.ClientTooltipFlag;
-import net.neoforged.neoforge.items.IItemHandlerModifiable;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
-import net.neoforged.neoforge.items.wrapper.CombinedInvWrapper;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.IItemHandler;
+import net.minecraftforge.items.IItemHandlerModifiable;
+import net.minecraftforge.items.ItemHandlerHelper;
+import net.minecraftforge.items.wrapper.CombinedInvWrapper;
+import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -67,6 +63,10 @@ public class CashRegisterBlockEntity extends StockTickerBlockEntity {
     private final IItemHandlerModifiable ledgerHandler;
     public final CombinedInvWrapper invWrapper;
     private final ContainerOpenersCounter openersCounter;
+
+    private final LazyOptional<IItemHandler> capability;
+    private final LazyOptional<IItemHandler> ledgerCapability;
+    private final LazyOptional<IItemHandler> combinedCapability;
 
     private int saleTicks;
 
@@ -143,15 +143,19 @@ public class CashRegisterBlockEntity extends StockTickerBlockEntity {
 
             @Override
             public boolean isItemValid(int slot, ItemStack stack) {
-                if (slot != 0 || stack.isEmpty() || !stack.is(CALItems.SALES_LEDGER) || stack.getCount() != 1)
+                if (slot != 0 || stack.isEmpty() || !stack.is(CALItems.SALES_LEDGER.get()) || stack.getCount() != 1)
                     return false;
 
-                var history = stack.get(CALDataComponents.SALES_HISTORY);
+                var history = SalesHistoryData.get(stack);
                 return history == null || history.saleCount() < 1000;
             }
         };
 
         invWrapper = new CombinedInvWrapper(receivedPayments, ledgerHandler);
+
+        capability = LazyOptional.of(() -> receivedPayments);
+        ledgerCapability = LazyOptional.of(() -> ledgerHandler);
+        combinedCapability = LazyOptional.of(() -> invWrapper);
     }
 
     @Override
@@ -195,20 +199,15 @@ public class CashRegisterBlockEntity extends StockTickerBlockEntity {
             openersCounter.recheckOpeners(level, worldPosition, getBlockState());
     }
 
-    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-        event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK,
-                CALBlockEntityTypes.CASH_REGISTER.get(),
-                (be, context) -> context == Direction.DOWN ? be.receivedPayments : context == Direction.UP ? be.ledgerHandler : be.invWrapper
-        );
+    @Override
+    public @NotNull <T> LazyOptional<T> getCapability(@NotNull Capability<T> cap, @Nullable Direction side) {
+        if (isItemHandlerCap(cap))
+            return side == Direction.DOWN ? capability.cast() : side == Direction.UP ? ledgerCapability.cast() : combinedCapability.cast();
 
-        if (Mods.COMPUTERCRAFT.isLoaded()) {
-            event.registerBlockEntity(
-                    PeripheralCapability.get(),
-                    CALBlockEntityTypes.CASH_REGISTER.get(),
-                    (be, context) -> be.computerBehavior.getPeripheralCapability()
-            );
-        }
+        if (computerBehavior.isPeripheralCap(cap))
+            return computerBehavior.getPeripheralCapability();
+
+        return super.getCapability(cap, side);
     }
 
     @Override
@@ -233,19 +232,20 @@ public class CashRegisterBlockEntity extends StockTickerBlockEntity {
     }
 
     @Override
-    protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-        super.write(tag, registries, clientPacket);
-        if (ledger != null && !ledger.isEmpty())
-            tag.put("Ledger", ledger.save(registries));
+    protected void write(CompoundTag tag, boolean clientPacket) {
+        super.write(tag, clientPacket);
+        if (ledger != null && !ledger.isEmpty()) {
+            tag.put("Ledger", ledger.save(new CompoundTag()));
+        }
         tag.putInt("SaleTicks", saleTicks);
     }
 
     @Override
-    protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-        super.read(tag, registries, clientPacket);
+    protected void read(CompoundTag tag, boolean clientPacket) {
+        super.read(tag, clientPacket);
         ledger = ItemStack.EMPTY;
         if (tag.contains("Ledger", CompoundTag.TAG_COMPOUND))
-            ledger = ItemStack.parseOptional(registries, tag.getCompound("Ledger"));
+            ledger = ItemStack.of(tag.getCompound("Ledger"));
         saleTicks = tag.getInt("SaleTicks");
     }
 
@@ -273,7 +273,8 @@ public class CashRegisterBlockEntity extends StockTickerBlockEntity {
         if (!behaviour.mayAdministrate(Minecraft.getInstance().player))
             return false;
 
-        if (!ledger.isEmpty() && ledger.get(CALDataComponents.SALES_HISTORY) instanceof SalesHistoryData history) {
+        var history = ledger.isEmpty() ? null : SalesHistoryData.get(ledger);
+        if (history != null) {
             CALLang.translate("sales.sales", CALLang.number(history.saleCount()).style(ChatFormatting.GOLD))
                     .style(ChatFormatting.WHITE)
                     .forGoggles(tooltip);
@@ -300,7 +301,7 @@ public class CashRegisterBlockEntity extends StockTickerBlockEntity {
             var other_costs = costs.getSecond();
 
             var options = Minecraft.getInstance().options;
-            var tooltipFlags = ClientTooltipFlag.of(options.advancedItemTooltips ? TooltipFlag.ADVANCED : TooltipFlag.NORMAL);
+            var tooltipFlags = options.advancedItemTooltips ? TooltipFlag.ADVANCED : TooltipFlag.NORMAL;
 
             for (var entry : currency_costs.entrySet()) {
                 var currency = entry.getKey();
@@ -346,7 +347,7 @@ public class CashRegisterBlockEntity extends StockTickerBlockEntity {
         var order = baked.getFirst();
 
         // Get the sales item.
-        var history = ledger.isEmpty() ? null : ledger.get(CALDataComponents.SALES_HISTORY);
+        var history = ledger.isEmpty() ? null : SalesHistoryData.get(ledger);
         if (history == null)
             history = SalesHistoryData.EMPTY;
 
@@ -367,7 +368,7 @@ public class CashRegisterBlockEntity extends StockTickerBlockEntity {
         if (ledger.isEmpty())
             ledger = CALItems.SALES_LEDGER.asStack();
 
-        ledger.set(CALDataComponents.SALES_HISTORY, result);
+        result.save(ledger);
 
         reconcileCurrency();
 
@@ -390,7 +391,8 @@ public class CashRegisterBlockEntity extends StockTickerBlockEntity {
                 continue;
             }
 
-            if (!(CurrencyUtilities.getForItem(stack.getItem()) instanceof ICurrency currency))
+            var currency = CurrencyUtilities.getForItem(stack.getItem());
+            if (currency == null)
                 continue;
 
             currencies.put(currency, currencies.getOrDefault(currency, 0) + currency.getValue(null, stack, stack.getCount()));

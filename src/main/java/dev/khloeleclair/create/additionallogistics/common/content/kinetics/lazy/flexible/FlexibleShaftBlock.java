@@ -22,7 +22,7 @@ public class FlexibleShaftBlock extends AbstractFlexibleShaftBlock implements En
     }
 
     @Override
-    protected FluidState getFluidState(BlockState state) {
+    public FluidState getFluidState(BlockState state) {
         return fluidState(state);
     }
 
@@ -32,7 +32,7 @@ public class FlexibleShaftBlock extends AbstractFlexibleShaftBlock implements En
     }
 
     @Override
-    protected BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
+    public BlockState updateShape(BlockState state, Direction direction, BlockState neighborState, LevelAccessor level, BlockPos pos, BlockPos neighborPos) {
         updateWater(level, state, pos);
         return super.updateShape(state, direction, neighborState, level, pos, neighborPos);
     }

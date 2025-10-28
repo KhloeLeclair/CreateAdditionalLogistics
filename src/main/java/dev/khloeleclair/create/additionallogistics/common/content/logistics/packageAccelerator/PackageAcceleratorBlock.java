@@ -12,7 +12,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.ItemStack;
@@ -33,26 +32,27 @@ public class PackageAcceleratorBlock extends DirectionalKineticBlock implements 
     }
 
     @Override
-    protected ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hitResult) {
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        var stack = player.getItemInHand(hand);
         if (level.getBlockEntity(pos) instanceof PackagerBlockEntity) {
             if (!level.isClientSide && stack.getItem() instanceof BlockItem bi) {
-                var result = bi.place(new BlockPlaceContext(player, hand, stack, hitResult));
+                var result = bi.place(new BlockPlaceContext(player, hand, stack, hit));
                 if (result == InteractionResult.CONSUME)
-                    return ItemInteractionResult.CONSUME;
+                    return InteractionResult.CONSUME;
                 else if (result == InteractionResult.FAIL)
-                    return ItemInteractionResult.FAIL;
+                    return InteractionResult.FAIL;
                 else if (result == InteractionResult.SUCCESS)
-                    return ItemInteractionResult.SUCCESS;
+                    return InteractionResult.SUCCESS;
             }
 
-            return ItemInteractionResult.SUCCESS;
+            return InteractionResult.SUCCESS;
         }
 
-        return ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION;
+        return InteractionResult.PASS;
     }
 
     @Override
-    protected VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
+    public VoxelShape getShape(BlockState state, BlockGetter level, BlockPos pos, CollisionContext context) {
         return VoxelShaper.forDirectional(AllShapes.MILLSTONE, Direction.UP).get(state.getValue(FACING));
     }
 

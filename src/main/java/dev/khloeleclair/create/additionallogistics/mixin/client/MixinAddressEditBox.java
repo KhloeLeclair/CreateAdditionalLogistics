@@ -12,8 +12,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(AddressEditBox.class)
 public class MixinAddressEditBox extends EditBox {
 
-    public MixinAddressEditBox(Font font, int width, int height, Component message) {
-        super(font, width, height, message);
+    public MixinAddressEditBox(Font font, int x, int y, int width, int height, Component message) {
+        super(font, x, y, width, height, message);
     }
 
     @Inject(

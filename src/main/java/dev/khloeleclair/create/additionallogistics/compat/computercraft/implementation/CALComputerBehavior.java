@@ -8,7 +8,6 @@ import dev.khloeleclair.create.additionallogistics.common.content.logistics.cash
 import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.SalesHistoryData;
 import dev.khloeleclair.create.additionallogistics.common.content.logistics.packageEditor.PackageEditorBlockEntity;
 import dev.khloeleclair.create.additionallogistics.common.content.trains.networkMonitor.NetworkMonitorBlockEntity;
-import dev.khloeleclair.create.additionallogistics.common.registries.CALDataComponents;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALItems;
 import dev.khloeleclair.create.additionallogistics.compat.computercraft.AbstractEventfulComputerBehavior;
 import dev.khloeleclair.create.additionallogistics.compat.computercraft.implementation.luaObjects.LuaSaleObject;
@@ -20,22 +19,21 @@ import dev.khloeleclair.create.additionallogistics.compat.computercraft.implemen
 import net.createmod.catnip.data.Pair;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
-import org.jetbrains.annotations.Nullable;
-
-import java.util.function.Supplier;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.common.util.NonNullSupplier;
 
 public class CALComputerBehavior extends AbstractEventfulComputerBehavior {
 
-    @Nullable
-    IPeripheral peripheral;
-    Supplier<IPeripheral> peripheralSupplier;
+    LazyOptional<IPeripheral> peripheral;
+    NonNullSupplier<IPeripheral> peripheralSupplier;
 
     public CALComputerBehavior(SmartBlockEntity sbe) {
         super(sbe);
+        peripheral = LazyOptional.empty();
         peripheralSupplier = getPeripheralFor(sbe);
     }
 
-    public static Supplier<IPeripheral> getPeripheralFor(SmartBlockEntity sbe) {
+    public static NonNullSupplier<IPeripheral> getPeripheralFor(SmartBlockEntity sbe) {
         if (sbe instanceof CashRegisterBlockEntity cr)
             return () -> new CashRegisterPeripheral(cr);
         else if (sbe instanceof PackageEditorBlockEntity pe)
@@ -52,8 +50,11 @@ public class CALComputerBehavior extends AbstractEventfulComputerBehavior {
 
     public static void registerItemDetailProviders() {
         VanillaDetailRegistries.ITEM_STACK.addProvider((out, stack) -> {
-            if (stack.is(CALItems.SALES_LEDGER)) {
-                var obj = new LuaSalesHistoryObject(stack.get(CALDataComponents.SALES_HISTORY));
+            if (stack.is(CALItems.SALES_LEDGER.get())) {
+                var history = SalesHistoryData.get(stack);
+                if (history == null)
+                    history = SalesHistoryData.EMPTY;
+                var obj = new LuaSalesHistoryObject(history);
                 out.put("sales", obj);
             }
         });
@@ -78,6 +79,7 @@ public class CALComputerBehavior extends AbstractEventfulComputerBehavior {
 
     @Override
     public void queueEvent(String event, Object... arguments) {
+        var peripheral = this.peripheral.resolve().orElse(null);
         if (peripheral instanceof SyncedPeripheral<?> sp) {
             updateArguments(arguments);
             sp.queueEvent(event, arguments);
@@ -85,21 +87,21 @@ public class CALComputerBehavior extends AbstractEventfulComputerBehavior {
     }
 
     public void queuePositionedEvent(String event, Object... arguments) {
+        var peripheral = this.peripheral.resolve().orElse(null);
         if (peripheral instanceof SyncedPeripheral<?> sp) {
             updateArguments(arguments);
             sp.queuePositionedEvent(event, arguments);
         }
     }
 
-    public IPeripheral getPeripheralCapability() {
-        if (peripheral == null)
-            peripheral = peripheralSupplier.get();
-        return peripheral;
+    public <T> LazyOptional<T> getPeripheralCapability() {
+        if (!peripheral.isPresent())
+            peripheral = LazyOptional.of(peripheralSupplier);
+        return peripheral.cast();
     }
 
     public void removePeripheral() {
-        if (peripheral != null)
-            getWorld().invalidateCapabilities(blockEntity.getBlockPos());
+        peripheral.invalidate();
     }
 
 }

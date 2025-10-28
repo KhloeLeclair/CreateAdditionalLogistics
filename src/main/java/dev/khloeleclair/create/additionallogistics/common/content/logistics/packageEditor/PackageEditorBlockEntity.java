@@ -1,10 +1,11 @@
 package dev.khloeleclair.create.additionallogistics.common.content.logistics.packageEditor;
 
-import com.simibubi.create.AllDataComponents;
 import com.simibubi.create.api.equipment.goggles.IHaveHoveringInformation;
 import com.simibubi.create.compat.Mods;
 import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
 import com.simibubi.create.content.equipment.clipboard.ClipboardBlockEntity;
+import com.simibubi.create.content.equipment.clipboard.ClipboardBlockItem;
+import com.simibubi.create.content.equipment.clipboard.ClipboardEntry;
 import com.simibubi.create.content.logistics.box.PackageItem;
 import com.simibubi.create.content.logistics.crate.BottomlessItemHandler;
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
@@ -13,7 +14,6 @@ import com.simibubi.create.content.logistics.packager.PackagingRequest;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import com.simibubi.create.foundation.item.TooltipHelper;
 import com.simibubi.create.foundation.utility.CreateLang;
-import dan200.computercraft.api.peripheral.PeripheralCapability;
 import dev.khloeleclair.create.additionallogistics.common.CALLang;
 import dev.khloeleclair.create.additionallogistics.common.Config;
 import dev.khloeleclair.create.additionallogistics.common.PatternReplacement;
@@ -37,9 +37,9 @@ import net.minecraft.world.level.block.entity.SignBlockEntity;
 import net.minecraft.world.level.block.entity.SignText;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.AttachFace;
-import net.neoforged.neoforge.capabilities.Capabilities;
-import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.items.IItemHandler;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.util.LazyOptional;
+import net.minecraftforge.items.IItemHandler;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -80,20 +80,12 @@ public class PackageEditorBlockEntity extends PackagerBlockEntity implements IHa
         hasComputerReplacements = false;
     }
 
-    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
-        event.registerBlockEntity(
-                Capabilities.ItemHandler.BLOCK,
-                CALBlockEntityTypes.PACKAGE_EDITOR.get(),
-                (be, context) -> be.inventory
-        );
+    @Override
+    public <T> LazyOptional<T> getCapability(Capability<T> cap, Direction side) {
+        if (computerBehavior.isPeripheralCap(cap))
+            return computerBehavior.getPeripheralCapability();
 
-        if (Mods.COMPUTERCRAFT.isLoaded()) {
-            event.registerBlockEntity(
-                    PeripheralCapability.get(),
-                    CALBlockEntityTypes.PACKAGE_EDITOR.get(),
-                    (be, context) -> be.computerBehavior.getPeripheralCapability()
-            );
-        }
+        return super.getCapability(cap, side);
     }
 
     @Override
@@ -105,16 +97,16 @@ public class PackageEditorBlockEntity extends PackagerBlockEntity implements IHa
     }
 
     @Override
-    protected void write(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-        super.write(tag, registries, clientPacket);
+    protected void write(CompoundTag tag, boolean clientPacket) {
+        super.write(tag, clientPacket);
         if (parseError != null && ! parseError.isEmpty())
             tag.putString("ParseError", parseError);
         tag.putBoolean("HasReplacements", hasReplacements);
     }
 
     @Override
-    protected void read(CompoundTag tag, HolderLookup.Provider registries, boolean clientPacket) {
-        super.read(tag, registries, clientPacket);
+    protected void read(CompoundTag tag, boolean clientPacket) {
+        super.read(tag, clientPacket);
         parseError = tag.contains("ParseError", CompoundTag.TAG_STRING) ? tag.getString("ParseError") : null;
         hasReplacements = tag.getBoolean("HasReplacements");
     }
@@ -376,8 +368,7 @@ public class PackageEditorBlockEntity extends PackagerBlockEntity implements IHa
         }
 
         if (entity instanceof ClipboardBlockEntity cb && isSignOrClipboardAttached(cb.getBlockState(), pos)) {
-            var data = cb.components().get(AllDataComponents.CLIPBOARD_CONTENT);
-            var pages = data == null ? null : data.pages();
+            var pages = ClipboardEntry.readAll(cb.dataContainer);
             List<PatternReplacement> result = new ArrayList<>();
             if (pages != null) {
                 for (var page : pages) {

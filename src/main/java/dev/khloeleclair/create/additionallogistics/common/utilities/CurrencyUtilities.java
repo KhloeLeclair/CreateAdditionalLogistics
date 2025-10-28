@@ -16,7 +16,6 @@ import dev.khloeleclair.create.additionallogistics.api.ICurrencyBuilder;
 import dev.khloeleclair.create.additionallogistics.common.CALLang;
 import dev.khloeleclair.create.additionallogistics.common.Config;
 import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CashRegisterBlockEntity;
-import dev.khloeleclair.create.additionallogistics.common.registries.CALDataMaps;
 import dev.khloeleclair.create.additionallogistics.mixin.IStockTickerBlockEntityAccessor;
 import dev.khloeleclair.create.additionallogistics.mixin.client.IBlueprintOverlayRendererAccessor;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
@@ -27,8 +26,6 @@ import net.createmod.catnip.data.Pair;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.core.registries.Registries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
@@ -41,12 +38,11 @@ import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.neoforged.api.distmarker.Dist;
-import net.neoforged.api.distmarker.OnlyIn;
-import net.neoforged.neoforge.items.IItemHandlerModifiable;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
-import net.neoforged.neoforge.items.wrapper.PlayerInvWrapper;
-import net.neoforged.neoforge.registries.datamaps.DataMapsUpdatedEvent;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+import net.minecraftforge.items.IItemHandlerModifiable;
+import net.minecraftforge.items.ItemHandlerHelper;
+import net.minecraftforge.items.wrapper.PlayerInvWrapper;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.ArrayList;
@@ -65,9 +61,9 @@ public class CurrencyUtilities {
 
     static {
         // Numismatics Support
-        BUILTIN_FORMATTERS.put(ResourceLocation.fromNamespaceAndPath("numismatics", "coins"), (value, ctx) -> {
-            if (ctx.hasShiftDown())
-                return null;
+        BUILTIN_FORMATTERS.put(ResourceLocation.tryBuild("numismatics", "coins"), (value, ctx) -> {
+            /*if (ctx.hasShiftDown())
+                return null;*/
 
             int cogs = value / 64;
             int spurs = value % 64;
@@ -125,7 +121,7 @@ public class CurrencyUtilities {
         }
     }
 
-    public static void onDataMapUpdated(DataMapsUpdatedEvent event) {
+    /*public static void onDataMapUpdated(DataMapsUpdatedEvent event) {
         if (event.getRegistryKey() != Registries.ITEM || !isPopulated)
             return;
 
@@ -138,7 +134,7 @@ public class CurrencyUtilities {
         }
 
         isPopulated = false;
-    }
+    }*/
 
     private static void ensurePopulated() {
         if (isPopulated)
@@ -146,38 +142,7 @@ public class CurrencyUtilities {
 
         isPopulated = true;
 
-        var entries = BuiltInRegistries.ITEM.getDataMap(CALDataMaps.CURRENCY_DATA);
-        if (entries == null || entries.isEmpty())
-            return;
-
-        synchronized (CURRENCIES) {
-            int i = 0;
-
-            for (var entry : entries.entrySet()) {
-                var item = BuiltInRegistries.ITEM.getOptional(entry.getKey()).orElse(null);
-                if (item == null)
-                    continue;
-
-                var data = entry.getValue();
-                var id = data.id();
-                int value = data.value();
-                if (id == null) {
-                    CreateAdditionalLogistics.LOGGER.warn("Ignoring currency entry for {} with null id", entry.getKey());
-                    continue;
-                }
-                if (value < 1) {
-                    CreateAdditionalLogistics.LOGGER.warn("Ignoring currency {} for {} with invalid valud", id, entry.getKey());
-                    continue;
-                }
-
-                var currency = CURRENCIES.computeIfAbsent(id, SimpleCurrency::new);
-                if (currency instanceof SimpleCurrency sc)
-                    sc.addItem(item, value);
-                i++;
-            }
-
-            CreateAdditionalLogistics.LOGGER.debug("Added {} items to {} currencies.", i, CURRENCIES.size());
-        }
+        // TODO: Alternative for data maps on 1.20?
     }
 
     @Nullable
@@ -192,15 +157,11 @@ public class CurrencyUtilities {
     @Nullable
     public static ICurrency getForItem(Item item) {
         ensurePopulated();
-        var data = item.builtInRegistryHolder().getData(CALDataMaps.CURRENCY_DATA);
         ResourceLocation id;
 
-        if (data != null)
-            id = data.id();
-        else
-            synchronized (API_CURRENCIES) {
-                id = API_CURRENCIES.get(item);
-            }
+        synchronized (API_CURRENCIES) {
+            id = API_CURRENCIES.get(item);
+        }
 
         if (id != null)
             synchronized (CURRENCIES) {
@@ -254,10 +215,10 @@ public class CurrencyUtilities {
         // Determine which items from the player will be consumed as payment.
         // This is necessary for checking that the cash register has room.
         InventorySummary consumed = new InventorySummary();
-        consumed.addAllBigItemStacks(paymentOther);
+        paymentOther.forEach(consumed::add);
 
         for(var entry : paymentCurrencies.entrySet())
-            consumed.addAllItemStacks(entry.getKey().getStacksWithValue(entry.getValue()));
+            entry.getKey().getStacksWithValue(entry.getValue()).forEach(consumed::add);
 
         // Check space in stock ticker
         int occupiedSlots = 0;
@@ -306,7 +267,7 @@ public class CurrencyUtilities {
 
             // Other Payments
             InventorySummary tally = new InventorySummary();
-            tally.addAllBigItemStacks(paymentOther);
+            paymentOther.forEach(tally::add);
 
             for (int i = 0; i < player.getInventory().items.size(); i++) {
                 ItemStack item = player.getInventory()
@@ -397,7 +358,7 @@ public class CurrencyUtilities {
                 if (simulate) {
                     // If we're simulating, count this slot for later and
                     // save the remaining items for adding up.
-                    to_insert.addAllItemStacks(result.remaining());
+                    result.remaining().forEach(to_insert::add);
                     emptied_slots++;
 
                 } else if (result.remaining().isEmpty())
@@ -410,7 +371,7 @@ public class CurrencyUtilities {
                     // Give the player the remaining items while removing
                     // this slot's existing item.
                     var stacks = result.remaining();
-                    itemHandler.setStackInSlot(slot, stacks.getFirst());
+                    itemHandler.setStackInSlot(slot, stacks.get(0));
 
                     if (stacks.size() > 1)
                         for (int j = 1; j < stacks.size(); j++) {

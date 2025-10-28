@@ -30,8 +30,8 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
-import net.neoforged.neoforge.client.model.generators.ModelFile;
-import net.neoforged.neoforge.client.model.generators.MultiPartBlockStateBuilder;
+import net.minecraftforge.client.model.generators.ModelFile;
+import net.minecraftforge.client.model.generators.MultiPartBlockStateBuilder;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.function.Supplier;
@@ -48,7 +48,7 @@ public class CALBlockStateGen {
         return encasedFlexibleShaft(
                 () -> CALBlocks.DYED_FLEXIBLE_SHAFTS.get(color),
                 casing,
-                ResourceLocation.withDefaultNamespace("block/" + color.getSerializedName() + "_concrete"),
+                new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "block/" + color.getSerializedName() + "_concrete"),
                 casingShift
         );
     }
@@ -68,7 +68,7 @@ public class CALBlockStateGen {
     ) {
 
         return b -> {
-            b.loot((p, lb) -> p.dropOther(lb, drop.get()));
+            b.loot((p, lb) ->  p.dropOther(lb, drop.get()));
             b.blockstate(encasedFlexibleShaftBlockState(casing, coreTexture));
 
             if (casingShift != null) {
@@ -437,7 +437,7 @@ public class CALBlockStateGen {
     }
 
     private static ResourceLocation strippedLog(String wood) {
-        return ResourceLocation.withDefaultNamespace("block/stripped_" + wood + "_log_top");
+        return new ResourceLocation(ResourceLocation.DEFAULT_NAMESPACE, "block/stripped_" + wood + "_log_top");
     }
 
 
