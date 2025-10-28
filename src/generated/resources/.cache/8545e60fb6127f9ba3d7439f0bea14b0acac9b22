@@ -1,4 +1,4 @@
-// 1.21.1	2025-10-21T16:17:33.888272	Registrate Provider for createadditionallogistics [Registries, Data Maps, Recipes, Advancements, Loot Tables, Tags (enchantments), Tags (blocks), Tags (items), Tags (fluids), Tags (entity_types), generic_server_provider, Blockstates, Item models, Lang (en_us/en_ud), generic_client_provider]
+// 1.21.1	2025-10-28T01:07:55.9784958	Registrate Provider for createadditionallogistics [Registries, Data Maps, Recipes, Advancements, Loot Tables, Tags (enchantments), Tags (blocks), Tags (items), Tags (fluids), Tags (entity_types), generic_server_provider, Blockstates, Item models, Lang (en_us/en_ud), generic_client_provider]
 bfd7d0dc84f7893e95c616816a5be0c5556ceb41 assets/createadditionallogistics/blockstates/andesite_encased_black_flexible_shaft.json
 1b415eaca7a60190c3d3cfa6f5d1344201540cbe assets/createadditionallogistics/blockstates/andesite_encased_blue_flexible_shaft.json
 14ca0c953b730feed683c1b12803ff679b81e6cd assets/createadditionallogistics/blockstates/andesite_encased_brown_flexible_shaft.json
@@ -155,8 +155,8 @@ d825dd683b47fc4251d5d7bf7526a72832fbbdcc assets/createadditionallogistics/blocks
 53e565de7c2cb9464f4a99b4a02e9634d2b5661c assets/createadditionallogistics/blockstates/yellow_flexible_shaft.json
 b4bbcc5497a74ef589f70e8fcb0c5d98669b43f0 assets/createadditionallogistics/blockstates/yellow_short_seat.json
 173b6397594a4c9602e1e72f5d90e0fd93a021a9 assets/createadditionallogistics/blockstates/yellow_tall_seat.json
-01b00a53752998c16eac7225fcbe3e6fb4ec9f8d assets/createadditionallogistics/lang/en_ud.json
-563d06fa2b4200d8698c03218df0e2e5abb50dae assets/createadditionallogistics/lang/en_us.json
+02e47752fad4f707fadae346ff861c9a7f2d67db assets/createadditionallogistics/lang/en_ud.json
+394a20270839771abd954ffbed9337a02b4bce0c assets/createadditionallogistics/lang/en_us.json
 0c05a5ea524403273fe175b1e7d70287ca28ca72 assets/createadditionallogistics/models/block/andesite_encased_black_flexible_shaft.json
 6012b1cfe5d3bee8aea249359c34a034bb01b0a9 assets/createadditionallogistics/models/block/andesite_encased_blue_flexible_shaft.json
 11f6077f8fa1d08826b550fb8ca9e1e7c15508c9 assets/createadditionallogistics/models/block/andesite_encased_brown_flexible_shaft.json
@@ -596,6 +596,7 @@ ddb33bfd1a012cfbde91af8a2d068c5fafb28672 data/createadditionallogistics/advancem
 bdf553641e2d7a4214fe2b9d616aa6918dd50da3 data/createadditionallogistics/advancement/recipes/misc/crafting/logistics/cash_register_clear_data.json
 397e5518cc91775aa0a79c9d7a1fe4870cc6918d data/createadditionallogistics/advancement/recipes/misc/crafting/logistics/package_accelerator.json
 cb9cfa24e0ab1eba4315158d5c11640918b60ebe data/createadditionallogistics/advancement/recipes/misc/crafting/logistics/package_editor.json
+510edbdab09a0da51bae89eeda59c483afbee002 data/createadditionallogistics/advancement/recipes/misc/crafting/trains/network_monitor.json
 53bdacb763f1aedf007e128de22db23454d5fa9d data/createadditionallogistics/loot_table/blocks/andesite_encased_black_flexible_shaft.json
 5f906c3290cc302b1b602cbe9ee54797cb62915f data/createadditionallogistics/loot_table/blocks/andesite_encased_blue_flexible_shaft.json
 65510ddc41f1fd63f2d1cb3c1b51920d3749bda2 data/createadditionallogistics/loot_table/blocks/andesite_encased_brown_flexible_shaft.json
@@ -844,6 +845,7 @@ cb7e58a028f079e1776f9e82c13b183820e6578c data/createadditionallogistics/recipe/c
 d3d197658824583be34f2185127d4631d4bd5d44 data/createadditionallogistics/recipe/crafting/logistics/cash_register_clear_data.json
 326bf1acc06034368c4326d5e0c5cdd55b51e73c data/createadditionallogistics/recipe/crafting/logistics/package_accelerator.json
 2edc4d8c29dca9c4f7da87ea05759ab074d4a3a9 data/createadditionallogistics/recipe/crafting/logistics/package_editor.json
+944636e9d289347475e84a3963f01b982487bc98 data/createadditionallogistics/recipe/crafting/trains/network_monitor.json
 e5ccdadaa7dec25bda7ca0092dd3dc2974931fb9 data/createadditionallogistics/tags/block/basic_shafts.json
 d2cb05c6f1088ec971750741995e9f665ff022af data/createadditionallogistics/tags/block/flexible_shafts.json
 15c2e580c96606c1eaf73afd5630b5790fc5e220 data/createadditionallogistics/tags/block/lazy.json

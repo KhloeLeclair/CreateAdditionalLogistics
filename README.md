@@ -23,6 +23,21 @@ for example, limit it to only waiting for at most a stack of something at a time
 Your factory's logistics grid will thank you.
 
 
+### Additional Stock (Restocker Gauge Improvement)
+
+Restockers are pretty cool, but something I don't like about them is how they stock
+to a *specific value* and as soon as so much as a single cobblestone is missing,
+they'll request the exact number needed to reach that value again. This can be a
+bit silly and wasteful. As such, additional stock! Say, for example, you have a
+Restocker that's set to keep one stack of cobblestone on hand. With this, you can
+tell the Restocker to request 8 additional stacks of items whenever the available
+quantity falls under the requested level (1 stack). Then, say the number of
+cobblestone in storage drops to 32. Half of a stack. Instead of requesting 32
+cobblestone to get back up to one stack, it'll request 544 cobblestone. That's
+the missing 32, and 8 more stacks. Kind of like a Threshold Switch,  but for
+restocking. And with a somewhat clunkier UI because of how the Restocker works.
+
+
 ### Regular Expressions (Package Address Improvement)
 
 Globs are nice, but sometimes they just lack a little something, right? Well, go
@@ -100,6 +115,24 @@ Finally, there are two special behaviors you can manage if you're using a clipbo
    doesn't match any other rules.
 
 
+### Train Network Monitor Peripheral (New Block, CC: Tweaked Only)
+
+You know what's cool? Trains. You know what's cooler? Having some big cool wall of
+data about your trains. Arrivals, departures, the status of trains. And trains are
+pretty important for logistics, too. The Train Network Monitor is a single block
+that allows you to look up live data for any station and any train on a given
+train network. This includes everything the normal Train Station peripheral gives
+you, and additional events for train arrivals and departures. You can also see
+how many packages are in the system, and the status of every postbox attached to
+the various train stations.
+
+If you're feeling particularly adventurous, you can enable optional features for
+viewing more details about train inventories and for read-write access to remote
+trains and stations. Want to update schedules on the fly using a computer?
+Be my guest. However, this is disabled by default because it seems a bit too
+unbalanced to me.
+
+
 ### Short and Tall Seats (New Block, Basically... Seats?)
 
 Err, seats aren't logistics? Whatever do you mean? You can, erm... sit on them,
@@ -136,7 +169,9 @@ with incompatible rotations.
 
 Did I mention Lazy Shafts, Flexible Lazy Shafts, and Lazy Cogs can be encased? They
 support Andesite Casing, Brass Casing, Copper Casing, Industrial Iron Block, and
-Weathered Iron Block.
+Weathered Iron Block. (Yes, I want to implement Train Casing, but it's actually a
+bit weird to do for some weird technical reasons, at least if I want the connected
+textures to work properly. It's coming Eventually™.)
 
 
 ## Improvements
@@ -218,7 +253,7 @@ the stock ticker. But at least you won't do it by accident.
 
 * Train Network Monitor, a new CC: Tweaked peripheral that can be used to
   discover the state of all stations and associated postboxes on a rail
-  network. This is a work-in-progress block and currently has no recipe.
+  network, and receive events when trains arrive at or depart from stations. 
 
 * Cash Registers now support automatic currency conversion. This means that,
   as an example, if something costs a single Diamond and you only have a
@@ -226,6 +261,14 @@ the stock ticker. But at least you won't do it by accident.
   you eight Diamonds in change. This feature automatically discovers crafting
   2x2 or 3x3 crafting recipes for converting items up, and also supports a
   data asset for adding other currencies, such as the cogs from Numismatics.
+
+* Chinese translation. Thanks to yision1 on GitHub!
+
+* An API is now exposed to CC: Tweaked computers for processing package
+  addresses, available via `require("createadditionallogistics.package_addresses")`.
+  It can be used to convert Create's glob syntax to regular expressions, and
+  to determine if two provided addresses match.
+
 
 ### Changed
 
@@ -238,6 +281,10 @@ the stock ticker. But at least you won't do it by accident.
 * The address input field for Package Filters, Stock Keepers, Factory Gauges,
   and Redstone Requesters have had their length limit increased to 100 to
   match the change made to Frogport and Postboxes.
+
+* When changing the rotation of a Flexible Lazy Shaft, particles can now appear
+  to show which direction the side is rotating.
+
 
 ### Fixed
 

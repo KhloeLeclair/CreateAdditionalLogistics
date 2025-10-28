@@ -23,6 +23,7 @@
 
   "createadditionallogistics.config.trains.network-monitor.allow-inventory": "Allow Reading Inventory",
   "createadditionallogistics.config.trains.network-monitor.allow-writing": "Allow Writing",
+  "createadditionallogistics.config.trains.network-monitor.arrival-events": "Arrival Events",
 
   "createadditionallogistics.config.addresses.allowRegex": "Allow RegEx",
   "createadditionallogistics.config.addresses.optimize": "Optimize Matching",

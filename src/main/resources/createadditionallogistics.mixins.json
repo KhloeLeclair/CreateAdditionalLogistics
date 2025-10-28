@@ -9,10 +9,10 @@
     "MixinSeatBlock",
     "MixinStockTickerInteractionHandler",
     "MixinSmartBlockEntity",
+    "MixinTrain",
     "RotationPropagatorInvoker",
     "MixinAbstractContraptionEntity",
     "MixinBlazeBurnerBlockEntity",
-    "MixinShoppingListItem",
     "MixinTableClothBlockEntity",
     "IStockTickerBlockEntityAccessor",
     "IStationPeripheralAccessor"
@@ -23,7 +23,11 @@
     "client.MixinFactoryPanelScreen",
     "client.MixinStockKeeperRequestScreen",
     "client.MixinVisualizationManager",
-    "client.MixinAddressEditBox"
+    "client.MixinAddressEditBox",
+    "client.MixinTableClothOverlayRenderer",
+    "client.MixinShoppingListItem",
+    "client.IBlueprintOverlayRendererAccessor",
+    "client.MixinTrackTargetingClient"
   ],
   "injectors": {
     "defaultRequire": 1

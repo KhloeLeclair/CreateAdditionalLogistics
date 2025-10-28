@@ -6,17 +6,21 @@ import com.simibubi.create.content.contraptions.StructureTransform;
 import com.simibubi.create.content.decoration.encasing.EncasedBlock;
 import com.simibubi.create.content.kinetics.base.IRotate;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
+import com.simibubi.create.content.kinetics.base.RotationIndicatorParticleData;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.base.AbstractLowEntityKineticBlockEntity;
 import net.createmod.catnip.data.Iterate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.Vec3;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 
@@ -24,6 +28,11 @@ public class FlexibleShaftBlockEntity extends AbstractLowEntityKineticBlockEntit
 
     protected final byte[] sideActive;
     protected boolean validateSides;
+
+    @Nullable
+    protected Direction particleSide;
+    protected int particleCountdown;
+
 
     public FlexibleShaftBlockEntity(BlockEntityType<?> typeIn, BlockPos pos, BlockState state) {
         super(typeIn, pos, state);
@@ -58,10 +67,56 @@ public class FlexibleShaftBlockEntity extends AbstractLowEntityKineticBlockEntit
     public void tick() {
         super.tick();
 
-        if (validateSides && !level.isClientSide) {
-            validateSides = false;
-            checkSides();
+        if (!level.isClientSide) {
+            if (validateSides) {
+                validateSides = false;
+                checkSides();
+            }
+
+            if (particleCountdown > 0) {
+                particleCountdown--;
+                if (particleCountdown == 0)
+                    spawnSideParticles();
+            }
         }
+    }
+
+    protected void queueSideParticles(Direction side) {
+        particleSide = side;
+        particleCountdown = 2;
+    }
+
+    protected void spawnSideParticles() {
+        var side = particleSide;
+        if (side == null)
+            return;
+
+        particleSide = null;
+
+        if (!(level instanceof ServerLevel sl))
+            return;
+
+        float speed = getSpeed() * getRotationSpeedModifier(side);
+        if (speed == 0f)
+            return;
+
+        float step = side.getAxisDirection().getStep() * 0.5f;
+        var axis = side.getAxis();
+        Vec3 position = worldPosition.getCenter().add(
+            axis == Direction.Axis.X ? step : 0,
+            axis == Direction.Axis.Y ? step : 0,
+            axis == Direction.Axis.Z ? step : 0
+        );
+
+        var speedLevel = IRotate.SpeedLevel.of(speed);
+
+        int color = speedLevel.getColor();
+        int particleSpeed = speedLevel.getParticleSpeed();
+        particleSpeed *= Math.signum(speed);
+
+        var particleData = new RotationIndicatorParticleData(color, particleSpeed, .75f, .65f, 5, side.getAxis());
+
+        sl.sendParticles(particleData, position.x, position.y, position.z, 20, 0, 0, 0, 1);
     }
 
     @Override
@@ -156,6 +211,7 @@ public class FlexibleShaftBlockEntity extends AbstractLowEntityKineticBlockEntit
         }
 
         sideActive[index] = value;
+        queueSideParticles(side);
 
         var state = getBlockState();
         if (state.getBlock() instanceof EncasedBlock) {

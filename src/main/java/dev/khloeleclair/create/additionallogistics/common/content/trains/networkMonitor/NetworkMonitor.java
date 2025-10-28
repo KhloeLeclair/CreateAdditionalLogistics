@@ -4,6 +4,9 @@ import com.simibubi.create.content.trains.graph.EdgePointType;
 import com.simibubi.create.content.trains.graph.TrackGraph;
 import com.simibubi.create.content.trains.signal.SingleBlockEntityEdgePoint;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
+import org.jetbrains.annotations.Nullable;
+
+import java.util.UUID;
 
 public class NetworkMonitor extends SingleBlockEntityEdgePoint {
 
@@ -12,8 +15,42 @@ public class NetworkMonitor extends SingleBlockEntityEdgePoint {
             NetworkMonitor::new
     );
 
+    public static void onTrainArrival(TrackGraph graph, UUID train, UUID station) {
+        graph.getPoints(NETWORK_MONITOR).forEach(point -> point.onTrainArrival(train, station));
+    }
+
+    public static void onTrainDeparture(TrackGraph graph, UUID train) {
+        graph.getPoints(NETWORK_MONITOR).forEach(point -> point.onTrainDeparture(train));
+    }
+
+
     public NetworkMonitor() {
 
+    }
+
+    @Nullable
+    public NetworkMonitorBlockEntity getEntity() {
+        var server = CreateAdditionalLogistics.getServer();
+        if (server == null || blockEntityDimension == null)
+            return null;
+
+        var level = server.getLevel(blockEntityDimension);
+        if (level == null || !level.isLoaded(blockEntityPos) || !(level.getBlockEntity(blockEntityPos) instanceof NetworkMonitorBlockEntity nmbe))
+            return null;
+
+        return nmbe;
+    }
+
+    public void onTrainArrival(UUID train, UUID station) {
+        var nmbe = getEntity();
+        if (nmbe != null)
+            nmbe.onTrainArrival(train, station);
+    }
+
+    public void onTrainDeparture(UUID train) {
+        var nmbe = getEntity();
+        if (nmbe != null)
+            nmbe.onTrainDeparture(train);
     }
 
     @Override

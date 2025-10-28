@@ -11,7 +11,7 @@ import com.simibubi.create.foundation.item.TooltipModifier;
 import com.tterrag.registrate.util.nullness.NonNullSupplier;
 import dev.khloeleclair.create.additionallogistics.common.Config;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.base.AbstractLowEntityKineticBlockEntity;
-import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CurrencyUtilities;
+import dev.khloeleclair.create.additionallogistics.common.utilities.CurrencyUtilities;
 import dev.khloeleclair.create.additionallogistics.common.datagen.DataGen;
 import dev.khloeleclair.create.additionallogistics.common.registries.*;
 import dev.khloeleclair.create.additionallogistics.common.utilities.RecipeHelper;
@@ -64,6 +64,8 @@ public class CreateAdditionalLogistics {
 
         // Register things.
         REGISTRATE.get().registerEventListeners(modEventBus);
+
+        CurrencyUtilities.init();
 
         CALTags.init();
         CALBlocks.register();

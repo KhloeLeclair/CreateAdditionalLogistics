@@ -1,4 +1,4 @@
-package dev.khloeleclair.create.additionallogistics.common;
+package dev.khloeleclair.create.additionallogistics.common.utilities;
 
 public interface IPromiseLimit {
     int getCALPromiseLimit();

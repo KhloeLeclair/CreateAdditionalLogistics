@@ -1,12 +1,12 @@
-package dev.khloeleclair.create.additionallogistics.mixin;
+package dev.khloeleclair.create.additionallogistics.mixin.client;
 
 import com.llamalad7.mixinextras.sugar.Local;
 import com.simibubi.create.content.logistics.packager.InventorySummary;
 import com.simibubi.create.content.logistics.tableCloth.ShoppingListItem;
-import dev.khloeleclair.create.additionallogistics.api.currency.ICurrency;
-import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CurrencyUtilities;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALDataComponents;
+import dev.khloeleclair.create.additionallogistics.common.utilities.CurrencyUtilities;
 import net.createmod.catnip.data.Couple;
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -38,9 +38,9 @@ public class MixinShoppingListItem {
         var items = lists.getSecond();
         // Check for currency items to handle.
         for(var item : items.getStacks()) {
-            if (ICurrency.getForItem(item.stack.getItem()) != null) {
+            if (CurrencyUtilities.getForItem(item.stack.getItem()) != null) {
                 ci.cancel();
-                CurrencyUtilities.createShoppingListTooltip(stack, tooltipComponents, tooltipFlag, lists);
+                CurrencyUtilities.createShoppingListTooltip(Minecraft.getInstance().player, stack, tooltipComponents, tooltipFlag, lists);
                 return;
             }
         }

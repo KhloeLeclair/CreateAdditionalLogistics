@@ -20,6 +20,7 @@ public class CALComputerCraftProxy {
     private static void registerWithDependency() {
         computerFactory = CALComputerBehavior::new;
         CALComputerBehavior.registerItemDetailProviders();
+        CALComputerBehavior.registerApis();
     }
 
     public static AbstractEventfulComputerBehavior behavior(SmartBlockEntity sbe) {

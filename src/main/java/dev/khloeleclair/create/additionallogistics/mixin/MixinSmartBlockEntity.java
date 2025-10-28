@@ -1,7 +1,7 @@
 package dev.khloeleclair.create.additionallogistics.mixin;
 
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
-import dev.khloeleclair.create.additionallogistics.common.ISetLazyTickCounter;
+import dev.khloeleclair.create.additionallogistics.common.utilities.ISetLazyTickCounter;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 

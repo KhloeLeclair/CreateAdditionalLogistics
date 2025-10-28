@@ -8,7 +8,7 @@ import com.simibubi.create.foundation.blockEntity.behaviour.ValueBoxTransform;
 import com.simibubi.create.foundation.blockEntity.behaviour.filtering.FilteringBehaviour;
 import com.simibubi.create.foundation.utility.CreateLang;
 import dev.khloeleclair.create.additionallogistics.common.Config;
-import dev.khloeleclair.create.additionallogistics.common.IPromiseLimit;
+import dev.khloeleclair.create.additionallogistics.common.utilities.IPromiseLimit;
 import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;

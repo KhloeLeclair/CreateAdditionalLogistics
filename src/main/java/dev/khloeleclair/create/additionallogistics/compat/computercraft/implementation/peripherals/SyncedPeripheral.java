@@ -5,17 +5,17 @@ import com.simibubi.create.compat.computercraft.implementation.ComputerBehaviour
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import dan200.computercraft.api.peripheral.IComputerAccess;
 import dan200.computercraft.api.peripheral.IPeripheral;
+import dan200.computercraft.api.peripheral.NotAttachedException;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import net.createmod.catnip.platform.CatnipServices;
 
 import javax.annotation.Nullable;
-import java.lang.ref.WeakReference;
 import java.util.Map;
 
 public abstract class SyncedPeripheral<T extends SmartBlockEntity> implements IPeripheral {
 
     protected final T blockEntity;
-    private final Map<Integer, WeakReference<IComputerAccess>> computers = new Int2ObjectOpenHashMap<>();
+    private final Map<Integer, IComputerAccess> computers = new Int2ObjectOpenHashMap<>();
 
     public SyncedPeripheral(T blockEntity) {
         this.blockEntity = blockEntity;
@@ -24,7 +24,7 @@ public abstract class SyncedPeripheral<T extends SmartBlockEntity> implements IP
     @Override
     public void attach(IComputerAccess computer) {
         synchronized (computers) {
-            computers.put(computer.getID(), new WeakReference<>(computer));
+            computers.put(computer.getID(), computer);
         }
         updateBlockEntity();
     }
@@ -38,36 +38,42 @@ public abstract class SyncedPeripheral<T extends SmartBlockEntity> implements IP
     }
 
     public void queuePositionedEvent(String event, Object... arguments) {
-        pruneDeadComputers();
-        for(var ref : computers.values()) {
-            var computer = ref.get();
-            if (computer != null) {
-                Object[] args = new Object[arguments.length + 1];
-                System.arraycopy(arguments, 0, args, 1, arguments.length);
-                args[0] = computer.getAttachmentName();
+        if (computers.isEmpty())
+            return;
 
-                computer.queueEvent(event, args);
+        synchronized (computers) {
+            var it = computers.values().iterator();
+            while(it.hasNext()) {
+                var computer = it.next();
+                try {
+                    String name = computer.getAttachmentName();
+                    Object[] args = new Object[arguments.length + 1];
+                    System.arraycopy(arguments, 0, args, 1, arguments.length);
+                    args[0] = name;
+
+                    computer.queueEvent(event, args);
+                } catch(NotAttachedException ex) {
+                    it.remove();
+                }
             }
         }
     }
 
     public void queueEvent(String event, Object... arguments) {
-        pruneDeadComputers();
-        for(var ref : computers.values()) {
-            var computer = ref.get();
-            if (computer != null)
-                computer.queueEvent(event, arguments);
-        }
-    }
-
-    private void pruneDeadComputers() {
         synchronized (computers) {
-            computers.values().removeIf(ref -> ref.get() == null);
+            var it = computers.values().iterator();
+            while(it.hasNext()) {
+                var computer = it.next();
+                try {
+                    computer.queueEvent(event, arguments);
+                } catch(NotAttachedException ex) {
+                    it.remove();
+                }
+            }
         }
     }
 
     private void updateBlockEntity() {
-        pruneDeadComputers();
         boolean hasAttachedComputer = ! computers.isEmpty();
 
         blockEntity.getBehaviour(ComputerBehaviour.TYPE).setHasAttachedComputer(hasAttachedComputer);

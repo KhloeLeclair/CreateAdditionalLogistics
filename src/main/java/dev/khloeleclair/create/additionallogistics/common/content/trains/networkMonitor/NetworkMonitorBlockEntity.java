@@ -1,25 +1,25 @@
 package dev.khloeleclair.create.additionallogistics.common.content.trains.networkMonitor;
 
 import com.simibubi.create.compat.Mods;
-import com.simibubi.create.compat.computercraft.AbstractComputerBehaviour;
 import com.simibubi.create.content.trains.track.TrackTargetingBehaviour;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import dan200.computercraft.api.peripheral.PeripheralCapability;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALBlockEntityTypes;
+import dev.khloeleclair.create.additionallogistics.compat.computercraft.AbstractEventfulComputerBehavior;
 import dev.khloeleclair.create.additionallogistics.compat.computercraft.CALComputerCraftProxy;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import org.jetbrains.annotations.Nullable;
 
 import java.util.List;
+import java.util.UUID;
 
 public class NetworkMonitorBlockEntity extends SmartBlockEntity {
 
     public TrackTargetingBehaviour<NetworkMonitor> edgePoint;
-    public AbstractComputerBehaviour computerBehavior;
+    public AbstractEventfulComputerBehavior computerBehavior;
 
     public NetworkMonitorBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
         super(type, pos, state);
@@ -47,10 +47,12 @@ public class NetworkMonitorBlockEntity extends SmartBlockEntity {
         }
     }
 
+    public void onTrainArrival(UUID train, UUID station) {
+        computerBehavior.queuePositionedEvent("train_arrival", train.toString(), station.toString());
+    }
 
-    @Nullable
-    public NetworkMonitor getMonitor() {
-        return edgePoint.getEdgePoint();
+    public void onTrainDeparture(UUID train) {
+        computerBehavior.queuePositionedEvent("train_departure", train.toString());
     }
 
 }

@@ -3,6 +3,7 @@ package dev.khloeleclair.create.additionallogistics.common.datagen;
 import com.simibubi.create.Create;
 import com.simibubi.create.content.decoration.encasing.EncasedCTBehaviour;
 import com.simibubi.create.foundation.block.connected.CTSpriteShiftEntry;
+import com.simibubi.create.foundation.block.connected.HorizontalCTBehaviour;
 import com.simibubi.create.foundation.data.CreateRegistrate;
 import com.simibubi.create.foundation.data.SharedProperties;
 import com.tterrag.registrate.builders.BlockBuilder;
@@ -329,7 +330,28 @@ public class CALBlockStateGen {
                                 .texture("casing", casingLocation)
                                 .texture("opening", openingLocation))
                 .build();
+    }
 
+    public static <B extends EncasedLazyShaftBlock, P> NonNullUnaryOperator<BlockBuilder<B, P>> layeredEncasedLazyShaft(
+            String casing, ResourceLocation openingLocation, Supplier<CTSpriteShiftEntry> casingShift, Supplier<CTSpriteShiftEntry> casingShift2
+    ) {
+        return builder -> encasedBase(builder, CALBlocks.LAZY_SHAFT::get)
+                .onRegister(CreateRegistrate.connectedTextures(() -> new HorizontalCTBehaviour(casingShift.get(), casingShift2.get())))
+                .onRegister(CreateRegistrate.casingConnectivity((block, cc) -> cc.make(block, casingShift.get(),
+                        (s, f) -> f.getAxis() != s.getValue(AbstractLazySimpleKineticBlock.AXIS))))
+                .blockstate((c, p) -> axisBlock(c, p, blockState -> p.models()
+                                .withExistingParent("block/encased_lazy_shaft/block_" + casing, p.modLoc("block/lazy_shaft/layered_encased"))
+                                .texture("side", casingShift.get().getOriginalResourceLocation())
+                                .texture("end", casingShift2.get().getOriginalResourceLocation())
+                                .texture("opening", openingLocation)
+                        , true))
+                .item()
+                .model((c,p) ->
+                        p.withExistingParent("block/encased_lazy_shaft/item_" + casing, p.modLoc("block/lazy_shaft/layered_encased"))
+                                .texture("side", casingShift.get().getOriginalResourceLocation())
+                                .texture("end", casingShift2.get().getOriginalResourceLocation())
+                                .texture("opening", openingLocation))
+                .build();
     }
 
     public static <B extends EncasedLazyShaftBlock, P> NonNullUnaryOperator<BlockBuilder<B, P>> encasedLazyShaftNotConnected(

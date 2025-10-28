@@ -2,7 +2,7 @@ package dev.khloeleclair.create.additionallogistics.mixin;
 
 import com.simibubi.create.content.logistics.stockTicker.StockTickerInteractionHandler;
 import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CashRegisterBlockEntity;
-import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CurrencyUtilities;
+import dev.khloeleclair.create.additionallogistics.common.utilities.CurrencyUtilities;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;

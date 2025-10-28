@@ -25,21 +25,22 @@ public class Config {
     }
 
     public static class _Server {
-        public final ModConfigSpec.BooleanValue currencyConversion;
-        public final ModConfigSpec.BooleanValue stockTickersConvertToo;
+        public final ModConfigSpec.BooleanValue currencyCompression;
+        public final ModConfigSpec.BooleanValue currencyStockTicker;
 
-        public final ModConfigSpec.BooleanValue allowTrainInventoryReading;
-        public final ModConfigSpec.BooleanValue allowTrainWriting;
+        public final ModConfigSpec.BooleanValue trainInventoryAccess;
+        public final ModConfigSpec.BooleanValue trainWriting;
+        public final ModConfigSpec.BooleanValue trainArrivalEvents;
 
         _Server(ModConfigSpec.Builder builder) {
             builder.comment("Currency Conversion").push("currencyConversion");
 
-            currencyConversion = builder
+            currencyCompression = builder
                     .comment("When enabled, items that are freely converted to and from other items (for example, 9 Diamonds equal 1 Diamond Block) will be converted automatically to make shopping easier. Otherwise, only specifically defined currencies will work.")
                     .translation(t("currency-conversion.compression"))
                     .define("compression", true);
 
-            stockTickersConvertToo = builder
+            currencyStockTicker = builder
                     .comment("Allow Stock Tickers to perform Currency Conversion as well.")
                     .translation(t("currency-conversion.stock-tickers"))
                     .define("allowStockTickers", false);
@@ -48,15 +49,20 @@ public class Config {
 
             builder.comment("Train Network Monitor").push("trainNetworkMonitor");
 
-            allowTrainInventoryReading = builder
+            trainInventoryAccess = builder
                     .comment("When enabled, a train's inventory and fluid contents can be read using a Train Network Monitor Peripheral. When disabled, only information about packages is available.")
                     .translation(t("trains.network-monitor.allow-inventory"))
                     .define("allowInventoryAccess", false);
 
-            allowTrainWriting = builder
+            trainWriting = builder
                     .comment("When enabled, trains and stations can be modified using a Train Network Monitor Peripheral. When disabled, data can only be read.")
                     .translation(t("trains.network-monitor.allow-writing"))
                     .define("allowWriting", false);
+
+            trainArrivalEvents = builder
+                    .comment("When enabled, Train Network Monitors will emit events whenever a train arrives or departs a station on the monitored train network.")
+                    .translation(t("trains.network-monitor.arrival-events"))
+                    .define("arrivalEvents", true);
 
             builder.pop();
         }

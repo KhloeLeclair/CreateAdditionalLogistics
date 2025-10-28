@@ -25,7 +25,7 @@ public class LuaTrainObject implements LuaComparable {
     protected final Train train;
 
     public static LuaTrainObject of(Train train, boolean writeable) {
-        boolean allow_inventory = Config.Server.allowTrainInventoryReading.get();
+        boolean allow_inventory = Config.Server.trainInventoryAccess.get();
 
         if (writeable) {
             return allow_inventory ? new LuaWriteableInventoryTrainObject(train) : new LuaWriteableTrainObject(train);

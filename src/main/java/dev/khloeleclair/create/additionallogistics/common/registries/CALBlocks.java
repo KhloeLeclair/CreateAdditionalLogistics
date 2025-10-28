@@ -8,7 +8,6 @@ import com.simibubi.create.content.decoration.encasing.EncasedBlock;
 import com.simibubi.create.content.decoration.encasing.EncasingRegistry;
 import com.simibubi.create.content.logistics.packager.PackagerGenerator;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBlockItem;
-import com.simibubi.create.content.trains.graph.EdgePointType;
 import com.simibubi.create.content.trains.track.TrackTargetingBlockItem;
 import com.simibubi.create.foundation.block.DyedBlockList;
 import com.simibubi.create.foundation.data.CreateRegistrate;
@@ -36,6 +35,7 @@ import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.
 import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CashRegisterBlock;
 import dev.khloeleclair.create.additionallogistics.common.content.logistics.packageAccelerator.PackageAcceleratorBlock;
 import dev.khloeleclair.create.additionallogistics.common.content.logistics.packageEditor.PackageEditorBlock;
+import dev.khloeleclair.create.additionallogistics.common.content.trains.networkMonitor.NetworkMonitor;
 import dev.khloeleclair.create.additionallogistics.common.content.trains.networkMonitor.NetworkMonitorBlock;
 import dev.khloeleclair.create.additionallogistics.common.datagen.CALBlockStateGen;
 import net.createmod.catnip.data.Couple;
@@ -130,6 +130,13 @@ public class CALBlocks {
                     .transform(CALBlockStateGen.encasedLazyShaft("copper", CreateAdditionalLogistics.asResource("block/copper_gearbox"), () -> AllSpriteShifts.COPPER_CASING))
                     .transform(encasedLazyShaft())
                     .register();
+
+    /*public static BlockEntry<EncasedLazyShaftBlock> RAILWAY_ENCASED_LAZY_SHAFT =
+            REGISTRATE.block("railway_encased_lazy_shaft", p -> new EncasedLazyShaftBlock(p, AllBlocks.RAILWAY_CASING::get))
+                    .properties(p -> p.mapColor(MapColor.TERRACOTTA_CYAN))
+                    .transform(CALBlockStateGen.layeredEncasedLazyShaft("railway", Create.asResource("block/brass_gearbox"), () -> AllSpriteShifts.RAILWAY_CASING_SIDE, () -> AllSpriteShifts.RAILWAY_CASING))
+                    .transform(encasedLazyShaft())
+                    .register();*/
 
     public static BlockEntry<EncasedLazyShaftBlock> INDUSTRIAL_IRON_ENCASED_LAZY_SHAFT =
             REGISTRATE.block("industrial_iron_encased_lazy_shaft", p -> new EncasedLazyShaftBlock(p, AllBlocks.INDUSTRIAL_IRON_BLOCK))
@@ -494,24 +501,33 @@ public class CALBlocks {
                     .blockstate((c, p) -> p.simpleBlock(c.get(), p.models().getExistingFile(p.modLoc("block/" + c.getName() + "/block"))))
                     .lang("Train Network Monitor Peripheral")
                     .recipe((c,p) -> {
-                        var ender_modem = BuiltInRegistries.ITEM.getOptional(ResourceLocation.fromNamespaceAndPath("computercraft", "ender_modem"));
+                        var ender_modem = BuiltInRegistries.ITEM.getOptional(ResourceLocation.fromNamespaceAndPath("computercraft", "wireless_modem_advanced"));
                         if (ender_modem.isEmpty())
                             return;
 
                         ShapelessRecipeBuilder.shapeless(RecipeCategory.MISC, c.get())
-                                .unlockedBy("has_cc_modem", RegistrateRecipeProvider.has(ender_modem.get()))
+                                .unlockedBy("has_modem", RegistrateRecipeProvider.has(ender_modem.get()))
+                                .unlockedBy("has_casing", RegistrateRecipeProvider.has(AllBlocks.RAILWAY_CASING))
                                 .requires(AllBlocks.RAILWAY_CASING)
                                 .requires(AllItems.TRANSMITTER)
                                 .requires(ender_modem.get())
                                 .save(p, CreateAdditionalLogistics.asResource("crafting/trains/" + c.getName()));
                     })
-                    .item(TrackTargetingBlockItem.ofType(EdgePointType.OBSERVER))
+                    .item(TrackTargetingBlockItem.ofType(NetworkMonitor.NETWORK_MONITOR))
                     .build()
                     .register();
 
     static {
         REGISTRATE.defaultCreativeTab(AllCreativeModeTabs.BASE_CREATIVE_TAB.getKey());
     }
+
+    // Vertical Belt
+    /*public static final BlockEntry<VerticalBeltBlock> VERTICAL_BELT =
+            REGISTRATE.block("vertical_belt", VerticalBeltBlock::new)
+                    .initialProperties(SharedProperties::softMetal)
+                    .properties(p -> p.mapColor(MapColor.COLOR_GRAY))
+                    .transform(axeOrPickaxe())
+                    .register();*/
 
     // Cash Register
     public static final BlockEntry<CashRegisterBlock> CASH_REGISTER =

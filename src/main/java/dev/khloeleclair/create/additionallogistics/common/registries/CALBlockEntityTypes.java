@@ -12,6 +12,8 @@ import dev.khloeleclair.create.additionallogistics.client.content.kinetics.lazy.
 import dev.khloeleclair.create.additionallogistics.client.content.logistics.cashRegister.CashRegisterBlockEntityRenderer;
 import dev.khloeleclair.create.additionallogistics.client.content.logistics.packageAccelerator.PackageAcceleratorRenderer;
 import dev.khloeleclair.create.additionallogistics.client.content.logistics.packageAccelerator.PackageAcceleratorVisual;
+import dev.khloeleclair.create.additionallogistics.client.content.trains.networkMonitor.NetworkMonitorRenderer;
+import dev.khloeleclair.create.additionallogistics.client.content.trains.networkMonitor.NetworkMonitorVisual;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.cog.LazyCogWheelBlockEntity;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.FlexibleShaftBlockEntity;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.shaft.LazyShaftBlockEntity;
@@ -23,6 +25,14 @@ import dev.khloeleclair.create.additionallogistics.common.content.trains.network
 public class CALBlockEntityTypes {
 
     private static final CreateRegistrate REGISTRATE = CreateAdditionalLogistics.REGISTRATE.get();
+
+    // Vertical Belt
+    /*public static final BlockEntityEntry<VerticalBeltBlockEntity> VERTICAL_BELT =
+            REGISTRATE.blockEntity("vertical_belt", VerticalBeltBlockEntity::new)
+                    .validBlocks(
+                            CALBlocks.VERTICAL_BELT
+                    )
+                    .register();*/
 
     // Flexible Shaft
     public static final BlockEntityEntry<FlexibleShaftBlockEntity> FLEXIBLE_SHAFT =
@@ -50,7 +60,7 @@ public class CALBlockEntityTypes {
                     .validBlocks(
                             CALBlocks.LAZY_SHAFT,
                             CALBlocks.ANDESITE_ENCASED_LAZY_SHAFT, CALBlocks.BRASS_ENCASED_LAZY_SHAFT,
-                            CALBlocks.COPPER_ENCASED_LAZY_SHAFT,
+                            CALBlocks.COPPER_ENCASED_LAZY_SHAFT, //CALBlocks.RAILWAY_ENCASED_LAZY_SHAFT,
                             CALBlocks.INDUSTRIAL_IRON_ENCASED_LAZY_SHAFT, CALBlocks.WEATHERED_IRON_ENCASED_LAZY_SHAFT
                     )
                     .renderer(() -> LowEntityKineticBlockEntityRenderer::new)
@@ -84,7 +94,9 @@ public class CALBlockEntityTypes {
     // Network Monitor
     public static final BlockEntityEntry<NetworkMonitorBlockEntity> NETWORK_MONITOR =
             REGISTRATE.blockEntity("network_monitor", NetworkMonitorBlockEntity::new)
+                    .visual(() -> NetworkMonitorVisual::new)
                     .validBlocks(CALBlocks.NETWORK_MONITOR)
+                    .renderer(() -> NetworkMonitorRenderer::new)
                     .register();
 
     // Cash Register

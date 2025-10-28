@@ -5,7 +5,7 @@ import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.content.logistics.packager.PackagerBlockEntity;
 import com.simibubi.create.foundation.blockEntity.behaviour.BlockEntityBehaviour;
 import dev.khloeleclair.create.additionallogistics.common.Config;
-import dev.khloeleclair.create.additionallogistics.common.ISetLazyTickCounter;
+import dev.khloeleclair.create.additionallogistics.common.utilities.ISetLazyTickCounter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;

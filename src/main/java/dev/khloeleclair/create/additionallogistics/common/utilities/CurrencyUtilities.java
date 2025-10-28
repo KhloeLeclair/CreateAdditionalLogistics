@@ -1,4 +1,4 @@
-package dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister;
+package dev.khloeleclair.create.additionallogistics.common.utilities;
 
 import com.simibubi.create.AllSoundEvents;
 import com.simibubi.create.content.logistics.BigItemStack;
@@ -6,21 +6,26 @@ import com.simibubi.create.content.logistics.packager.InventorySummary;
 import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBehaviour;
 import com.simibubi.create.content.logistics.stockTicker.PackageOrder;
 import com.simibubi.create.content.logistics.stockTicker.StockTickerBlockEntity;
+import com.simibubi.create.content.logistics.tableCloth.BlueprintOverlayShopContext;
 import com.simibubi.create.content.logistics.tableCloth.ShoppingListItem;
 import com.simibubi.create.foundation.utility.CreateLang;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
-import dev.khloeleclair.create.additionallogistics.api.currency.ICurrency;
+import dev.khloeleclair.create.additionallogistics.api.Currency;
+import dev.khloeleclair.create.additionallogistics.api.ICurrency;
+import dev.khloeleclair.create.additionallogistics.api.ICurrencyBuilder;
 import dev.khloeleclair.create.additionallogistics.common.CALLang;
 import dev.khloeleclair.create.additionallogistics.common.Config;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CashRegisterBlockEntity;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALDataMaps;
-import dev.khloeleclair.create.additionallogistics.common.utilities.RecipeHelper;
 import dev.khloeleclair.create.additionallogistics.mixin.IStockTickerBlockEntityAccessor;
+import dev.khloeleclair.create.additionallogistics.mixin.client.IBlueprintOverlayRendererAccessor;
 import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.createmod.catnip.data.Couple;
 import net.createmod.catnip.data.Iterate;
 import net.createmod.catnip.data.Pair;
 import net.minecraft.ChatFormatting;
+import net.minecraft.client.Minecraft;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
@@ -28,12 +33,19 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.neoforged.api.distmarker.Dist;
+import net.neoforged.api.distmarker.OnlyIn;
+import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
+import net.neoforged.neoforge.items.wrapper.PlayerInvWrapper;
 import net.neoforged.neoforge.registries.datamaps.DataMapsUpdatedEvent;
 import org.jetbrains.annotations.Nullable;
 
@@ -41,14 +53,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.function.BiFunction;
 
 public class CurrencyUtilities {
 
     public static final Map<ResourceLocation, ICurrency> CURRENCIES = new Object2ObjectOpenHashMap<>();
     public static final Map<Item, ResourceLocation> API_CURRENCIES = new Object2ObjectOpenHashMap<>();
-    public static final Map<ResourceLocation, BiFunction<Integer, TooltipFlag, Component>> FORMATTERS = new Object2ObjectOpenHashMap<>();
-    public static final Map<ResourceLocation, BiFunction<Integer, TooltipFlag, Component>> BUILTIN_FORMATTERS = new Object2ObjectOpenHashMap<>();
+    public static final Map<ResourceLocation, ICurrency.IValueFormatter> FORMATTERS = new Object2ObjectOpenHashMap<>();
+    public static final Map<ResourceLocation, ICurrency.IValueFormatter> BUILTIN_FORMATTERS = new Object2ObjectOpenHashMap<>();
 
     private static boolean isPopulated;
 
@@ -64,6 +75,8 @@ public class CurrencyUtilities {
             var result = Component.literal(String.valueOf(spurs)).append("¤");
 
             if (cogs > 0) {
+                // Yes this is a terrible way to handle pluralization.
+                // This is also the way Numismatics itself handles it, so...
                 var new_result = CALLang.number(cogs).text(" ").text(Component.translatable("item.numismatics.cog").getString().toLowerCase(Locale.ROOT) + (cogs == 1 ? "" : "s"));
                 if (spurs == 0)
                     return new_result.component();
@@ -76,20 +89,16 @@ public class CurrencyUtilities {
     }
 
     public static boolean isConversionEnabled(boolean is_cash_register) {
-        if (!is_cash_register && !Config.Server.stockTickersConvertToo.get())
+        if (!is_cash_register && !Config.Server.currencyStockTicker.get())
             return false;
-        if (Config.Server.currencyConversion.get())
+        if (Config.Server.currencyCompression.get())
             return true;
         ensurePopulated();
         return ! CURRENCIES.isEmpty();
     }
 
-    public static boolean isConversionEnabled() {
-        return isConversionEnabled(true);
-    }
-
     @Nullable
-    public static BiFunction<Integer, TooltipFlag, Component> getFormatter(ResourceLocation id) {
+    public static ICurrency.IValueFormatter getFormatter(ResourceLocation id) {
         synchronized (FORMATTERS) {
             if (FORMATTERS.containsKey(id))
                 return FORMATTERS.get(id);
@@ -110,7 +119,7 @@ public class CurrencyUtilities {
         }
     }
 
-    public static void registerFormatter(ResourceLocation id, BiFunction<Integer, TooltipFlag, Component> formatter) {
+    public static void registerFormatter(ResourceLocation id, ICurrency.IValueFormatter formatter) {
         synchronized (FORMATTERS) {
             FORMATTERS.put(id, formatter);
         }
@@ -218,7 +227,7 @@ public class CurrencyUtilities {
         }
 
         Couple<InventorySummary> bakeEntries = list.bakeEntries(level, null);
-        var payment = splitCost(bakeEntries.getSecond().getStacksByCount());
+        var payment = splitCost(player, bakeEntries.getSecond().getStacksByCount());
 
         Map<ICurrency, Integer> paymentCurrencies = payment.getFirst();
         List<BigItemStack> paymentOther = payment.getSecond();
@@ -360,6 +369,14 @@ public class CurrencyUtilities {
 
     /// Extract an amount of currency from the player's inventory.
     public static ExtractValueResult extractValueFromPlayer(Player player, ICurrency currency, int value, boolean simulate) {
+        return extractValueFrom(player, player.level(), player.blockPosition(), new PlayerInvWrapper(player.getInventory()), currency, value, simulate);
+    }
+
+    public static ExtractValueResult extractValueFromBlock(@Nullable Player player, BlockEntity be, IItemHandlerModifiable itemHandler, ICurrency currency, int value, boolean simulate) {
+        return extractValueFrom(player, be.getLevel(), be.getBlockPos(), itemHandler, currency, value, simulate);
+    }
+
+    public static ExtractValueResult extractValueFrom(@Nullable Player player, Level level, BlockPos pos, IItemHandlerModifiable itemHandler, ICurrency currency, int value, boolean simulate) {
         if (value <= 0)
             return ExtractValueResult.of(false, 0);
 
@@ -367,40 +384,52 @@ public class CurrencyUtilities {
         int emptied_slots = 0;
         InventorySummary to_insert = new InventorySummary();
 
-        // TODO: Refactor this method to always draw the smallest valid currency first,
-        // instead of just the first one we find.
-
         // First, build a list of items to insert.
-        for(int i = 0; i < player.getInventory().items.size(); i++) {
-            ItemStack stack = player.getInventory().getItem(i);
-            var result = currency.extractValue(stack, remaining);
-            if (result.remainingValue() == remaining)
-                continue;
+        for(boolean exact : Iterate.trueAndFalse) {
+            for (int slot = 0; slot < itemHandler.getSlots(); slot++) {
+                ItemStack stack = itemHandler.getStackInSlot(slot);
+                var result = currency.extractValue(player, stack, remaining, exact);
+                if (result.remainingValue() == remaining)
+                    continue;
 
-            remaining = result.remainingValue();
+                remaining = result.remainingValue();
 
-            if (simulate) {
-                // If we're simulating, count this slot for later and
-                // save the remaining items for adding up.
-                to_insert.addAllItemStacks(result.remaining());
-                emptied_slots++;
+                if (simulate) {
+                    // If we're simulating, count this slot for later and
+                    // save the remaining items for adding up.
+                    to_insert.addAllItemStacks(result.remaining());
+                    emptied_slots++;
 
-            } else if (result.remaining().isEmpty())
-                // We're not simulating, there's nothing remaining.
-                // Clear this slot.
-                player.getInventory().setItem(i, ItemStack.EMPTY);
+                } else if (result.remaining().isEmpty())
+                    // We're not simulating, there's nothing remaining.
+                    // Clear this slot.
+                    itemHandler.setStackInSlot(slot, ItemStack.EMPTY);
 
-            else {
-                // We're not simulating. There's remaining items.
-                // Give the player the remaining items while removing
-                // this slot's existing item.
-                var stacks = result.remaining();
-                player.getInventory().setItem(i, stacks.getFirst());
+                else {
+                    // We're not simulating. There's remaining items.
+                    // Give the player the remaining items while removing
+                    // this slot's existing item.
+                    var stacks = result.remaining();
+                    itemHandler.setStackInSlot(slot, stacks.getFirst());
 
-                if (stacks.size() > 1)
-                    for(int j = 1; j < stacks.size(); j++)
-                        ItemHandlerHelper.giveItemToPlayer(player, stacks.get(j));
+                    if (stacks.size() > 1)
+                        for (int j = 1; j < stacks.size(); j++) {
+                            var remainder = ItemHandlerHelper.insertItem(itemHandler, stacks.get(j), false);
+                            if (!remainder.isEmpty() && !level.isClientSide) {
+                                ItemEntity entity = new ItemEntity(level, pos.getX(), pos.getY() + 0.5F, pos.getZ(), remainder);
+                                entity.setPickUpDelay(40);
+                                entity.setDeltaMovement(entity.getDeltaMovement().multiply(0.0, 1.0, 0.0));
+                                level.addFreshEntity(entity);
+                            }
+                        }
+                }
+
+                if (remaining <= 0)
+                    break;
             }
+
+            if (remaining <= 0)
+                break;
         }
 
         // If we're simulating, see if we have room to insert any remaining values.
@@ -412,8 +441,8 @@ public class CurrencyUtilities {
                 occupiedSlots += Mth.ceil(entry.count / (float) entry.stack.getMaxStackSize());
 
             occupiedSlots -= emptied_slots;
-            for (int i = 0; i < player.getInventory().items.size(); i++) {
-                ItemStack stack = player.getInventory().getItem(i);
+            for (int slot = 0; slot < itemHandler.getSlots(); slot++) {
+                ItemStack stack = itemHandler.getStackInSlot(slot);
                 if (stack.isEmpty())
                     occupiedSlots--;
             }
@@ -426,7 +455,7 @@ public class CurrencyUtilities {
     }
 
 
-    public static Pair<Map<ICurrency, Integer>, List<BigItemStack>> splitCost(List<BigItemStack> input) {
+    public static Pair<Map<ICurrency, Integer>, List<BigItemStack>> splitCost(Player player, List<BigItemStack> input) {
         Map<ICurrency, Integer> currency_cost = new Object2IntArrayMap<>();
         List<BigItemStack> other_cost = new ArrayList<>();
 
@@ -435,7 +464,7 @@ public class CurrencyUtilities {
             if (currency == null)
                 other_cost.add(entry);
             else {
-                int value = currency.getValue(entry.stack, entry.count);
+                int value = currency.getValue(player, entry.stack, entry.count);
                 currency_cost.put(currency, currency_cost.getOrDefault(currency, 0) + value);
             }
 
@@ -444,12 +473,57 @@ public class CurrencyUtilities {
         return Pair.of(currency_cost, other_cost);
     }
 
+    @OnlyIn(Dist.CLIENT)
+    public static void renderShoppingList(@Nullable ShoppingListItem.ShoppingList list) {
+        if (list == null || IBlueprintOverlayRendererAccessor.CAL$getActive())
+            return;
 
-    public static void createShoppingListTooltip(ItemStack stack, List<Component> tooltipComponents, TooltipFlag tooltipFlag, @Nullable Couple<InventorySummary> lists) {
+        var lists = list.bakeEntries(Minecraft.getInstance().level, null);
+        var costs = splitCost(Minecraft.getInstance().player, lists.getSecond().getStacks());
+
+        var currency_cost = costs.getFirst();
+        var other_cost = costs.getSecond();
+        var purchased = lists.getFirst();
+
+        if (currency_cost == null || other_cost == null || purchased == null)
+            return;
+
+        IBlueprintOverlayRendererAccessor.callPrepareCustomOverlay();
+        IBlueprintOverlayRendererAccessor.CAL$setNoOutput(false);
+        IBlueprintOverlayRendererAccessor.CAL$setShopContext(new BlueprintOverlayShopContext(true, 1, 0));
+
+        var player = Minecraft.getInstance().player;
+
+        var ingredients = IBlueprintOverlayRendererAccessor.CAL$getIngredients();
+        var results = IBlueprintOverlayRendererAccessor.CAL$getResults();
+
+        for(var entry : currency_cost.entrySet()) {
+            var currency = entry.getKey();
+            var value = entry.getValue();
+            var result = CurrencyUtilities.extractValueFromPlayer(player, currency, value, true);
+
+            boolean can_afford = !result.inventoryFull() && result.remaining() <= 0;
+
+            for(var item : currency.getStacksWithValue(value))
+                ingredients.add(Pair.of(item, can_afford));
+        }
+
+        for(var entry : other_cost) {
+            boolean can_afford = IBlueprintOverlayRendererAccessor.callCanAfford(player, entry);
+            ingredients.add(Pair.of(entry.stack.copyWithCount(entry.count), can_afford));
+        }
+
+        for(BigItemStack entry : purchased.getStacksByCount())
+            results.add(entry.stack.copyWithCount(entry.count));
+
+    }
+
+
+    public static void createShoppingListTooltip(Player player, ItemStack stack, List<Component> tooltipComponents, TooltipFlag tooltipFlag, @Nullable Couple<InventorySummary> lists) {
         if (lists == null)
             return;
 
-        var costs = splitCost(lists.getSecond().getStacks());
+        var costs = splitCost(player, lists.getSecond().getStacks());
         var currency_cost = costs.getFirst();
         var other_cost = costs.getSecond();
 
@@ -463,15 +537,12 @@ public class CurrencyUtilities {
             for(var entry : currency_cost.entrySet()) {
                 var currency = entry.getKey();
                 Component cmp;
-                if (currency.hasFormatter())
-                    try {
-                        cmp = currency.formatValue(entry.getValue(), tooltipFlag);
-                    } catch(Exception ex) {
-                        CreateAdditionalLogistics.LOGGER.error("Error running currency formatter for {}", currency.getId(), ex);
-                        cmp = null;
-                    }
-                else
+                try {
+                    cmp = currency.formatValue(entry.getValue(), tooltipFlag);
+                } catch(Exception ex) {
+                    CreateAdditionalLogistics.LOGGER.error("Error running currency formatter for {}", currency.getId(), ex);
                     cmp = null;
+                }
 
                 if (cmp != null)
                     tooltipComponents.add(Component.empty().withStyle(ChatFormatting.YELLOW).append(cmp));
@@ -487,12 +558,18 @@ public class CurrencyUtilities {
     }
 
     private static Component addTooltipLine(ChatFormatting style, ItemStack entry) {
-        return CreateLang.builder()
-                .add(entry.getHoverName().plainCopy())
+        var result = CreateLang.builder()
+                .add(entry.getHoverName())
                 .text(" x")
                 .text(String.valueOf(entry.getCount()))
                 .style(style)
                 .component();
+
+        var rarity = entry.getRarity();
+        if (rarity == Rarity.EPIC || rarity == Rarity.RARE)
+            return result.withStyle(entry.getRarity().getStyleModifier());
+
+        return result;
     }
 
     private static Component addTooltipLine(ChatFormatting style, BigItemStack entry) {
@@ -504,5 +581,39 @@ public class CurrencyUtilities {
                 .component();
     }
 
+    public static class CurrencyBackend implements ICurrency.ICurrencyBackend {
+
+        public static CurrencyBackend INSTANCE = new CurrencyBackend();
+
+        @Override
+        public void registerFormatter(ResourceLocation id, ICurrency.IValueFormatter formatter) {
+            CurrencyUtilities.registerFormatter(id, formatter);
+        }
+
+        @Override
+        public void registerCurrency(ResourceLocation id, ICurrency currency) {
+            CurrencyUtilities.registerCurrency(id, currency);
+        }
+
+        @Override
+        public ICurrencyBuilder newBuilder(ResourceLocation id) {
+            return new SimpleCurrency.CurrencyBuilder(id, this);
+        }
+
+        @Override
+        public @Nullable ICurrency get(ResourceLocation id) {
+            return CurrencyUtilities.get(id);
+        }
+
+        @Override
+        public @Nullable ICurrency getForItem(Item item) {
+            return CurrencyUtilities.getForItem(item);
+        }
+
+    }
+
+    public static void init() {
+        Currency.setBackend(CurrencyBackend.INSTANCE);
+    }
 
 }

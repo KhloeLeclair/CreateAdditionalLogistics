@@ -12,12 +12,17 @@ import com.simibubi.create.foundation.item.ItemHelper;
 import com.simibubi.create.foundation.item.SmartInventory;
 import com.simibubi.create.foundation.utility.CreateLang;
 import dan200.computercraft.api.peripheral.PeripheralCapability;
+import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
+import dev.khloeleclair.create.additionallogistics.api.ICurrency;
 import dev.khloeleclair.create.additionallogistics.common.CALLang;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALBlockEntityTypes;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALDataComponents;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALItems;
+import dev.khloeleclair.create.additionallogistics.common.utilities.CurrencyUtilities;
 import dev.khloeleclair.create.additionallogistics.compat.computercraft.AbstractEventfulComputerBehavior;
 import dev.khloeleclair.create.additionallogistics.compat.computercraft.CALComputerCraftProxy;
+import it.unimi.dsi.fastutil.ints.IntArrayList;
+import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
 import net.createmod.catnip.data.Pair;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -30,10 +35,12 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.ContainerOpenersCounter;
@@ -42,12 +49,15 @@ import net.neoforged.api.distmarker.Dist;
 import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.client.ClientTooltipFlag;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import net.neoforged.neoforge.items.wrapper.CombinedInvWrapper;
 import org.jetbrains.annotations.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class CashRegisterBlockEntity extends StockTickerBlockEntity {
 
@@ -284,7 +294,41 @@ public class CashRegisterBlockEntity extends StockTickerBlockEntity {
             InventorySummary summary = new InventorySummary();
             for (int i = 0; i < receivedPayments.getSlots(); i++)
                 summary.add(receivedPayments.getStackInSlot(i));
-            for (BigItemStack entry : summary.getStacksByCount())
+
+            var costs = CurrencyUtilities.splitCost(null, summary.getStacks());
+            var currency_costs = costs.getFirst();
+            var other_costs = costs.getSecond();
+
+            var options = Minecraft.getInstance().options;
+            var tooltipFlags = ClientTooltipFlag.of(options.advancedItemTooltips ? TooltipFlag.ADVANCED : TooltipFlag.NORMAL);
+
+            for (var entry : currency_costs.entrySet()) {
+                var currency = entry.getKey();
+                Component cmp;
+                try {
+                    cmp = currency.formatValue(entry.getValue(), tooltipFlags);
+                } catch(Exception ex) {
+                    CreateAdditionalLogistics.LOGGER.error("Error running currency formatter for {}", currency.getId(), ex);
+                    cmp = null;
+                }
+
+                if (cmp != null)
+                    CreateLang.builder()
+                            .add(cmp)
+                            .style(ChatFormatting.GREEN)
+                            .forGoggles(tooltip);
+                else {
+                    for(var stack : currency.getStacksWithValue(entry.getValue())) {
+                        CreateLang.builder()
+                                .text(Component.translatable(stack.getDescriptionId())
+                                        .getString() + " x" + stack.getCount())
+                                .style(ChatFormatting.GREEN)
+                                .forGoggles(tooltip);
+                    }
+                }
+            }
+
+            for (BigItemStack entry : other_costs)
                 CreateLang.builder()
                         .text(Component.translatable(entry.stack.getDescriptionId())
                                 .getString() + " x" + entry.count)
@@ -324,9 +368,61 @@ public class CashRegisterBlockEntity extends StockTickerBlockEntity {
             ledger = CALItems.SALES_LEDGER.asStack();
 
         ledger.set(CALDataComponents.SALES_HISTORY, result);
+
+        reconcileCurrency();
+
         saleTicks = 20;
         notifyUpdate();
     }
+
+    public void reconcileCurrency() {
+        if (level.isClientSide)
+            return;
+
+        Map<ICurrency, Integer> currencies = new Object2IntArrayMap<>();
+        List<Integer> slots = new IntArrayList();
+        int empty_slots = 0;
+
+        for(int slot = 0; slot < receivedPayments.getSlots(); slot++) {
+            var stack = receivedPayments.getStackInSlot(slot);
+            if (stack.isEmpty()) {
+                empty_slots++;
+                continue;
+            }
+
+            if (!(CurrencyUtilities.getForItem(stack.getItem()) instanceof ICurrency currency))
+                continue;
+
+            currencies.put(currency, currencies.getOrDefault(currency, 0) + currency.getValue(null, stack, stack.getCount()));
+            slots.add(slot);
+        }
+
+        if (currencies.isEmpty())
+            return;
+
+        List<ItemStack> stacks = new ArrayList<>();
+        for(var entry : currencies.entrySet())
+            stacks.addAll(entry.getKey().getStacksWithValue(entry.getValue()));
+
+        // Make sure we have enough slots to reconcile.
+        int available_slots = empty_slots + slots.size();
+        if (available_slots < stacks.size())
+            return;
+
+        // Alright, we have what we need, it's go time.
+        for(int slot : slots)
+            receivedPayments.setStackInSlot(slot, ItemStack.EMPTY);
+
+        for(var stack : stacks) {
+            var remainder = ItemHandlerHelper.insertItem(receivedPayments, stack, false);
+            if (!remainder.isEmpty()) {
+                ItemEntity entity = new ItemEntity(level, worldPosition.getX(), worldPosition.getY() + 0.5F, worldPosition.getZ(), remainder);
+                entity.setPickUpDelay(40);
+                level.addFreshEntity(entity);
+            }
+        }
+    }
+
 
     public SmartInventory getReceivedPaymentsHandler() {
         return receivedPayments;

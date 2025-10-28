@@ -8,7 +8,7 @@ import com.simibubi.create.foundation.utility.CreateLang;
 import dev.khloeleclair.create.additionallogistics.client.registries.CALGuiTextures;
 import dev.khloeleclair.create.additionallogistics.common.CALLang;
 import dev.khloeleclair.create.additionallogistics.common.Config;
-import dev.khloeleclair.create.additionallogistics.common.IPromiseLimit;
+import dev.khloeleclair.create.additionallogistics.common.utilities.IPromiseLimit;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALPackets;
 import net.createmod.catnip.gui.AbstractSimiScreen;
 import net.minecraft.client.gui.GuiGraphics;
@@ -75,6 +75,9 @@ public abstract class MixinFactoryPanelScreen extends AbstractSimiScreen {
                     .withStepFunction(c -> {
                         if (!c.shift)
                             return 1;
+
+                        if (maxSize == 1)
+                            return 5;
 
                         int remaining = c.currentValue % maxSize;
                         if (remaining == 0)
@@ -154,16 +157,19 @@ public abstract class MixinFactoryPanelScreen extends AbstractSimiScreen {
         CALGuiTextures.ADDITIONAL_STOCK_BG.render(graphics, CAL$requestAdditional.getX() + 2, CAL$requestAdditional.getY() - 1);
 
         // Label
-        graphics.drawString(font, CreateLang.text(" " + formatAdditional()).component(), CAL$requestAdditional.getX() + 15, CAL$requestAdditional.getY() + 4, 0xffeeeeee, true);
+        graphics.drawString(font, CreateLang.text(" " + CAL$formatAdditional()).component(), CAL$requestAdditional.getX() + 15, CAL$requestAdditional.getY() + 4, 0xffeeeeee, true);
     }
 
     @Unique
-    private String formatAdditional() {
+    private String CAL$formatAdditional() {
         int additional = CAL$requestAdditional == null ? 0 : CAL$requestAdditional.getState();
         if (additional <= 0)
             return "---";
 
         int stackSize = behaviour.getFilter().getMaxStackSize();
+        if (stackSize == 1)
+            return String.valueOf(additional);
+
         int stacks = additional / stackSize;
         int items = additional % stackSize;
 

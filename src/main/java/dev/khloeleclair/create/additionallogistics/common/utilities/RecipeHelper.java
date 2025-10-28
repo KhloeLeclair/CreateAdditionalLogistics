@@ -1,9 +1,9 @@
 package dev.khloeleclair.create.additionallogistics.common.utilities;
 
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
-import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.SimpleCurrency;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.createmod.catnip.data.Pair;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -13,7 +13,7 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.client.event.RecipesUpdatedEvent;
-import org.jspecify.annotations.Nullable;
+import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
 
@@ -21,7 +21,7 @@ public class RecipeHelper {
 
     public static RecipeCache getCache() { return SidedCache.getCache(RecipeCache.class); }
 
-    public static void onRecipesUpdated(RecipesUpdatedEvent event) {
+    public static void onRecipesUpdated(RecipesUpdatedEvent ignoredEvent) {
         SidedCache.runOnEachCache(RecipeCache.class, RecipeCache::clearCache);
     }
 
@@ -123,16 +123,17 @@ public class RecipeHelper {
                 return null;
 
             // Generate a key based on the key of the lowest item.
-            @org.jetbrains.annotations.Nullable ResourceLocation id;
+            @Nullable ResourceKey<Item> key;
             if (decompression.isEmpty())
-                id = item.builtInRegistryHolder().getKey().location();
+                key = item.builtInRegistryHolder().getKey();
             else
-                id = decompression.getLast().getFirst().builtInRegistryHolder().getKey().location();
+                key = decompression.getLast().getFirst().builtInRegistryHolder().getKey();
 
+            ResourceLocation id = key == null ? null : key.location();
             if (id == null)
                 return null;
 
-            SimpleCurrency currency = new SimpleCurrency(CreateAdditionalLogistics.asResource("generated/" + id.getNamespace() + "/" + id.getPath()));
+            SimpleCurrency currency = new SimpleCurrency(ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "generated/" + id.getPath()));
             int value = 1;
 
             // First, decompression items.

@@ -6,7 +6,7 @@ import com.simibubi.create.foundation.utility.AdventureUtil;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
 import dev.khloeleclair.create.additionallogistics.client.content.kinetics.lazy.FlexibleShaftScreen;
 import dev.khloeleclair.create.additionallogistics.client.content.logistics.cashRegister.SalesLedgerScreen;
-import dev.khloeleclair.create.additionallogistics.common.IPromiseLimit;
+import dev.khloeleclair.create.additionallogistics.common.utilities.IPromiseLimit;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.FlexibleShaftBlockEntity;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.base.AbstractLazySimpleKineticBlock;
 import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.flexible.AbstractFlexibleShaftBlock;

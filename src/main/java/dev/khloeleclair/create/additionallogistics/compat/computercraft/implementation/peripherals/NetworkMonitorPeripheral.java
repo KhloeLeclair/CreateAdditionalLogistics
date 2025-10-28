@@ -170,7 +170,7 @@ public class NetworkMonitorPeripheral extends SyncedPeripheral<NetworkMonitorBlo
     }
 
     private boolean isWriteable() {
-        return Config.Server.allowTrainWriting.get();
+        return Config.Server.trainWriting.get();
     }
 
     @Nullable

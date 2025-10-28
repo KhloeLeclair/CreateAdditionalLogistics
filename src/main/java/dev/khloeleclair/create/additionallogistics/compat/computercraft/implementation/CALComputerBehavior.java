@@ -1,6 +1,7 @@
 package dev.khloeleclair.create.additionallogistics.compat.computercraft.implementation;
 
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
+import dan200.computercraft.api.ComputerCraftAPI;
 import dan200.computercraft.api.detail.VanillaDetailRegistries;
 import dan200.computercraft.api.peripheral.IPeripheral;
 import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CashRegisterBlockEntity;
@@ -45,6 +46,10 @@ public class CALComputerBehavior extends AbstractEventfulComputerBehavior {
         throw new IllegalArgumentException("No peripheral available for " + BuiltInRegistries.BLOCK_ENTITY_TYPE.getKey(sbe.getType()));
     }
 
+    public static void registerApis() {
+        ComputerCraftAPI.registerAPIFactory(computer -> new PackageApi());
+    }
+
     public static void registerItemDetailProviders() {
         VanillaDetailRegistries.ITEM_STACK.addProvider((out, stack) -> {
             if (stack.is(CALItems.SALES_LEDGER)) {
@@ -73,15 +78,17 @@ public class CALComputerBehavior extends AbstractEventfulComputerBehavior {
 
     @Override
     public void queueEvent(String event, Object... arguments) {
-        updateArguments(arguments);
-        if (peripheral instanceof SyncedPeripheral<?> sp)
+        if (peripheral instanceof SyncedPeripheral<?> sp) {
+            updateArguments(arguments);
             sp.queueEvent(event, arguments);
+        }
     }
 
     public void queuePositionedEvent(String event, Object... arguments) {
-        updateArguments(arguments);
-        if (peripheral instanceof SyncedPeripheral<?> sp)
+        if (peripheral instanceof SyncedPeripheral<?> sp) {
+            updateArguments(arguments);
             sp.queuePositionedEvent(event, arguments);
+        }
     }
 
     public IPeripheral getPeripheralCapability() {
