@@ -7,8 +7,9 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.entity.player.StackedContents;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.TransientCraftingContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
@@ -162,89 +163,30 @@ public class RecipeHelper {
             return currency;
         }
 
-        private static CraftingContainer getContainerOf(int width, int height, List<ItemStack> items) {
-            return new CraftingContainer() {
+        private static CraftingContainer getContainerOf(int width, int height, ItemStack item) {
+            var inv = new TransientCraftingContainer(new AbstractContainerMenu(null, -1) {
                 @Override
-                public int getWidth() {
-                    return width;
-                }
-
-                @Override
-                public int getHeight() {
-                    return height;
-                }
-
-                @Override
-                public List<ItemStack> getItems() {
-                    return items;
-                }
-
-                @Override
-                public int getContainerSize() {
-                    return width * height;
-                }
-
-                @Override
-                public boolean isEmpty() {
-                    return false;
-                }
-
-                @Override
-                public ItemStack getItem(int i) {
-                    return items.get(i);
-                }
-
-                @Override
-                public ItemStack removeItem(int i, int i1) {
+                public ItemStack quickMoveStack(Player player, int i) {
                     return ItemStack.EMPTY;
-                }
-
-                @Override
-                public ItemStack removeItemNoUpdate(int i) {
-                    return ItemStack.EMPTY;
-                }
-
-                @Override
-                public void setItem(int i, ItemStack itemStack) {
-
-                }
-
-                @Override
-                public void setChanged() {
-
                 }
 
                 @Override
                 public boolean stillValid(Player player) {
                     return false;
                 }
+            }, width, height);
 
-                @Override
-                public void clearContent() {
+            for(int slot = 0; slot < inv.getContainerSize(); slot++)
+                inv.setItem(slot, item.copyWithCount(1));
 
-                }
-
-                @Override
-                public void fillStackedContents(StackedContents stackedContents) {
-
-                }
-            };
+            return inv;
         }
 
         private static List<ItemStack> getCompressionResult(Level level, ItemStack input, int size) {
 
-            List<ItemStack> inputGrid;
+            CraftingContainer inputGrid = getContainerOf(size, size, input);
 
-            if (size == 1)
-                inputGrid = List.of(input.copyWithCount(1));
-            else if (size == 2)
-                inputGrid = List.of(input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1));
-            else if (size == 3)
-                inputGrid = List.of(input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1), input.copyWithCount(1));
-            else
-                return List.of();
-
-            var recipes = safeGetRecipesFor(RecipeType.CRAFTING, getContainerOf(size, size, inputGrid), level);
+            var recipes = safeGetRecipesFor(RecipeType.CRAFTING, inputGrid, level);
             if (recipes.isEmpty())
                 return List.of();
 
@@ -253,7 +195,7 @@ public class RecipeHelper {
 
         private static ItemStack getUncompressResult(Level level, ItemStack input) {
             // We're looking for a recipe that puts the input stack in a 1x1 grid.
-            var inputGrid = getContainerOf(1, 1, List.of(input.copyWithCount(1)));
+            var inputGrid = getContainerOf(1, 1, input);
 
             var recipes = safeGetRecipesFor(RecipeType.CRAFTING, inputGrid, level);
             if (recipes.size() != 1)

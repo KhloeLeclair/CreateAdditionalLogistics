@@ -346,7 +346,13 @@ public class CurrencyUtilities {
         InventorySummary to_insert = new InventorySummary();
 
         // First, build a list of items to insert.
-        for(boolean exact : Iterate.trueAndFalse) {
+        boolean[] modes;
+        if (simulate)
+            modes = new boolean[]{false};
+        else
+            modes = Iterate.trueAndFalse;
+
+        for(boolean exact : modes) {
             for (int slot = 0; slot < itemHandler.getSlots(); slot++) {
                 ItemStack stack = itemHandler.getStackInSlot(slot);
                 var result = currency.extractValue(player, stack, remaining, exact);

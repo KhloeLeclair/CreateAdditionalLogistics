@@ -243,6 +243,20 @@ the stock ticker. But at least you won't do it by accident.
 
 # Changelog
 
+## 1.4.1
+
+### Fixed
+
+* Issue where currency conversion would incorrectly count the same item stack
+  multiple times.
+* Encased Flexible Shafts not correctly updating their state when a neighboring
+  lazy shaft updates.
+
+### Changed
+
+* Cash Register collision shape is now more accurate to its model.
+
+
 ## 1.4.0
 
 ### Changed
