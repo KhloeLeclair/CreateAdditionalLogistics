@@ -11,7 +11,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 @Mixin(VisualizationManager.class)
 public interface MixinVisualizationManager {
 
-    @Overwrite
+    @Overwrite(remap = false)
     static boolean supportsVisualization(@Nullable LevelAccessor level) {
         if (LowEntityKineticBlockEntityRenderer.overrideVisualization)
             return false;

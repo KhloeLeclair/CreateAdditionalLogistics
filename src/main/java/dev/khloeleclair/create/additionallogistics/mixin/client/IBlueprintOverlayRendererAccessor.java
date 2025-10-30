@@ -15,31 +15,31 @@ import java.util.List;
 @Mixin(BlueprintOverlayRenderer.class)
 public interface IBlueprintOverlayRendererAccessor {
 
-    @Accessor("active")
+    @Accessor(value = "active", remap = false)
     static boolean CAL$getActive() { throw new AssertionError(); }
 
-    @Accessor("active")
+    @Accessor(value = "active", remap = false)
     static void CAL$setActive(boolean active) { throw new AssertionError(); }
 
-    @Accessor("noOutput")
+    @Accessor(value = "noOutput", remap = false)
     static boolean CAL$getNoOutput() { throw new AssertionError(); }
 
-    @Accessor("noOutput")
+    @Accessor(value = "noOutput", remap = false)
     static void CAL$setNoOutput(boolean value) { throw new AssertionError(); }
 
-    @Accessor("results")
+    @Accessor(value = "results", remap = false)
     static List<ItemStack> CAL$getResults() { throw new AssertionError(); }
 
-    @Accessor("ingredients")
+    @Accessor(value = "ingredients", remap = false)
     static List<Pair<ItemStack, Boolean>> CAL$getIngredients() { throw new AssertionError(); }
 
-    @Accessor("shopContext")
+    @Accessor(value = "shopContext", remap = false)
     static void CAL$setShopContext(BlueprintOverlayShopContext context) { throw new AssertionError(); }
 
-    @Invoker
+    @Invoker(remap = false)
     static void callPrepareCustomOverlay() { throw new AssertionError(); }
 
-    @Invoker
+    @Invoker(remap = false)
     static boolean callCanAfford(Player player, BigItemStack entry) { throw new AssertionError(); }
 
 }
