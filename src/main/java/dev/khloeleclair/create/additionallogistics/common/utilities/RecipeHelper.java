@@ -35,7 +35,7 @@ public class RecipeHelper {
 
     public static class RecipeCache extends SidedCache {
 
-        private final Map<Item, @Nullable SimpleCurrency> compactingCurrencies;
+        private final Map<Item, Optional<SimpleCurrency>> compactingCurrencies;
 
         public RecipeCache(boolean isServer) {
             super(isServer);
@@ -54,14 +54,41 @@ public class RecipeHelper {
             if (level == null)
                 return null;
 
-            SimpleCurrency cached;
+            Optional<SimpleCurrency> cached;
 
             synchronized (compactingCurrencies) {
                 cached = compactingCurrencies.get(item);
             }
 
             if (cached != null)
-                return cached;
+                return cached.orElse(null);
+
+            SimpleCurrency currency;
+
+            try {
+                currency = getCompactingCurrencyImpl(item);
+            } catch(Exception ex) {
+                CreateAdditionalLogistics.LOGGER.warn("Error attempting to create compacting currency for item {}", item);
+                currency = null;
+            }
+
+            synchronized (compactingCurrencies) {
+                cached = currency == null ? Optional.empty() : Optional.of(currency);
+                if (currency == null)
+                    compactingCurrencies.put(item, cached);
+                else
+                    for(var i : currency.getItems())
+                        compactingCurrencies.put(i, cached);
+            }
+
+            return currency;
+        }
+
+        @Nullable
+        private SimpleCurrency getCompactingCurrencyImpl(Item item) {
+            final var level = getLevel();
+            if (level == null)
+                return null;
 
             List<Pair<Item, Integer>> decompression = new ArrayList<>();
             List<Pair<Item, Integer>> compression = new ArrayList<>();
@@ -137,7 +164,7 @@ public class RecipeHelper {
                 return null;
 
             SimpleCurrency currency = new SimpleCurrency(new ResourceLocation(id.getNamespace(), "generated/" + id.getPath()));
-            int value = 1;
+            long value = 1;
 
             // First, decompression items.
             for(int i = decompression.size() - 1; i >= 0; i--) {
@@ -153,11 +180,6 @@ public class RecipeHelper {
             for(var entry : compression) {
                 value *= entry.getSecond();
                 currency.addItem(entry.getFirst(), value);
-            }
-
-            synchronized (compactingCurrencies) {
-                for(var i : currency.getItems())
-                    compactingCurrencies.put(i, currency);
             }
 
             return currency;
