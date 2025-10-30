@@ -20,12 +20,13 @@ public abstract class MixinPackagePortScreen extends AbstractSimiContainerScreen
         super(container, inv, title);
     }
 
-    @Shadow
+    @Shadow(remap = false)
     private EditBox addressBox;
 
     @Inject(
             method = "nameBoxX",
-            at = @At("TAIL")
+            at = @At("TAIL"),
+            remap = false
     )
     private void CPE$onNameBoxX(String s, EditBox nameBox, CallbackInfoReturnable<Integer> ci) {
         // TODO: Adjust the position if the name gets too long.

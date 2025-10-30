@@ -21,7 +21,8 @@ public class MixinTableClothOverlayRenderer {
                     target = "Lcom/simibubi/create/content/equipment/blueprint/BlueprintOverlayRenderer;displayShoppingList(Lnet/createmod/catnip/data/Couple;)V",
                     shift = At.Shift.BEFORE
             ),
-            cancellable = true
+            cancellable = true,
+            remap = false
     )
     private static void CAL$onTick(CallbackInfo ci, @Local StockTickerBlockEntity tickerBE, @Local ShoppingListItem.ShoppingList list) {
         if (CurrencyUtilities.isConversionEnabled(tickerBE instanceof CashRegisterBlockEntity)) {

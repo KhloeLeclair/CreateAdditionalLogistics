@@ -23,13 +23,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 @Mixin(FactoryPanelScreen.class)
 public abstract class MixinFactoryPanelScreen extends AbstractSimiScreen {
 
-    @Shadow
+    @Shadow(remap = false)
     private boolean restocker;
 
-    @Shadow
+    @Shadow(remap = false)
     private FactoryPanelBehaviour behaviour;
 
-    @Shadow
+    @Shadow(remap = false)
     @Nullable
     private BigItemStack outputConfig;
 
@@ -123,7 +123,8 @@ public abstract class MixinFactoryPanelScreen extends AbstractSimiScreen {
 
     @Inject(
             method = "tick",
-            at = @At("RETURN")
+            at = @At("RETURN"),
+            remap = false
     )
     private void CAL$onTick(CallbackInfo ci) {
         CAL$updatePromiseLimitLabel();
@@ -132,7 +133,8 @@ public abstract class MixinFactoryPanelScreen extends AbstractSimiScreen {
 
     @Inject(
             method = "renderWindow",
-            at = @At("RETURN")
+            at = @At("RETURN"),
+            remap = false
     )
     private void CAL$onRenderWindow(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks, CallbackInfo ci) {
         if (!(behaviour instanceof IPromiseLimit))
@@ -185,7 +187,8 @@ public abstract class MixinFactoryPanelScreen extends AbstractSimiScreen {
 
     @Inject(
             method = "sendIt",
-            at = @At("RETURN")
+            at = @At("RETURN"),
+            remap = false
     )
     private void CAL$onSendIt(CallbackInfo ci) {
         if (!(behaviour instanceof IPromiseLimit) || CAL$promiseLimit == null)

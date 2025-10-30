@@ -18,7 +18,8 @@ public abstract class MixinStockTickerInteractionHandler {
     @Inject(
             method = "interactWithShop",
             at = @At("HEAD"),
-            cancellable = true
+            cancellable = true,
+            remap = false
     )
     private static void CAL$onPurchase(Player player, Level level, BlockPos targetPos, ItemStack mainHandItem, CallbackInfo ci) {
         if (CurrencyUtilities.isConversionEnabled(level.getBlockEntity(targetPos) instanceof CashRegisterBlockEntity)) {
@@ -29,7 +30,8 @@ public abstract class MixinStockTickerInteractionHandler {
 
     @Inject(
             method = "interactWithShop",
-            at = @At("RETURN")
+            at = @At("RETURN"),
+            remap = false
     )
     private static void CPE$onPurchase(Player player, Level level, BlockPos targetPos, ItemStack mainHandItem, CallbackInfo ci) {
         // If the main hand id wasn't voided, no transaction happened.

@@ -20,7 +20,8 @@ public class MixinBlazeBurnerBlockEntity {
     @Inject(
             method = "getStockTicker",
             at = @At("RETURN"),
-            cancellable = true
+            cancellable = true,
+            remap = false
     )
     private static void onGetStockTicker(LevelAccessor level, BlockPos pos, CallbackInfoReturnable<StockTickerBlockEntity> ci) {
         if (ci.getReturnValue() == null) {

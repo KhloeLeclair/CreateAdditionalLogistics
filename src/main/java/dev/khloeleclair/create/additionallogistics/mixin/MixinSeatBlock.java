@@ -16,7 +16,8 @@ public class MixinSeatBlock {
     @Inject(
             method = "sitDown",
             at = @At("HEAD"),
-            cancellable = true
+            cancellable = true,
+            remap = false
     )
     private static void CAL$onSitDown(Level world, BlockPos pos, Entity entity, CallbackInfo ci) {
         if (world.getBlockState(pos).getBlock() instanceof AbstractSeatBlock seat) {

@@ -10,12 +10,12 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(StationPeripheral.class)
 public interface IStationPeripheralAccessor {
 
-    @Invoker
+    @Invoker(remap = false)
     static CreateLuaTable callFromCompoundTag(CompoundTag tag) throws LuaException {
         throw new AssertionError();
     }
 
-    @Invoker
+    @Invoker(remap = false)
     static CompoundTag callToCompoundTag(CreateLuaTable table) throws LuaException {
         throw new AssertionError();
     }

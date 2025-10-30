@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.gen.Invoker;
 @Mixin(RotationPropagator.class)
 public interface RotationPropagatorInvoker {
 
-    @Invoker
+    @Invoker(remap = false)
     public static float callGetConveyedSpeed(KineticBlockEntity from, KineticBlockEntity to) {
         throw new AssertionError();
     };

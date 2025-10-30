@@ -15,15 +15,16 @@ import java.util.UUID;
 @Mixin(Train.class)
 public class MixinTrain {
 
-    @Shadow
+    @Shadow(remap = false)
     public UUID id;
 
-    @Shadow
+    @Shadow(remap = false)
     public TrackGraph graph;
 
     @Inject(
         method = "leaveStation",
-        at = @At("RETURN")
+        at = @At("RETURN"),
+        remap = false
     )
     private void CAL$onLeaveStation(CallbackInfo ci) {
         NetworkMonitor.onTrainDeparture(graph, id);
@@ -31,7 +32,8 @@ public class MixinTrain {
 
     @Inject(
             method = "arriveAt",
-            at = @At("RETURN")
+            at = @At("RETURN"),
+            remap = false
     )
     private void CAL$onArriveAt(GlobalStation station, CallbackInfo ci) {
         NetworkMonitor.onTrainArrival(graph, id, station.id);

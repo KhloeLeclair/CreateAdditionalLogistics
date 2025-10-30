@@ -12,13 +12,14 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 @Mixin(TrackTargetingClient.class)
 public class MixinTrackTargetingClient {
 
-    @Shadow
+    @Shadow(remap = false)
     static EdgePointType<?> lastType;
 
     @ModifyVariable(
             method = "render",
             name = "type",
-            at = @At("STORE")
+            at = @At("STORE"),
+            remap = false
     )
     private static TrackTargetingBehaviour.RenderedTrackOverlayType CAL$onGetType(TrackTargetingBehaviour.RenderedTrackOverlayType previous) {
         if (lastType == NetworkMonitor.NETWORK_MONITOR)

@@ -16,7 +16,8 @@ public class MixinPackagerRenderer {
     @Inject(
             method = "getTrayModel",
             at = @At("HEAD"),
-            cancellable = true
+            cancellable = true,
+            remap = false
     )
     private static void CAL$getTrayModel(BlockState blockState, CallbackInfoReturnable<PartialModel> ci) {
         if (blockState.is(CALBlocks.PACKAGE_EDITOR.get()))

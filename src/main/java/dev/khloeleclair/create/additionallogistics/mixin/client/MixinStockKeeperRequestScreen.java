@@ -20,7 +20,7 @@ import java.util.List;
 @Mixin(StockKeeperRequestScreen.class)
 public abstract class MixinStockKeeperRequestScreen extends AbstractSimiContainerScreen<StockKeeperRequestMenu> {
 
-    @Shadow
+    @Shadow(remap = false)
     @Nullable
     private List<List<ClipboardEntry>> clipboardItem;
 

@@ -8,7 +8,7 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(SmartBlockEntity.class)
 public abstract class MixinSmartBlockEntity implements ISetLazyTickCounter {
 
-    @Shadow
+    @Shadow(remap = false)
     private int lazyTickCounter;
 
     @Override

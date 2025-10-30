@@ -19,7 +19,8 @@ public class MixinPackageItem extends Item {
     @Inject(
             method = "matchAddress(Ljava/lang/String;Ljava/lang/String;)Z",
             at = @At("HEAD"),
-            cancellable = true
+            cancellable = true,
+            remap = false
     )
     private static void CAL$onMatchAddress(String boxAddress, String address, CallbackInfoReturnable<Boolean> ci) {
         if (Config.Common.globOptimize.get())

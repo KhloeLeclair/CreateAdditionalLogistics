@@ -26,9 +26,9 @@ public abstract class MixinFactoryPanelBehaviour extends FilteringBehaviour impl
     private static final String CAL_ADDITIONAL_STOCK_KEY = "CAL$Stock$Add";
     private static final String CAL_REMAINING_ADDITIONAL_KEY = "CAL$Stock$Rem";
 
-    @Shadow
+    @Shadow(remap = false)
     public boolean satisfied;
-    @Shadow
+    @Shadow(remap = false)
     private int lastReportedLevelInStorage;
 
     @Unique
@@ -99,7 +99,8 @@ public abstract class MixinFactoryPanelBehaviour extends FilteringBehaviour impl
     @ModifyVariable(
             method = "tickStorageMonitor",
             at = @At("STORE"),
-            name = "inStorage"
+            name = "inStorage",
+            remap = false
     )
     private int CAL$tickStorageMonitor$inStorage(int value) {
         // If the number of items has gone down in the last tick, we should
@@ -117,7 +118,8 @@ public abstract class MixinFactoryPanelBehaviour extends FilteringBehaviour impl
 
     @Inject(
             method = "tickStorageMonitor",
-            at = @At("RETURN")
+            at = @At("RETURN"),
+            remap = false
     )
     private void CAL$onTickStorageMonitor(CallbackInfo ci) {
         if (!satisfied && CAL$RemainingAdditional <= 0 && FPB().panelBE().restocker && hasCALAdditionalStock()) {
@@ -134,7 +136,8 @@ public abstract class MixinFactoryPanelBehaviour extends FilteringBehaviour impl
     @ModifyVariable(
             method = "tickStorageMonitor",
             at = @At("LOAD"),
-            name = "demand"
+            name = "demand",
+            remap = false
     )
     private int CAL$tickStorageMonitor$getDemand(int original) {
         if (CAL$RemainingAdditional > 0 && original > 0)
@@ -145,7 +148,8 @@ public abstract class MixinFactoryPanelBehaviour extends FilteringBehaviour impl
     @ModifyVariable(
             method = "tryRestock",
             at = @At("LOAD"),
-            name = "demand"
+            name = "demand",
+            remap = false
     )
     private int CAL$tryRestock$getDemand(int original) {
         if (CAL$RemainingAdditional > 0 && original > 0)
@@ -159,7 +163,8 @@ public abstract class MixinFactoryPanelBehaviour extends FilteringBehaviour impl
                     value = "INVOKE_ASSIGN",
                     target = "Lorg/joml/Math;clamp(III)I"
             ),
-            cancellable = true
+            cancellable = true,
+            remap = false
     )
     private void CAL$onTryRestock(
             CallbackInfo ci,
@@ -191,7 +196,8 @@ public abstract class MixinFactoryPanelBehaviour extends FilteringBehaviour impl
                     target = "resetTimer",
                     shift = At.Shift.AFTER
             ),
-            cancellable = true
+            cancellable = true,
+            remap = false
     )
     private void CAL$inTickRequests(CallbackInfo ci) {
         if (!hasCALPromiseLimit())
@@ -211,7 +217,8 @@ public abstract class MixinFactoryPanelBehaviour extends FilteringBehaviour impl
 
     @Inject(
             method = "writeSafe",
-            at = @At("RETURN")
+            at = @At("RETURN"),
+            remap = false
     )
     private void CAL$onWriteSafe(CompoundTag nbt, CallbackInfo ci) {
         CAL$writeData(nbt);
@@ -219,7 +226,8 @@ public abstract class MixinFactoryPanelBehaviour extends FilteringBehaviour impl
 
     @Inject(
             method = "write",
-            at = @At("RETURN")
+            at = @At("RETURN"),
+            remap = false
     )
     private void CAL$onWrite(CompoundTag nbt, boolean clientPacket, CallbackInfo ci) {
         CAL$writeData(nbt);
@@ -227,7 +235,8 @@ public abstract class MixinFactoryPanelBehaviour extends FilteringBehaviour impl
 
     @Inject(
             method = "read",
-            at = @At("RETURN")
+            at = @At("RETURN"),
+            remap = false
     )
     private void CAL$onRead(CompoundTag nbt, boolean clientPacket, CallbackInfo ci) {
         var fpb = FPB();

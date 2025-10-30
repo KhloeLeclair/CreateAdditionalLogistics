@@ -1,21 +1,29 @@
 package dev.khloeleclair.create.additionallogistics.client;
 
-import net.minecraftforge.fml.ModContainer;
+import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
+import dev.khloeleclair.create.additionallogistics.common.Config;
+import net.createmod.catnip.config.ui.BaseConfigScreen;
+import net.minecraftforge.client.ConfigScreenHandler;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.ModLoadingContext;
+import net.minecraftforge.fml.event.lifecycle.FMLLoadCompleteEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 
 //@Mod(value = CreateAdditionalLogistics.MODID, dist = Dist.CLIENT)
 public class CreateAdditionalLogisticsClient {
 
-    public CreateAdditionalLogisticsClient(ModContainer container) {
-        // Allows NeoForge to create a config screen for this mod's configs.
-        // The config screen is accessed by going to the Mods screen > clicking on your mod > clicking on config.
-        // Do not forget to add translations for your config options to the en_us.json file.
+    public CreateAdditionalLogisticsClient() {
+        IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
+        modEventBus.register(this);
 
-        // We could use the shiny Create mod screen... but it doesn't use i18n keys and has other odd behavior.
-        //Supplier<IConfigScreenFactory> configScreen = () -> (mc, previousScreen) -> new BaseConfigScreen(previousScreen, CreateAdditionalLogistics.MODID);
-        //container.registerExtensionPoint(IConfigScreenFactory.class, configScreen);
+        var factory = new ConfigScreenHandler.ConfigScreenFactory((mc, previousScreen) -> new BaseConfigScreen(previousScreen, CreateAdditionalLogistics.MODID));
+        ModLoadingContext.get().registerExtensionPoint(ConfigScreenHandler.ConfigScreenFactory.class, () -> factory);
+    }
 
-//        container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
-
+    @SubscribeEvent
+    public void loadComplete(final FMLLoadCompleteEvent event) {
+        Config.registerClient();
     }
 
 }

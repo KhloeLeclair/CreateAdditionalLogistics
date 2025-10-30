@@ -1,8 +1,11 @@
 package dev.khloeleclair.create.additionallogistics.common;
 
+import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
+import net.createmod.catnip.config.ui.BaseConfigScreen;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.common.ForgeConfigSpec;
 import net.minecraftforge.fml.ModLoadingContext;
-import net.minecraftforge.fml.config.IConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
 
 // An example config class. This is not required, but it's a good idea to have one to keep your config organized.
@@ -24,6 +27,13 @@ public class Config {
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, commonSpec);
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, serverSpec);
     }
+
+    @OnlyIn(Dist.CLIENT)
+    public static void registerClient() {
+        BaseConfigScreen.setDefaultActionFor(CreateAdditionalLogistics.MODID, screen -> screen
+                .withSpecs(clientSpec, commonSpec, serverSpec));
+    }
+
 
     public static class _Server {
         public final ForgeConfigSpec.BooleanValue currencyCompression;
@@ -154,7 +164,7 @@ public class Config {
         }
     }
 
-    static final IConfigSpec commonSpec;
+    static final ForgeConfigSpec commonSpec;
     public static final _Common Common;
 
     static {

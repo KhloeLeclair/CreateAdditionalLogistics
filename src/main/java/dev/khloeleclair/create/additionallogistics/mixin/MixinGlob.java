@@ -14,7 +14,8 @@ public class MixinGlob {
     @Inject(
             method = "toRegexPattern",
             at = @At("HEAD"),
-            cancellable = true
+            cancellable = true,
+            remap = false
     )
     private static void CPE$toRegexPattern(String input, CallbackInfoReturnable<String> ci) {
         if (Config.Common.globAllowRegex.get() && input.regionMatches(true, 0, "regex:", 0, 6)) {

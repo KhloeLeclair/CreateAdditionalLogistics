@@ -22,7 +22,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 @Mixin(TableClothBlockEntity.class)
 public abstract class MixinTableClothBlockEntity extends SmartBlockEntity {
 
-    @Shadow
+    @Shadow(remap = false)
     public AutoRequestData requestData;
 
     public MixinTableClothBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
@@ -31,7 +31,8 @@ public abstract class MixinTableClothBlockEntity extends SmartBlockEntity {
 
     @Inject(
             method = "useShop",
-            at = @At("RETURN")
+            at = @At("RETURN"),
+            remap = false
     )
     private void CAL$onUseShop(Player player, CallbackInfoReturnable<InteractionResult> ci) {
 
