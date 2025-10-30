@@ -37,8 +37,7 @@ public abstract class MixinPackagePortScreen extends AbstractSimiContainerScreen
             at = @At(
                     value = "INVOKE",
                     target = "Lnet/minecraft/client/gui/components/EditBox;setMaxLength(I)V",
-                    shift = At.Shift.AFTER,
-                    remap = false
+                    shift = At.Shift.AFTER
             )
     )
     private void CPE$onInitAfterSetNameboxLength(CallbackInfo ci) {
