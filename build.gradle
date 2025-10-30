@@ -32,7 +32,7 @@ var cleanResources = tasks.register('cleanOldGeneratedResources', Delete) {
 }
 
 base {
-    archivesName = mod_id
+    archivesName = "$mod_id-$minecraft_version"
 }
 
 // Mojang ships Java 17 to end users in 1.20.1, so mods should target Java 17.

@@ -15,13 +15,12 @@ public class MixinAbstractContraptionEntity {
     // I have no clue why this isn't working. At least it's of minor importance.
 
     @Redirect(
-            method = "positionRider",
+            method = "positionRider(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/entity/Entity$MoveFunction;)V",
             at = @At(
                     value = "INVOKE",
                     target = "Lcom/simibubi/create/content/contraptions/actors/seat/SeatEntity;getCustomEntitySeatOffset(Lnet/minecraft/world/entity/Entity;)D",
                     remap = false
-            ),
-            remap = false
+            )
     )
     private double CAL$getCustomEntitySeatOffset(@Nullable Entity entity) {
         return CustomSeatEntity.getCustomEntitySeatOffset(entity);
