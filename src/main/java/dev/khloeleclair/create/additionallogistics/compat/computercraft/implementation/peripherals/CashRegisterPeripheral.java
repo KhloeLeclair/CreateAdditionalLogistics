@@ -8,7 +8,7 @@ import dan200.computercraft.api.lua.IArguments;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaFunction;
 import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CashRegisterBlockEntity;
-import dev.khloeleclair.create.additionallogistics.common.registries.CALDataComponents;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.SalesHistoryData;
 import dev.khloeleclair.create.additionallogistics.compat.computercraft.implementation.ComputerUtil;
 import dev.khloeleclair.create.additionallogistics.compat.computercraft.implementation.luaObjects.LuaSalesHistoryObject;
 
@@ -107,7 +107,7 @@ public class CashRegisterPeripheral extends SyncedPeripheral<CashRegisterBlockEn
     @LuaFunction(mainThread = true)
     public final LuaSalesHistoryObject getSales() {
         var ledger = blockEntity.getLedger();
-        return new LuaSalesHistoryObject(ledger.get(CALDataComponents.SALES_HISTORY));
+        return new LuaSalesHistoryObject(SalesHistoryData.getOrEmpty(ledger));
     }
 
     @LuaFunction(mainThread = true)

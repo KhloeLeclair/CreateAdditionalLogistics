@@ -13,6 +13,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
+import org.jetbrains.annotations.Nullable;
 
 public class CustomSeatEntity extends SeatEntity {
 
@@ -38,10 +39,10 @@ public class CustomSeatEntity extends SeatEntity {
         pCallback.accept(pEntity, getX(), heightOffset + getCustomEntitySeatOffset(pEntity), getZ());
     }
 
-    public static double getCustomEntitySeatOffset(Entity passenger) {
+    public static double getCustomEntitySeatOffset(@Nullable Entity passenger) {
         double result = SeatEntity.getCustomEntitySeatOffset(passenger);
 
-        if (!(passenger.getVehicle() instanceof AbstractContraptionEntity contraptionEntity))
+        if (passenger == null || !(passenger.getVehicle() instanceof AbstractContraptionEntity contraptionEntity))
             return result;
 
         var contraption = contraptionEntity.getContraption();

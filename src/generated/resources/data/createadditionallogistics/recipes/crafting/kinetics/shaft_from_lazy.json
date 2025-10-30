@@ -1,0 +1,22 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "item": "createadditionallogistics:lazy_shaft"
+    },
+    {
+      "item": "createadditionallogistics:lazy_shaft"
+    },
+    {
+      "item": "createadditionallogistics:lazy_shaft"
+    },
+    {
+      "item": "createadditionallogistics:lazy_shaft"
+    }
+  ],
+  "result": {
+    "count": 4,
+    "item": "create:shaft"
+  }
+}

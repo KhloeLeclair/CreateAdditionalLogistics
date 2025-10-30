@@ -1,0 +1,30 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "create:brass_sheet"
+    },
+    "C": {
+      "tag": "forge:chests"
+    },
+    "G": {
+      "tag": "forge:glass"
+    },
+    "L": {
+      "item": "create:stock_link"
+    },
+    "O": {
+      "item": "minecraft:book"
+    }
+  },
+  "pattern": [
+    " G ",
+    "BLO",
+    " C "
+  ],
+  "result": {
+    "item": "createadditionallogistics:cash_register"
+  },
+  "show_notification": true
+}

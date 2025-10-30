@@ -119,7 +119,12 @@ public class CashRegisterBlockEntity extends StockTickerBlockEntity {
 
             @Override
             public ItemStack insertItem(int slot, ItemStack stack, boolean simulate) {
-                // Only allow extraction.
+                if ((ledger == null || ledger.isEmpty()) && isItemValid(slot, stack)) {
+                    if (!simulate)
+                        ledger = stack;
+                    return ItemStack.EMPTY;
+                }
+
                 return stack;
             }
 

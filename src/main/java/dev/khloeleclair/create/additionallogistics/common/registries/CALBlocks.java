@@ -350,6 +350,10 @@ public class CALBlocks {
                     .register();
 
 
+    private static BlockEntry<FlexibleShaftBlock> getDyedFlexibleShaft(DyeColor color) {
+        return DYED_FLEXIBLE_SHAFTS.get(color);
+    }
+
     public static final DyedBlockList<FlexibleShaftBlock> DYED_FLEXIBLE_SHAFTS = new DyedBlockList<>(color -> {
         String colorName = color.getSerializedName();
         return REGISTRATE.block(colorName + "_flexible_shaft", p -> new FlexibleShaftBlock(p, color))
@@ -370,7 +374,9 @@ public class CALBlocks {
                 .item()
                 .tag(CALTags.CALItemTags.LAZY.tag)
                 .tag(CALTags.CALItemTags.FLEXIBLE_SHAFTS.tag)
-                .tab(AllCreativeModeTabs.BASE_CREATIVE_TAB.getKey(), (c,p) -> p.accept(c.get(), CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY))
+                .tab(AllCreativeModeTabs.BASE_CREATIVE_TAB.getKey(), c -> {
+                    c.accept(getDyedFlexibleShaft(color).asItem(), CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY);
+                })
                 .build()
                 .register();
     });
@@ -627,6 +633,10 @@ public class CALBlocks {
     }
 
     // Short Seats
+    private static BlockEntry<ShortSeatBlock> getShortSeat(DyeColor color) {
+        return SHORT_SEATS.get(color);
+    }
+
     public static final DyedBlockList<ShortSeatBlock> SHORT_SEATS = new DyedBlockList<>(color -> {
         String colorName = color.getSerializedName();
         SeatMovementBehaviour movementBehaviour = new SeatMovementBehaviour();
@@ -663,12 +673,18 @@ public class CALBlocks {
                 .tag(CALTags.CALBlockTags.SHORT_SEATS.tag)
                 .item()
                 .tag(CALTags.CALItemTags.SHORT_SEATS.tag)
-                .tab(AllCreativeModeTabs.PALETTES_CREATIVE_TAB.getKey(), (c,p) -> p.accept(c.get(), color == DyeColor.RED ? CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS : CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY))
+                .tab(AllCreativeModeTabs.PALETTES_CREATIVE_TAB.getKey(), c -> {
+                    c.accept(getShortSeat(color).asItem(), color == DyeColor.RED ? CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS : CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY);
+                })
                 .build()
                 .register();
     });
 
     // Tall Seats
+    private static BlockEntry<TallSeatBlock> getTallSeat(DyeColor color) {
+        return TALL_SEATS.get(color);
+    }
+
     public static final DyedBlockList<TallSeatBlock> TALL_SEATS = new DyedBlockList<>(color -> {
         String colorName = color.getSerializedName();
         SeatMovementBehaviour movementBehaviour = new SeatMovementBehaviour();
@@ -705,7 +721,9 @@ public class CALBlocks {
                 .tag(CALTags.CALBlockTags.TALL_SEATS.tag)
                 .item()
                 .tag(CALTags.CALItemTags.TALL_SEATS.tag)
-                .tab(AllCreativeModeTabs.PALETTES_CREATIVE_TAB.getKey(), (c,p) -> p.accept(c.get(), color == DyeColor.RED ? CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS : CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY))
+                .tab(AllCreativeModeTabs.PALETTES_CREATIVE_TAB.getKey(), c -> {
+                    c.accept(getTallSeat(color).asItem(), color == DyeColor.RED ? CreativeModeTab.TabVisibility.PARENT_AND_SEARCH_TABS : CreativeModeTab.TabVisibility.SEARCH_TAB_ONLY);
+                })
                 .build()
                 .register();
     });

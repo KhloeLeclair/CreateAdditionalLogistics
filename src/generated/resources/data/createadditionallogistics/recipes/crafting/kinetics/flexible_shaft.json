@@ -1,0 +1,25 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "category": "misc",
+  "key": {
+    "B": {
+      "item": "create:brass_casing"
+    },
+    "C": {
+      "item": "create:cogwheel"
+    },
+    "S": {
+      "tag": "createadditionallogistics:basic_shafts"
+    }
+  },
+  "pattern": [
+    " S ",
+    "CBC",
+    " S "
+  ],
+  "result": {
+    "count": 4,
+    "item": "createadditionallogistics:flexible_shaft"
+  },
+  "show_notification": true
+}

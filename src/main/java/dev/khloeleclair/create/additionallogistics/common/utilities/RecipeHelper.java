@@ -5,14 +5,16 @@ import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.createmod.catnip.data.Pair;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.player.StackedContents;
+import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.client.event.RecipesUpdatedEvent;
+import net.minecraftforge.client.event.RecipesUpdatedEvent;
 import org.jetbrains.annotations.Nullable;
 
 import java.util.*;
@@ -100,7 +102,7 @@ public class RecipeHelper {
             frontier.add(item);
 
             while(!frontier.isEmpty()) {
-                current = frontier.removeFirst();
+                current = frontier.remove(0);
                 for(int size = 2; size <= 3; size++) {
                     for (var result : getCompressionResult(level, current.getDefaultInstance(), size)) {
                         // If it produced anything we've seen before, or more than 1 item, we don't want it.
@@ -125,15 +127,15 @@ public class RecipeHelper {
             // Generate a key based on the key of the lowest item.
             @Nullable ResourceKey<Item> key;
             if (decompression.isEmpty())
-                key = item.builtInRegistryHolder().getKey();
+                key = item.builtInRegistryHolder().key();
             else
-                key = decompression.getLast().getFirst().builtInRegistryHolder().getKey();
+                key = decompression.get(decompression.size() - 1).getFirst().builtInRegistryHolder().key();
 
             ResourceLocation id = key == null ? null : key.location();
             if (id == null)
                 return null;
 
-            SimpleCurrency currency = new SimpleCurrency(ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "generated/" + id.getPath()));
+            SimpleCurrency currency = new SimpleCurrency(new ResourceLocation(id.getNamespace(), "generated/" + id.getPath()));
             int value = 1;
 
             // First, decompression items.
@@ -160,6 +162,75 @@ public class RecipeHelper {
             return currency;
         }
 
+        private static CraftingContainer getContainerOf(int width, int height, List<ItemStack> items) {
+            return new CraftingContainer() {
+                @Override
+                public int getWidth() {
+                    return width;
+                }
+
+                @Override
+                public int getHeight() {
+                    return height;
+                }
+
+                @Override
+                public List<ItemStack> getItems() {
+                    return items;
+                }
+
+                @Override
+                public int getContainerSize() {
+                    return width * height;
+                }
+
+                @Override
+                public boolean isEmpty() {
+                    return false;
+                }
+
+                @Override
+                public ItemStack getItem(int i) {
+                    return items.get(i);
+                }
+
+                @Override
+                public ItemStack removeItem(int i, int i1) {
+                    return ItemStack.EMPTY;
+                }
+
+                @Override
+                public ItemStack removeItemNoUpdate(int i) {
+                    return ItemStack.EMPTY;
+                }
+
+                @Override
+                public void setItem(int i, ItemStack itemStack) {
+
+                }
+
+                @Override
+                public void setChanged() {
+
+                }
+
+                @Override
+                public boolean stillValid(Player player) {
+                    return false;
+                }
+
+                @Override
+                public void clearContent() {
+
+                }
+
+                @Override
+                public void fillStackedContents(StackedContents stackedContents) {
+
+                }
+            };
+        }
+
         private static List<ItemStack> getCompressionResult(Level level, ItemStack input, int size) {
 
             List<ItemStack> inputGrid;
@@ -173,27 +244,27 @@ public class RecipeHelper {
             else
                 return List.of();
 
-            var recipes = safeGetRecipesFor(RecipeType.CRAFTING, CraftingInput.of(size, size, inputGrid), level);
+            var recipes = safeGetRecipesFor(RecipeType.CRAFTING, getContainerOf(size, size, inputGrid), level);
             if (recipes.isEmpty())
                 return List.of();
 
-            return recipes.stream().map(x -> x.value().getResultItem(level.registryAccess())).toList();
+            return recipes.stream().map(x -> x.getResultItem(level.registryAccess())).toList();
         }
 
         private static ItemStack getUncompressResult(Level level, ItemStack input) {
             // We're looking for a recipe that puts the input stack in a 1x1 grid.
-            var inputGrid = CraftingInput.of(1, 1, List.of(input.copyWithCount(1)));
+            var inputGrid = getContainerOf(1, 1, List.of(input.copyWithCount(1)));
 
             var recipes = safeGetRecipesFor(RecipeType.CRAFTING, inputGrid, level);
             if (recipes.size() != 1)
                 return ItemStack.EMPTY;
 
-            return recipes.getFirst().value().getResultItem(level.registryAccess());
+            return recipes.get(0).getResultItem(level.registryAccess());
         }
 
     }
 
-    public static <I extends CraftingInput, T extends Recipe<I>> List<RecipeHolder<T>> safeGetRecipesFor(RecipeType<T> recipeType, I inventory, Level level) {
+    public static <C extends Container, T extends Recipe<C>> List<T> safeGetRecipesFor(RecipeType<T> recipeType, C inventory, Level level) {
         try {
             return level.getRecipeManager().getRecipesFor(recipeType, inventory, level);
         } catch (Exception e) {

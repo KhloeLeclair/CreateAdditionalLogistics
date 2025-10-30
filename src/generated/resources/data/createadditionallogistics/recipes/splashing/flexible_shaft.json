@@ -1,0 +1,13 @@
+{
+  "type": "create:splashing",
+  "ingredients": [
+    {
+      "tag": "createadditionallogistics:flexible_shafts"
+    }
+  ],
+  "results": [
+    {
+      "item": "createadditionallogistics:flexible_shaft"
+    }
+  ]
+}

@@ -4,11 +4,11 @@ import com.simibubi.create.AllItems;
 import com.simibubi.create.content.logistics.redstoneRequester.AutoRequestData;
 import com.simibubi.create.content.logistics.tableCloth.TableClothBlockEntity;
 import com.simibubi.create.foundation.blockEntity.SmartBlockEntity;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CashRegisterBlock;
 import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CashRegisterBlockEntity;
-import dev.khloeleclair.create.additionallogistics.common.registries.CALDataComponents;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntityType;
@@ -33,15 +33,15 @@ public abstract class MixinTableClothBlockEntity extends SmartBlockEntity {
             method = "useShop",
             at = @At("RETURN")
     )
-    private void CAL$onUseShop(Player player, CallbackInfoReturnable<ItemInteractionResult> ci) {
+    private void CAL$onUseShop(Player player, CallbackInfoReturnable<InteractionResult> ci) {
 
         ItemStack itemInHand = player.getItemInHand(InteractionHand.MAIN_HAND);
-        if (! itemInHand.is(AllItems.SHOPPING_LIST.get()) || ci.getReturnValue() != ItemInteractionResult.SUCCESS)
+        if (! itemInHand.is(AllItems.SHOPPING_LIST.get()) || ci.getReturnValue() != InteractionResult.SUCCESS)
             return;
 
-        BlockPos tickerPos = requestData.targetOffset().offset(worldPosition);
-        if (level.getBlockEntity(tickerPos) instanceof CashRegisterBlockEntity) {
-            itemInHand.set(CALDataComponents.CASH_REGISTER_POS, tickerPos);
+        BlockPos tickerPos = requestData.targetOffset.offset(worldPosition);
+        if (level != null && level.getBlockEntity(tickerPos) instanceof CashRegisterBlockEntity) {
+            CashRegisterBlock.setCashRegisterPos(itemInHand, tickerPos);
             player.setItemInHand(InteractionHand.MAIN_HAND, itemInHand);
         }
 

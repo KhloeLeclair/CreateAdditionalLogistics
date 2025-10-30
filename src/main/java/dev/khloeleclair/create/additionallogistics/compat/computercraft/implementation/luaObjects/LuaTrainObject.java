@@ -250,8 +250,8 @@ public class LuaTrainObject implements LuaComparable {
                 tankData.put("capacity", fluids.getTankCapacity(tank));
                 tankData.put("amount", fluid.getAmount());
 
-                var holder = fluid.getFluidHolder();
-                String key = (holder == null || holder.getKey() == null) ? null : holder.getKey().location().toString();
+                var holder = fluid.getFluid().builtInRegistryHolder();
+                String key = (holder == null || holder.key() == null) ? null : holder.key().location().toString();
 
                 tankData.put("name", key);
 
@@ -279,7 +279,7 @@ public class LuaTrainObject implements LuaComparable {
         if (level == null)
             throw new LuaException("train in unknown dimension");
 
-        return IStationPeripheralAccessor.callFromCompoundTag(schedule.write(level.registryAccess()));
+        return IStationPeripheralAccessor.callFromCompoundTag(schedule.write());
     }
 
     public Map<?, ?> getTableRepresentation() {

@@ -4,15 +4,17 @@ import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBloc
 import com.simibubi.create.content.logistics.stockTicker.StockTickerBlock;
 import com.simibubi.create.content.logistics.stockTicker.StockTickerBlockEntity;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALBlockEntityTypes;
-import net.createmod.catnip.data.Iterate;
+import net.createmod.catnip.math.VoxelShaper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -27,20 +29,41 @@ import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.Shapes;
 import net.minecraft.world.phys.shapes.VoxelShape;
 import net.minecraftforge.network.NetworkHooks;
+import org.jetbrains.annotations.Nullable;
 
 public class CashRegisterBlock extends StockTickerBlock {
 
     public static final BooleanProperty OPEN = BlockStateProperties.OPEN;
 
-    public static VoxelShape[] SHAPES;
+    public static VoxelShaper SHAPES = VoxelShaper.forHorizontal(Shapes.or(
+            Block.box(0, 0, 0, 16, 4, 16),
+            Block.box(0, 4, 10, 16, 13, 16),
+            Block.box(0, 13, 12, 16, 16, 15),
 
-    static {
-        SHAPES = new VoxelShape[Iterate.horizontalDirections.length];
+            // Front
+            Block.box(2, 4, 2, 16, 5, 10),
+            Block.box(2, 5, 4, 16, 7, 10),
+            Block.box(2, 7, 6, 16, 9, 10),
+            Block.box(2, 9, 8, 16, 11, 10)
+    ), Direction.NORTH);
 
-        for(int i = 0; i < SHAPES.length; i++) {
-            Direction dir = Iterate.horizontalDirections[i];
-            SHAPES[i] = buildShape(dir);
-        }
+    @Nullable
+    public static BlockPos getCashRegisterPos(ItemStack stack) {
+        var tag = stack.getTag();
+        if (tag != null && tag.contains("CAL$CashRegister", CompoundTag.TAG_LONG))
+            return BlockPos.of(tag.getLong("CAL$CashRegister"));
+        return null;
+    }
+
+    public static void setCashRegisterPos(ItemStack stack, @Nullable BlockPos pos) {
+        if (stack.isEmpty())
+            return;
+
+        var tag = stack.getOrCreateTag();
+        if (pos == null)
+            tag.remove("CAL$CashRegister");
+        else
+            tag.putLong("CAL$CashRegister", pos.asLong());
     }
 
 
@@ -58,49 +81,9 @@ public class CashRegisterBlock extends StockTickerBlock {
         pBuilder.add(OPEN);
     }
 
-    public static VoxelShape buildShape(Direction facing) {
-        double x1, x2, z1, z2;
-
-        switch(facing) {
-            case NORTH:
-                x1 = 0;
-                z1 = 10/16.0;
-                x2 = 1;
-                z2 = 1f;
-                break;
-
-            case EAST:
-                x1 = 0;
-                z1 = 0;
-                x2 = 6/16.0;
-                z2 = 1;
-                break;
-
-            case WEST:
-                x1 = 10/16.0;
-                z1 = 0;
-                x2 = 1;
-                z2 = 1;
-                break;
-
-            case SOUTH:
-            default:
-                x1 = 0;
-                z1 = 0;
-                x2 = 1;
-                z2 = 6/16.0;
-                break;
-        }
-
-        return Shapes.or(
-                Shapes.box(0, 0, 0, 16/16.0, 6/16.0, 16/16.0),
-                Shapes.box(x1, 6/16.0, z1, x2, 1, z2)
-        );
-    }
-
     @Override
     public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
-        return SHAPES[pState.getValue(FACING).get2DDataValue() % SHAPES.length];
+        return SHAPES.get(pState.getValue(FACING));
     }
 
     @Override

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "building",
+  "ingredients": [
+    {
+      "tag": "forge:dyes/gray"
+    },
+    {
+      "tag": "createadditionallogistics:short_seats"
+    }
+  ],
+  "result": {
+    "item": "createadditionallogistics:gray_short_seat"
+  }
+}

@@ -56,7 +56,7 @@ public class SalesLedgerItem extends Item {
 
     @Override
     public boolean isDamageable(ItemStack stack) {
-        return true;
+        return false;
     }
 
     @Override

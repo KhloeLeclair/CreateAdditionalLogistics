@@ -51,6 +51,7 @@ public class CALPackets {
 
     public static final SimpleChannel INSTANCE = NetworkRegistry.ChannelBuilder
             .named(CreateAdditionalLogistics.asResource("main"))
+            .networkProtocolVersion(() -> PROTOCOL_VERSION)
             .serverAcceptedVersions(PROTOCOL_VERSION::equals)
             .clientAcceptedVersions(PROTOCOL_VERSION::equals)
             .simpleChannel();

@@ -113,7 +113,7 @@ public class FlexibleShaftBlockEntity extends AbstractLowEntityKineticBlockEntit
         int particleSpeed = speedLevel.getParticleSpeed();
         particleSpeed *= Math.signum(speed);
 
-        var particleData = new RotationIndicatorParticleData(color, particleSpeed, .75f, .65f, 5, side.getAxis().getName().charAt(0));
+        var particleData = new RotationIndicatorParticleData(color, particleSpeed, .75f, .65f, 5, side.getAxis().name().charAt(0));
 
         sl.sendParticles(particleData, position.x, position.y, position.z, 20, 0, 0, 0, 1);
     }

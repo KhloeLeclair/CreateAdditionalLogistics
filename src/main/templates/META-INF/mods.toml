@@ -62,10 +62,7 @@ file="META-INF/accesstransformer.cfg"
 [[dependencies.${mod_id}]] #optional
     # the modid of the dependency
     modId="forge" #mandatory
-    # The type of the dependency. Can be one of "required", "optional", "incompatible" or "discouraged" (case insensitive).
-    # 'required' requires the mod to exist, 'optional' does not
-    # 'incompatible' will prevent the game from loading timestamp the mod exists, and 'discouraged' will show a warning
-    type="required" #mandatory
+    mandatory=true
     # Optional field describing why the dependency is required or why it is incompatible
     # reason="..."
     # The version range of the dependency
@@ -80,21 +77,14 @@ file="META-INF/accesstransformer.cfg"
 # Here's another dependency
 [[dependencies.${mod_id}]]
     modId="minecraft"
-    type="required"
-    # This version range declares a minimum of the current minecraft version up to but not including the next major version
+    mandatory=true
     versionRange="${minecraft_version_range}"
     ordering="NONE"
     side="BOTH"
 
-# Features are specific properties of the game environment, that you may want to declare you require. This example declares
-# that your mod requires GL version 3.2 or higher. Other features will be added. They are side aware so declaring this won't
-# stop your mod loading on the server for example.
-#[features.${mod_id}]
-#openGLVersion="[3.2,)"
-
 [[dependencies.${mod_id}]]
     modId="create"
-    type="required"
+    mandatory=true
     versionRange="[6.0.7,6.1.0)"
-    ordering="NONE"
+    ordering="AFTER"
     side="BOTH"

@@ -1,0 +1,15 @@
+{
+  "type": "minecraft:crafting_shapeless",
+  "category": "misc",
+  "ingredients": [
+    {
+      "tag": "forge:dyes/cyan"
+    },
+    {
+      "tag": "createadditionallogistics:flexible_shafts"
+    }
+  ],
+  "result": {
+    "item": "createadditionallogistics:cyan_flexible_shaft"
+  }
+}

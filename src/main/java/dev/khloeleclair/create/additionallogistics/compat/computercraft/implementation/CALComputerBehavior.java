@@ -19,10 +19,17 @@ import dev.khloeleclair.create.additionallogistics.compat.computercraft.implemen
 import net.createmod.catnip.data.Pair;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.common.capabilities.Capability;
+import net.minecraftforge.common.capabilities.CapabilityManager;
+import net.minecraftforge.common.capabilities.CapabilityToken;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.common.util.NonNullSupplier;
 
 public class CALComputerBehavior extends AbstractEventfulComputerBehavior {
+
+    protected static final Capability<IPeripheral> PERIPHERAL_CAPABILITY = CapabilityManager
+            .get(new CapabilityToken<>() {
+            });
 
     LazyOptional<IPeripheral> peripheral;
     NonNullSupplier<IPeripheral> peripheralSupplier;
@@ -92,6 +99,11 @@ public class CALComputerBehavior extends AbstractEventfulComputerBehavior {
             updateArguments(arguments);
             sp.queuePositionedEvent(event, arguments);
         }
+    }
+
+    @Override
+    public <T> boolean isPeripheralCap(Capability<T> cap) {
+        return cap == PERIPHERAL_CAPABILITY;
     }
 
     public <T> LazyOptional<T> getPeripheralCapability() {

@@ -171,7 +171,7 @@ public abstract class AbstractLazySimpleKineticBlock<T extends AbstractLowEntity
 
         BlockState newState = withSides(level, pos, state);
         if (newState != state && level instanceof ServerLevel sl)
-                AbstractLowEntityKineticBlockEntity.markDirty(sl, pos);
+            AbstractLowEntityKineticBlockEntity.markDirty(sl, pos);
 
         return newState;
     }

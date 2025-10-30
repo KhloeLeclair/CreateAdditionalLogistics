@@ -9,7 +9,6 @@ import com.simibubi.create.foundation.blockEntity.behaviour.filtering.FilteringB
 import com.simibubi.create.foundation.utility.CreateLang;
 import dev.khloeleclair.create.additionallogistics.common.Config;
 import dev.khloeleclair.create.additionallogistics.common.utilities.IPromiseLimit;
-import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.Mth;
 import org.spongepowered.asm.mixin.Mixin;
@@ -138,7 +137,7 @@ public abstract class MixinFactoryPanelBehaviour extends FilteringBehaviour impl
             name = "demand"
     )
     private int CAL$tickStorageMonitor$getDemand(int original) {
-        if (CAL$RemainingAdditional > 0)
+        if (CAL$RemainingAdditional > 0 && original > 0)
             return original + CAL$RemainingAdditional;
         return original;
     }
@@ -149,7 +148,7 @@ public abstract class MixinFactoryPanelBehaviour extends FilteringBehaviour impl
             name = "demand"
     )
     private int CAL$tryRestock$getDemand(int original) {
-        if (CAL$RemainingAdditional > 0)
+        if (CAL$RemainingAdditional > 0 && original > 0)
             return original + CAL$RemainingAdditional;
         return original;
     }
@@ -214,7 +213,7 @@ public abstract class MixinFactoryPanelBehaviour extends FilteringBehaviour impl
             method = "writeSafe",
             at = @At("RETURN")
     )
-    private void CAL$onWriteSafe(CompoundTag nbt, HolderLookup.Provider registries, CallbackInfo ci) {
+    private void CAL$onWriteSafe(CompoundTag nbt, CallbackInfo ci) {
         CAL$writeData(nbt);
     }
 
@@ -222,7 +221,7 @@ public abstract class MixinFactoryPanelBehaviour extends FilteringBehaviour impl
             method = "write",
             at = @At("RETURN")
     )
-    private void CAL$onWrite(CompoundTag nbt, HolderLookup.Provider registries, boolean clientPacket, CallbackInfo ci) {
+    private void CAL$onWrite(CompoundTag nbt, boolean clientPacket, CallbackInfo ci) {
         CAL$writeData(nbt);
     }
 
@@ -230,7 +229,7 @@ public abstract class MixinFactoryPanelBehaviour extends FilteringBehaviour impl
             method = "read",
             at = @At("RETURN")
     )
-    private void CAL$onRead(CompoundTag nbt, HolderLookup.Provider registries, boolean clientPacket, CallbackInfo ci) {
+    private void CAL$onRead(CompoundTag nbt, boolean clientPacket, CallbackInfo ci) {
         var fpb = FPB();
         if (!fpb.active)
             return;

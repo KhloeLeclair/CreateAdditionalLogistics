@@ -14,6 +14,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.DyeColor;
@@ -34,6 +35,7 @@ import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
+import net.minecraftforge.common.util.FakePlayer;
 import org.jetbrains.annotations.Nullable;
 
 public abstract class AbstractFlexibleShaftBlock extends AbstractLowEntityKineticBlock<FlexibleShaftBlockEntity> {
@@ -177,15 +179,14 @@ public abstract class AbstractFlexibleShaftBlock extends AbstractLowEntityKineti
     }
 
     @Override
-    protected InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hitResult) {
-        if (!player.getMainHandItem().isEmpty())
-            return InteractionResult.FAIL;
-
-        if (!level.isClientSide && player instanceof ServerPlayer sp) {
-            CALPackets.OpenFlexibleShaftScreen.of(pos).send(sp);
+    public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+        if (player != null && player.mayBuild() && !(player instanceof FakePlayer) && player.getItemInHand(hand).isEmpty()) {
+            if (!level.isClientSide && player instanceof ServerPlayer sp)
+                CALPackets.OpenFlexibleShaftScreen.of(pos).send(sp);
+            return InteractionResult.SUCCESS;
         }
 
-        return InteractionResult.SUCCESS;
+        return super.use(state, level, pos, player, hand, hit);
     }
 
     public void setSide(Level level, BlockPos pos, Direction side, byte value) {

@@ -1,7 +1,6 @@
 package dev.khloeleclair.create.additionallogistics.common;
 
 import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModLoadingContext;
 import net.minecraftforge.fml.config.IConfigSpec;
 import net.minecraftforge.fml.config.ModConfig;
@@ -20,7 +19,7 @@ public class Config {
         return CALLang.key("config." + path);
     }
 
-    public static void register(ModContainer modContainer) {
+    public static void register() {
         ModLoadingContext.get().registerConfig(ModConfig.Type.CLIENT, clientSpec);
         ModLoadingContext.get().registerConfig(ModConfig.Type.COMMON, commonSpec);
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, serverSpec);

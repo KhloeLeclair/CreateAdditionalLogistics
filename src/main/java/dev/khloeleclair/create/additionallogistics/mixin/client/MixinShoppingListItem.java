@@ -3,7 +3,7 @@ package dev.khloeleclair.create.additionallogistics.mixin.client;
 import com.llamalad7.mixinextras.sugar.Local;
 import com.simibubi.create.content.logistics.packager.InventorySummary;
 import com.simibubi.create.content.logistics.tableCloth.ShoppingListItem;
-import dev.khloeleclair.create.additionallogistics.common.registries.CALDataComponents;
+import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CashRegisterBlock;
 import dev.khloeleclair.create.additionallogistics.common.utilities.CurrencyUtilities;
 import net.createmod.catnip.data.Couple;
 import net.minecraft.client.Minecraft;
@@ -32,7 +32,7 @@ public class MixinShoppingListItem {
             cancellable = true
     )
     private void CAL$appendHoverText(ItemStack pStack, Level pLevel, List<Component> pTooltipComponents, TooltipFlag pIsAdvanced, CallbackInfo ci, @Nullable @Local Couple<InventorySummary> lists) {
-        if (lists == null || ! CurrencyUtilities.isConversionEnabled(pStack.get(CALDataComponents.CASH_REGISTER_POS) != null))
+        if (lists == null || ! CurrencyUtilities.isConversionEnabled(CashRegisterBlock.getCashRegisterPos(pStack) != null))
             return;
 
         var items = lists.getSecond();

@@ -1,11 +1,8 @@
 package dev.khloeleclair.create.additionallogistics.client;
 
-import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
-import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.common.Mod;
 
-@Mod(value = CreateAdditionalLogistics.MODID, dist = Dist.CLIENT)
+//@Mod(value = CreateAdditionalLogistics.MODID, dist = Dist.CLIENT)
 public class CreateAdditionalLogisticsClient {
 
     public CreateAdditionalLogisticsClient(ModContainer container) {
@@ -17,7 +14,7 @@ public class CreateAdditionalLogisticsClient {
         //Supplier<IConfigScreenFactory> configScreen = () -> (mc, previousScreen) -> new BaseConfigScreen(previousScreen, CreateAdditionalLogistics.MODID);
         //container.registerExtensionPoint(IConfigScreenFactory.class, configScreen);
 
-        container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
+//        container.registerExtensionPoint(IConfigScreenFactory.class, ConfigurationScreen::new);
 
     }
 

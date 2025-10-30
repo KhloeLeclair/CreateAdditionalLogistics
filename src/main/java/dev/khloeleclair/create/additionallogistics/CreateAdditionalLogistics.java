@@ -27,8 +27,8 @@ import net.minecraftforge.event.server.ServerStoppedEvent;
 import net.minecraftforge.eventbus.api.EventPriority;
 import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
-import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.jetbrains.annotations.Nullable;
 import org.slf4j.Logger;
 
@@ -60,7 +60,11 @@ public class CreateAdditionalLogistics {
     }
 
 
-    public CreateAdditionalLogistics(IEventBus modEventBus, ModContainer modContainer) {
+    public CreateAdditionalLogistics() {
+        this(FMLJavaModLoadingContext.get().getModEventBus());
+    }
+
+    public CreateAdditionalLogistics(IEventBus modEventBus) {
 
         // Register things.
         REGISTRATE.get().registerEventListeners(modEventBus);
@@ -78,8 +82,6 @@ public class CreateAdditionalLogistics {
 
         CALComputerCraftProxy.register();
 
-        CALDataComponents.register(modEventBus);
-
         CALPackets.register();
 
         modEventBus.addListener(EventPriority.HIGHEST, DataGen::gatherData);
@@ -90,21 +92,21 @@ public class CreateAdditionalLogistics {
         MinecraftForge.EVENT_BUS.addListener(AbstractLowEntityKineticBlockEntity::onTick);
 
         // Register our mod's ModConfigSpec so that FML can create and load the config file for us
-        Config.register(modContainer);
+        Config.register();
     }
 
     @SubscribeEvent
-    private void onServerStart(ServerStartingEvent event) {
+    public void onServerStart(ServerStartingEvent event) {
         server = event.getServer();
     }
 
     @SubscribeEvent
-    private void onServerStopped(ServerStoppedEvent event) {
+    public void onServerStopped(ServerStoppedEvent event) {
         server = null;
     }
 
     @SubscribeEvent
-    private void onRightClick(PlayerInteractEvent.RightClickBlock event) {
+    public void onRightClick(PlayerInteractEvent.RightClickBlock event) {
         if (! Config.Common.protectStockKeeperSeats.get())
             return;
 

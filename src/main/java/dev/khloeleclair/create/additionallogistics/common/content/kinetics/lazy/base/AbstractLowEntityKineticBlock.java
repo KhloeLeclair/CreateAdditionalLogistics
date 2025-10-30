@@ -18,6 +18,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityTicker;
@@ -117,6 +118,21 @@ public abstract class AbstractLowEntityKineticBlock<T extends AbstractLowEntityK
             super.onRemove(pState, pLevel, pPos, pNewState, pIsMoving);
         if (pLevel.isClientSide)
             clearInformationWalkCache();
+    }
+
+    @Override
+    public void onBlockStateChange(LevelReader level, BlockPos pos, BlockState oldState, BlockState newState) {
+        // Ensure we don't have a block entity if we shouldn't be active.
+        if (!isActive(newState) && level instanceof Level l) {
+            if (l.getBlockEntity(pos) instanceof AbstractLowEntityKineticBlockEntity be)
+                be.notifyConnectedToValidate();
+
+            l.removeBlockEntity(pos);
+        }
+
+        /*// Because 1.20.1 is cursed, we need to more aggressively mark things dirty.
+        if (level instanceof ServerLevel sl)
+            AbstractLowEntityKineticBlockEntity.markDirty(sl, pos);*/
     }
 
     @Override
