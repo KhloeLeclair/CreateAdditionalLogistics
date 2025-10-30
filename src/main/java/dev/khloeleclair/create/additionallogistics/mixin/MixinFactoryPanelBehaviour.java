@@ -161,7 +161,8 @@ public abstract class MixinFactoryPanelBehaviour extends FilteringBehaviour impl
             method = "tryRestock",
             at = @At(
                     value = "INVOKE_ASSIGN",
-                    target = "Lorg/joml/Math;clamp(III)I"
+                    target = "Lorg/joml/Math;clamp(III)I",
+                    remap = false
             ),
             cancellable = true,
             remap = false
@@ -194,7 +195,8 @@ public abstract class MixinFactoryPanelBehaviour extends FilteringBehaviour impl
             at = @At(
                     value = "INVOKE",
                     target = "resetTimer",
-                    shift = At.Shift.AFTER
+                    shift = At.Shift.AFTER,
+                    remap = false
             ),
             cancellable = true,
             remap = false

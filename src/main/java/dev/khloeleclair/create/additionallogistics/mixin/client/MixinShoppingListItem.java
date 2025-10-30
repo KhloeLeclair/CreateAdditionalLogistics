@@ -27,7 +27,8 @@ public class MixinShoppingListItem {
             at = @At(
                     value = "INVOKE_ASSIGN",
                     target = "Lcom/simibubi/create/content/logistics/tableCloth/ShoppingListItem$ShoppingList;bakeEntries(Lnet/minecraft/world/level/LevelAccessor;Lnet/minecraft/core/BlockPos;)Lnet/createmod/catnip/data/Couple;",
-                    shift = At.Shift.AFTER
+                    shift = At.Shift.AFTER,
+                    remap = false
             ),
             cancellable = true
     )

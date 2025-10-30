@@ -19,7 +19,8 @@ public class MixinTableClothOverlayRenderer {
             at = @At(
                     value = "INVOKE",
                     target = "Lcom/simibubi/create/content/equipment/blueprint/BlueprintOverlayRenderer;displayShoppingList(Lnet/createmod/catnip/data/Couple;)V",
-                    shift = At.Shift.BEFORE
+                    shift = At.Shift.BEFORE,
+                    remap = false
             ),
             cancellable = true,
             remap = false
