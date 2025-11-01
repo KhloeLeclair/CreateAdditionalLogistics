@@ -294,7 +294,7 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
             return;
         }
 
-        dirtyPositions.add(new LevelBlockPos(level, pos));
+        dirtyPositions.add(new LevelBlockPos(level, pos.immutable()));
     }
 
     public static void updateDirty() {

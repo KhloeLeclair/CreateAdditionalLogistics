@@ -5,7 +5,7 @@ import com.simibubi.create.content.logistics.packagerLink.LogisticallyLinkedBloc
 import com.simibubi.create.content.logistics.stockTicker.StockTickerBlock;
 import com.simibubi.create.content.logistics.stockTicker.StockTickerBlockEntity;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALBlockEntityTypes;
-import net.createmod.catnip.data.Iterate;
+import net.createmod.catnip.math.VoxelShaper;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.server.level.ServerLevel;
@@ -36,17 +36,17 @@ public class CashRegisterBlock extends StockTickerBlock {
 
     public static final MapCodec<CashRegisterBlock> CODEC = simpleCodec(CashRegisterBlock::new);
 
-    public static VoxelShape[] SHAPES;
+    public static VoxelShaper SHAPES = VoxelShaper.forHorizontal(Shapes.or(
+            Block.box(0, 0, 0, 16, 4, 16),
+            Block.box(0, 4, 10, 16, 13, 16),
+            Block.box(0, 13, 12, 16, 16, 15),
 
-    static {
-        SHAPES = new VoxelShape[Iterate.horizontalDirections.length];
-
-        for(int i = 0; i < SHAPES.length; i++) {
-            Direction dir = Iterate.horizontalDirections[i];
-            SHAPES[i] = buildShape(dir);
-        }
-    }
-
+            // Front
+            Block.box(2, 4, 2, 16, 5, 10),
+            Block.box(2, 5, 4, 16, 7, 10),
+            Block.box(2, 7, 6, 16, 9, 10),
+            Block.box(2, 9, 8, 16, 11, 10)
+    ), Direction.NORTH);
 
     public CashRegisterBlock(Properties pProperties) {
         super(pProperties);
@@ -62,49 +62,9 @@ public class CashRegisterBlock extends StockTickerBlock {
         pBuilder.add(OPEN);
     }
 
-    public static VoxelShape buildShape(Direction facing) {
-        double x1, x2, z1, z2;
-
-        switch(facing) {
-            case Direction.NORTH:
-                x1 = 0;
-                z1 = 10/16.0;
-                x2 = 1;
-                z2 = 1f;
-                break;
-
-            case Direction.EAST:
-                x1 = 0;
-                z1 = 0;
-                x2 = 6/16.0;
-                z2 = 1;
-                break;
-
-            case Direction.WEST:
-                x1 = 10/16.0;
-                z1 = 0;
-                x2 = 1;
-                z2 = 1;
-                break;
-
-            case Direction.SOUTH:
-            default:
-                x1 = 0;
-                z1 = 0;
-                x2 = 1;
-                z2 = 6/16.0;
-                break;
-        }
-
-        return Shapes.or(
-                Shapes.box(0, 0, 0, 16/16.0, 6/16.0, 16/16.0),
-                Shapes.box(x1, 6/16.0, z1, x2, 1, z2)
-        );
-    }
-
     @Override
     public VoxelShape getShape(BlockState pState, BlockGetter pLevel, BlockPos pPos, CollisionContext pContext) {
-        return SHAPES[pState.getValue(FACING).get2DDataValue() % SHAPES.length];
+        return SHAPES.get(pState.getValue(FACING));
     }
 
     @Override

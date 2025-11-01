@@ -19,7 +19,7 @@ import dev.khloeleclair.create.additionallogistics.common.content.logistics.cash
 import dev.khloeleclair.create.additionallogistics.common.registries.CALDataMaps;
 import dev.khloeleclair.create.additionallogistics.mixin.IStockTickerBlockEntityAccessor;
 import dev.khloeleclair.create.additionallogistics.mixin.client.IBlueprintOverlayRendererAccessor;
-import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2LongArrayMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.createmod.catnip.data.Couple;
 import net.createmod.catnip.data.Iterate;
@@ -69,8 +69,8 @@ public class CurrencyUtilities {
             if (ctx.hasShiftDown())
                 return null;
 
-            int cogs = value / 64;
-            int spurs = value % 64;
+            long cogs = value / 64;
+            int spurs = (int) (value % 64);
 
             var result = Component.literal(String.valueOf(spurs)).append("¤");
 
@@ -229,7 +229,7 @@ public class CurrencyUtilities {
         Couple<InventorySummary> bakeEntries = list.bakeEntries(level, null);
         var payment = splitCost(player, bakeEntries.getSecond().getStacksByCount());
 
-        Map<ICurrency, Integer> paymentCurrencies = payment.getFirst();
+        Map<ICurrency, Long> paymentCurrencies = payment.getFirst();
         List<BigItemStack> paymentOther = payment.getSecond();
 
         InventorySummary orderEntries = bakeEntries.getFirst();
@@ -360,32 +360,39 @@ public class CurrencyUtilities {
     }
 
 
-    public record ExtractValueResult(boolean inventoryFull, int remaining) {
-        public static ExtractValueResult of(boolean inventoryFull, int remaining) {
+    public record ExtractValueResult(boolean inventoryFull, long remaining) {
+        public static ExtractValueResult of(boolean inventoryFull, long remaining) {
             return new ExtractValueResult(inventoryFull, remaining);
         }
 
     }
 
     /// Extract an amount of currency from the player's inventory.
-    public static ExtractValueResult extractValueFromPlayer(Player player, ICurrency currency, int value, boolean simulate) {
+    public static ExtractValueResult extractValueFromPlayer(Player player, ICurrency currency, long value, boolean simulate) {
         return extractValueFrom(player, player.level(), player.blockPosition(), new PlayerInvWrapper(player.getInventory()), currency, value, simulate);
     }
 
-    public static ExtractValueResult extractValueFromBlock(@Nullable Player player, BlockEntity be, IItemHandlerModifiable itemHandler, ICurrency currency, int value, boolean simulate) {
+    public static ExtractValueResult extractValueFromBlock(@Nullable Player player, BlockEntity be, IItemHandlerModifiable itemHandler, ICurrency currency, long value, boolean simulate) {
         return extractValueFrom(player, be.getLevel(), be.getBlockPos(), itemHandler, currency, value, simulate);
     }
 
-    public static ExtractValueResult extractValueFrom(@Nullable Player player, Level level, BlockPos pos, IItemHandlerModifiable itemHandler, ICurrency currency, int value, boolean simulate) {
+    public static ExtractValueResult extractValueFrom(@Nullable Player player, Level level, BlockPos pos, IItemHandlerModifiable itemHandler, ICurrency currency, long value, boolean simulate) {
         if (value <= 0)
             return ExtractValueResult.of(false, 0);
 
-        int remaining = value;
+        long remaining = value;
         int emptied_slots = 0;
         InventorySummary to_insert = new InventorySummary();
 
+        // Don't run the exact-mode pass in simulation.
+        boolean[] modes;
+        if (simulate)
+            modes = new boolean[]{false};
+        else
+            modes = Iterate.trueAndFalse;
+
         // First, build a list of items to insert.
-        for(boolean exact : Iterate.trueAndFalse) {
+        for(boolean exact : modes) {
             for (int slot = 0; slot < itemHandler.getSlots(); slot++) {
                 ItemStack stack = itemHandler.getStackInSlot(slot);
                 var result = currency.extractValue(player, stack, remaining, exact);
@@ -455,8 +462,8 @@ public class CurrencyUtilities {
     }
 
 
-    public static Pair<Map<ICurrency, Integer>, List<BigItemStack>> splitCost(Player player, List<BigItemStack> input) {
-        Map<ICurrency, Integer> currency_cost = new Object2IntArrayMap<>();
+    public static Pair<Map<ICurrency, Long>, List<BigItemStack>> splitCost(Player player, List<BigItemStack> input) {
+        Map<ICurrency, Long> currency_cost = new Object2LongArrayMap<>();
         List<BigItemStack> other_cost = new ArrayList<>();
 
         for(var entry : input) {
@@ -464,8 +471,8 @@ public class CurrencyUtilities {
             if (currency == null)
                 other_cost.add(entry);
             else {
-                int value = currency.getValue(player, entry.stack, entry.count);
-                currency_cost.put(currency, currency_cost.getOrDefault(currency, 0) + value);
+                long value = currency.getValue(player, entry.stack, entry.count);
+                currency_cost.put(currency, currency_cost.getOrDefault(currency, 0L) + value);
             }
 
         }

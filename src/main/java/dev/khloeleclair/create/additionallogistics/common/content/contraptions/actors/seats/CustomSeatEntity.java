@@ -41,7 +41,7 @@ public class CustomSeatEntity extends SeatEntity {
     public static double getCustomEntitySeatOffset(Entity passenger) {
         double result = SeatEntity.getCustomEntitySeatOffset(passenger);
 
-        if (!(passenger.getVehicle() instanceof AbstractContraptionEntity contraptionEntity))
+        if (passenger == null || !(passenger.getVehicle() instanceof AbstractContraptionEntity contraptionEntity))
             return result;
 
         var contraption = contraptionEntity.getContraption();

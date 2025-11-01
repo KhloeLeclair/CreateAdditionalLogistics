@@ -22,7 +22,7 @@ import dev.khloeleclair.create.additionallogistics.common.utilities.CurrencyUtil
 import dev.khloeleclair.create.additionallogistics.compat.computercraft.AbstractEventfulComputerBehavior;
 import dev.khloeleclair.create.additionallogistics.compat.computercraft.CALComputerCraftProxy;
 import it.unimi.dsi.fastutil.ints.IntArrayList;
-import it.unimi.dsi.fastutil.objects.Object2IntArrayMap;
+import it.unimi.dsi.fastutil.objects.Object2LongArrayMap;
 import net.createmod.catnip.data.Pair;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -379,7 +379,7 @@ public class CashRegisterBlockEntity extends StockTickerBlockEntity {
         if (level.isClientSide)
             return;
 
-        Map<ICurrency, Integer> currencies = new Object2IntArrayMap<>();
+        Map<ICurrency, Long> currencies = new Object2LongArrayMap<>();
         List<Integer> slots = new IntArrayList();
         int empty_slots = 0;
 
@@ -393,7 +393,7 @@ public class CashRegisterBlockEntity extends StockTickerBlockEntity {
             if (!(CurrencyUtilities.getForItem(stack.getItem()) instanceof ICurrency currency))
                 continue;
 
-            currencies.put(currency, currencies.getOrDefault(currency, 0) + currency.getValue(null, stack, stack.getCount()));
+            currencies.put(currency, currencies.getOrDefault(currency, 0L) + currency.getValue(null, stack, stack.getCount()));
             slots.add(slot);
         }
 

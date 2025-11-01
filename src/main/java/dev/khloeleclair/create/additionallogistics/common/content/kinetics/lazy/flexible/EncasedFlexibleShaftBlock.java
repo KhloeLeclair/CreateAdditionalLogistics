@@ -5,11 +5,13 @@ import com.simibubi.create.content.decoration.encasing.EncasedBlock;
 import com.simibubi.create.content.kinetics.base.KineticBlockEntity;
 import com.simibubi.create.content.schematics.requirement.ItemRequirement;
 import com.tterrag.registrate.util.entry.BlockEntry;
+import dev.khloeleclair.create.additionallogistics.common.content.kinetics.lazy.base.AbstractLowEntityKineticBlockEntity;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALBlocks;
 import it.unimi.dsi.fastutil.bytes.Byte2ObjectOpenHashMap;
 import net.createmod.catnip.data.Iterate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
@@ -102,6 +104,11 @@ public class EncasedFlexibleShaftBlock extends AbstractFlexibleShaftBlock implem
             if (!level.isClientSide() && level.getBlockEntity(pos) instanceof FlexibleShaftBlockEntity fsb)
                 fsb.setSide(direction, (byte)0);
         }
+
+        // We can't make any assumptions about connections because of how we use our sides, so always
+        // mark dirty.
+        if (level instanceof ServerLevel sl)
+            AbstractLowEntityKineticBlockEntity.markDirty(sl, pos);
 
         return state;
     }

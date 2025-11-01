@@ -12,32 +12,32 @@ import java.util.List;
 
 public interface ICurrency {
 
-    record ExtractionResult(List<ItemStack> remaining, int remainingValue) {}
+    record ExtractionResult(List<ItemStack> remaining, long remainingValue) {}
 
     ResourceLocation getId();
 
     Iterable<Item> getItems();
 
-    int getValue(@Nullable Player player, ItemStack stack, int count);
+    long getValue(@Nullable Player player, ItemStack stack, int count);
 
-    List<ItemStack> getStacksWithValue(int count);
+    List<ItemStack> getStacksWithValue(long value);
 
-    ExtractionResult extractValue(@Nullable Player player, ItemStack stack, int toExtract, boolean exact);
+    ExtractionResult extractValue(@Nullable Player player, ItemStack stack, long toExtract, boolean exact);
 
     @Nullable
-    Component formatValue(int value, TooltipFlag flag);
+    Component formatValue(long value, TooltipFlag flag);
 
     interface IAdvancedValueGetter {
-        int get(@Nullable Player player, ItemStack stack, int count);
+        long get(@Nullable Player player, ItemStack stack, int count);
     }
 
     interface IAdvancedValueExtractor {
-        ExtractionResult apply(@Nullable Player player, ItemStack stack, int toExtract, boolean exact);
+        ExtractionResult apply(@Nullable Player player, ItemStack stack, long toExtract, boolean exact);
     }
 
     interface IValueFormatter {
         @Nullable
-        Component get(int value, TooltipFlag tooltipFlag);
+        Component get(long value, TooltipFlag tooltipFlag);
     }
 
     interface ICurrencyBackend {

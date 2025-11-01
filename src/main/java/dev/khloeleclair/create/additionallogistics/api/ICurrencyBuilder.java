@@ -4,8 +4,11 @@ import net.minecraft.world.item.Item;
 
 public interface ICurrencyBuilder {
 
-    /// Add a simple item to this currency.
+    @Deprecated
     ICurrencyBuilder add(Item item, int value);
+
+    /// Add a simple item to this currency.
+    ICurrencyBuilder add(Item item, long value);
 
     /// Add a complex item to this currency.
     ICurrencyBuilder add(Item item, ICurrency.IAdvancedValueGetter getValue, ICurrency.IAdvancedValueExtractor extractValue);
