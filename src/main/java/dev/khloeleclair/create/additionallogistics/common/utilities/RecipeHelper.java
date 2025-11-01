@@ -50,30 +50,24 @@ public class RecipeHelper {
 
         @Nullable
         public SimpleCurrency getCompactingCurrency(Item item) {
-            final var level = getLevel();
-            if (level == null)
-                return null;
-
             Optional<SimpleCurrency> cached;
-
             synchronized (compactingCurrencies) {
                 cached = compactingCurrencies.get(item);
+                if (cached != null)
+                    return cached.orElse(null);
             }
 
-            if (cached != null)
-                return cached.orElse(null);
-
+            @Nullable
             SimpleCurrency currency;
-
             try {
                 currency = getCompactingCurrencyImpl(item);
             } catch(Exception ex) {
-                CreateAdditionalLogistics.LOGGER.warn("Error attempting to create compacting currency for item {}", item);
+                CreateAdditionalLogistics.LOGGER.warn("Error while determining automatic compacting currency for item {}", item);
                 currency = null;
             }
 
+            cached = Optional.ofNullable(currency);
             synchronized (compactingCurrencies) {
-                cached = currency == null ? Optional.empty() : Optional.of(currency);
                 if (currency == null)
                     compactingCurrencies.put(item, cached);
                 else

@@ -345,13 +345,14 @@ public class CurrencyUtilities {
         int emptied_slots = 0;
         InventorySummary to_insert = new InventorySummary();
 
-        // First, build a list of items to insert.
+        // Don't run the exact-mode pass in simulation.
         boolean[] modes;
         if (simulate)
             modes = new boolean[]{false};
         else
             modes = Iterate.trueAndFalse;
 
+        // First, build a list of items to insert.
         for(boolean exact : modes) {
             for (int slot = 0; slot < itemHandler.getSlots(); slot++) {
                 ItemStack stack = itemHandler.getStackInSlot(slot);

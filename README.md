@@ -245,16 +245,24 @@ the stock ticker. But at least you won't do it by accident.
 
 ## 1.4.1
 
+### Added
+
+* Support for Minecraft 1.20.1. This is the first such release, and likely it has
+  some bugs so please report any issues you encounter.
+
+
 ### Fixed
 
-* Issue where currency conversion would incorrectly count the same item stack
-  multiple times.
-* Encased Flexible Shafts not correctly updating their state when a neighboring
-  lazy shaft updates.
+* Issue where Encased Flexible Shafts would not properly update their state when
+  a neighboring Lazy Shaft is updated.
+* Possible crash when calculating automatic currencies when certain mods are
+  installed that add crates / compressed forms of items, causing values to exceed
+  the maximum value of a signed 32-bit integer.
 
 ### Changed
 
-* Cash Register collision shape is now more accurate to its model.
+* Update the collision shape for Cash Registers to more accurately reflect the
+  block model's shape.
 
 
 ## 1.4.0

@@ -66,7 +66,6 @@ public class CashRegisterBlock extends StockTickerBlock {
             tag.putLong("CAL$CashRegister", pos.asLong());
     }
 
-
     public CashRegisterBlock(Properties pProperties) {
         super(pProperties);
         registerDefaultState(this.stateDefinition.any()

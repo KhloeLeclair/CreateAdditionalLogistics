@@ -1,6 +1,7 @@
 package dev.khloeleclair.create.additionallogistics.common.utilities;
 
 import com.google.common.collect.Iterables;
+import com.google.common.primitives.Ints;
 import dev.khloeleclair.create.additionallogistics.api.ICurrency;
 import dev.khloeleclair.create.additionallogistics.api.ICurrencyBuilder;
 import it.unimi.dsi.fastutil.Pair;
@@ -138,8 +139,7 @@ public class SimpleCurrency implements ICurrency {
             // We're in exact mode, so we can only deal with this specific currency item
             // and don't want to make change.
             long desired = toExtract / item_value;
-
-            int amount = Math.min(count, desired > Integer.MAX_VALUE ? Integer.MAX_VALUE : (int) desired);
+            int amount = Math.min(count, Ints.saturatedCast(desired));
             long remaining = toExtract - (amount * item_value);
 
             if (amount == count)
@@ -180,6 +180,10 @@ public class SimpleCurrency implements ICurrency {
         }
 
         public CurrencyBuilder add(Item item, int value) {
+            return this.add(item, (long) value);
+        }
+
+        public CurrencyBuilder add(Item item, long value) {
             if (item.equals(Items.AIR))
                 throw new IllegalArgumentException("item cannot be air");
             if (value < 1)
