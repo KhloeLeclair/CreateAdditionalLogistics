@@ -243,6 +243,14 @@ the stock ticker. But at least you won't do it by accident.
 
 # Changelog
 
+## 1.4.2
+
+### Fixed
+
+* Issue with the factory gauge UI crashing on Minecraft 1.20.1 due to a
+  misconfigured mixin.
+
+
 ## 1.4.1
 
 ### Added

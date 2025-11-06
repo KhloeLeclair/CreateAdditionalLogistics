@@ -123,8 +123,7 @@ public abstract class MixinFactoryPanelScreen extends AbstractSimiScreen {
 
     @Inject(
             method = "tick",
-            at = @At("RETURN"),
-            remap = false
+            at = @At("RETURN")
     )
     private void CAL$onTick(CallbackInfo ci) {
         CAL$updatePromiseLimitLabel();
