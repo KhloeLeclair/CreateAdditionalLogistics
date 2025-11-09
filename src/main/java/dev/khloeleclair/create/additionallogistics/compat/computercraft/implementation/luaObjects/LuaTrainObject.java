@@ -9,7 +9,7 @@ import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaFunction;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
 import dev.khloeleclair.create.additionallogistics.common.Config;
-import dev.khloeleclair.create.additionallogistics.compat.computercraft.implementation.ComputerUtil;
+import dev.khloeleclair.create.additionallogistics.compat.computercraft.implementation.CALComputerUtil;
 import dev.khloeleclair.create.additionallogistics.mixin.IStationPeripheralAccessor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceKey;
@@ -118,7 +118,7 @@ public class LuaTrainObject implements LuaComparable {
         if (pos.isEmpty())
             return null;
 
-        return ComputerUtil.getPosition(pos.get(), dimension);
+        return CALComputerUtil.getPosition(pos.get(), dimension);
     }
 
     @LuaFunction(mainThread = true)

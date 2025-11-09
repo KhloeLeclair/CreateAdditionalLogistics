@@ -7,7 +7,7 @@ import com.simibubi.create.content.trains.station.GlobalStation;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaFunction;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
-import dev.khloeleclair.create.additionallogistics.compat.computercraft.implementation.ComputerUtil;
+import dev.khloeleclair.create.additionallogistics.compat.computercraft.implementation.CALComputerUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
@@ -64,7 +64,7 @@ public class LuaPostboxObject implements LuaComparable {
 
     @LuaFunction(mainThread = true)
     public final Map<String, Object> getPosition() {
-        return ComputerUtil.getPosition(pos, station.blockEntityDimension);
+        return CALComputerUtil.getPosition(pos, station.blockEntityDimension);
     }
 
     @LuaFunction(mainThread = true)
@@ -143,7 +143,7 @@ public class LuaPostboxObject implements LuaComparable {
         Map<String, Object> result = new HashMap<>();
 
         result.put("id", station.id);
-        result.put("pos", ComputerUtil.getPosition(pos));
+        result.put("pos", CALComputerUtil.getPosition(pos));
 
         return result;
     }

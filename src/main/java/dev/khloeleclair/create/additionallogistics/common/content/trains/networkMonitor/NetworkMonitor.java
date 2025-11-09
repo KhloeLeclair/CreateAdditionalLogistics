@@ -15,11 +15,15 @@ public class NetworkMonitor extends SingleBlockEntityEdgePoint {
             NetworkMonitor::new
     );
 
-    public static void onTrainArrival(TrackGraph graph, UUID train, UUID station) {
+    public static void onTrainArrival(@Nullable TrackGraph graph, @Nullable UUID train, @Nullable UUID station) {
+        if (graph == null || train == null || station == null)
+            return;
         graph.getPoints(NETWORK_MONITOR).forEach(point -> point.onTrainArrival(train, station));
     }
 
-    public static void onTrainDeparture(TrackGraph graph, UUID train) {
+    public static void onTrainDeparture(@Nullable TrackGraph graph, @Nullable UUID train) {
+        if (graph == null || train == null)
+            return;
         graph.getPoints(NETWORK_MONITOR).forEach(point -> point.onTrainDeparture(train));
     }
 
