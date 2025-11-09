@@ -7,7 +7,7 @@ import net.minecraft.world.level.Level;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ComputerUtil {
+public class CALComputerUtil {
 
     public static Map<String, Object> getPosition(BlockPos pos, ResourceKey<Level> dimension) {
         var result = getPosition(pos);
