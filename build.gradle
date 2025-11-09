@@ -112,11 +112,12 @@ legacyForge {
             // Please read: https://stackoverflow.com/questions/2031163/when-to-use-the-different-log-levels
             logLevel = org.slf4j.event.Level.DEBUG
 
+            gameDirectory = project.file("$minecraft_version run")
+
             jvmArgument "-XX:+AllowEnhancedClassRedefinition"
             jvmArgument "-XX:+IgnoreUnrecognizedVMOptions"
 
             programArgument '-mixin.config=createadditionallogistics.mixins.json'
-
         }
     }
 

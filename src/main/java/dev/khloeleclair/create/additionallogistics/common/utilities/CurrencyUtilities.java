@@ -304,10 +304,11 @@ public class CurrencyUtilities {
         }
 
         // We have a sale.
+        tickerBE.broadcastPackageRequest(LogisticallyLinkedBehaviour.RequestType.PLAYER, order, null, ShoppingListItem.getAddress(mainHandItem));
+
         if (tickerBE instanceof CashRegisterBlockEntity register)
             register.recordSale(player, list);
 
-        tickerBE.broadcastPackageRequest(LogisticallyLinkedBehaviour.RequestType.PLAYER, order, null, ShoppingListItem.getAddress(mainHandItem));
         player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
         if (!order.isEmpty())
             AllSoundEvents.STOCK_TICKER_TRADE.playOnServer(level, tickerBE.getBlockPos());

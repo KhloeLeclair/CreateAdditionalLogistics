@@ -5,7 +5,7 @@ import com.simibubi.create.content.trains.station.StationBlockEntity;
 import dan200.computercraft.api.lua.LuaException;
 import dan200.computercraft.api.lua.LuaFunction;
 import dev.khloeleclair.create.additionallogistics.CreateAdditionalLogistics;
-import dev.khloeleclair.create.additionallogistics.compat.computercraft.implementation.ComputerUtil;
+import dev.khloeleclair.create.additionallogistics.compat.computercraft.implementation.CALComputerUtil;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.Nullable;
 
@@ -53,7 +53,7 @@ public class LuaStationObject implements LuaComparable {
 
     @LuaFunction(mainThread = true)
     public final Map<String, Object> getPosition() {
-        return ComputerUtil.getPosition(station.blockEntityPos, station.blockEntityDimension);
+        return CALComputerUtil.getPosition(station.blockEntityPos, station.blockEntityDimension);
     }
 
     @LuaFunction(mainThread = true)
