@@ -243,6 +243,13 @@ the stock ticker. But at least you won't do it by accident.
 
 # Changelog
 
+## 1.4.4
+
+### Fixed
+
+* Issue causing dedicated servers to crash during startup on 1.20.1.
+
+
 ## 1.4.3
 
 ### Fixed

@@ -21,6 +21,8 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.ItemStack;
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
 import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkEvent;
 import net.minecraftforge.network.NetworkRegistry;
@@ -56,7 +58,7 @@ public class CALPackets {
             .clientAcceptedVersions(PROTOCOL_VERSION::equals)
             .simpleChannel();
 
-    protected static <T extends ClientboundPacket> void registerClientbound(Class<T> type, Function<FriendlyByteBuf, T> factory, Consumer<T> handler) {
+    protected static <T extends ClientboundPacket> void registerClientbound(Class<T> type, Function<FriendlyByteBuf, T> factory, Supplier<Consumer<T>> handler) {
         INSTANCE.messageBuilder(type, index++, NetworkDirection.PLAY_TO_CLIENT)
                 .encoder(T::write)
                 .decoder(factory)
@@ -64,12 +66,12 @@ public class CALPackets {
                 .add();
     }
 
-    private static <T extends ClientboundPacket>BiConsumer<T, Supplier<NetworkEvent.Context>> clientHandler(Consumer<T> handler) {
+    private static <T extends ClientboundPacket>BiConsumer<T, Supplier<NetworkEvent.Context>> clientHandler(Supplier<Consumer<T>> handler) {
         return (t, contextSupplier) -> {
             if (t instanceof CALPacket cp && cp.runOnMainThread()) {
-                Minecraft.getInstance().execute(() -> handler.accept(t));
+                Minecraft.getInstance().execute(() -> handler.get().accept(t));
             } else
-                handler.accept(t);
+                handler.get().accept(t);
             contextSupplier.get().setPacketHandled(true);
         };
     }
@@ -98,9 +100,9 @@ public class CALPackets {
 
     public static void register() {
 
-        registerClientbound(ServerToClientEvent.class, ServerToClientEvent::new, ServerToClientEvent.Handler::handle);
-        registerClientbound(OpenFlexibleShaftScreen.class, OpenFlexibleShaftScreen::new, OpenFlexibleShaftScreen.Handler::handle);
-        registerClientbound(OpenSalesLedgerScreen.class, OpenSalesLedgerScreen::new, OpenSalesLedgerScreen.Handler::handle);
+        registerClientbound(ServerToClientEvent.class, ServerToClientEvent::new, () -> ServerToClientEvent.Handler::handle);
+        registerClientbound(OpenFlexibleShaftScreen.class, OpenFlexibleShaftScreen::new, () -> OpenFlexibleShaftScreen.Handler::handle);
+        registerClientbound(OpenSalesLedgerScreen.class, OpenSalesLedgerScreen::new, () -> OpenSalesLedgerScreen.Handler::handle);
 
         registerServerbound(ConfigureFlexibleShaft.class, ConfigureFlexibleShaft::new);
         registerServerbound(UpdateGaugePromiseLimit.class, UpdateGaugePromiseLimit::new);
@@ -140,6 +142,7 @@ public class CALPackets {
         }
 
         public static class Handler {
+            @OnlyIn(Dist.CLIENT)
             public static void handle(ServerToClientEvent packet) {
                 if (packet.key.equals("clear_information"))
                     AbstractLazySimpleKineticBlock.clearInformationWalkCache();
@@ -239,6 +242,7 @@ public class CALPackets {
         }
 
         public static class Handler {
+            @OnlyIn(Dist.CLIENT)
             public static void handle(OpenFlexibleShaftScreen packet) {
                 if (Minecraft.getInstance().player == null)
                     return;
@@ -278,6 +282,7 @@ public class CALPackets {
         }
 
         public static class Handler {
+            @OnlyIn(Dist.CLIENT)
             public static void handle(OpenSalesLedgerScreen packet) {
                 if (Minecraft.getInstance().player == null)
                     return;
