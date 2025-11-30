@@ -156,16 +156,13 @@ public class SafeRegex {
 
     @NotNull
     private static CachedRegexResult processRegex(@NotNull String regex) {
-        CachedRegexResult cached;
-        try {
-            cached = REGEX_CACHE.getIfPresent(regex);
+        CachedRegexResult cached = null;
 
-            if (cached == null) {
-                throw new NullPointerException();
-                // direct a null result to the catch logic so that it doesn't have to be written twice (yes i know it's stupid but it looks nicer)
-                // basically keep the same logic for dealing with a null result but also use that logic for dealing with a null regex
-            }
-        } catch (NullPointerException npe) {
+        if (regex != null) {
+            cached = REGEX_CACHE.getIfPresent(regex);
+        }
+
+        if (cached == null) {
             try {
                 var pattern = Pattern.compile(regex);
 
@@ -226,15 +223,13 @@ public class SafeRegex {
     }
 
     private static String cachedToRegexPattern(String address) {
-        CachedGlobResult cached;
+        CachedGlobResult cached = null;
 
-        try {
+        if (address != null) {
             cached = GLOB_CACHE.getIfPresent(address);
+        }
 
-            if (cached == null) {
-                throw new NullPointerException(); // see L176
-            }
-        } catch (NullPointerException npe) {
+        if (cached == null) {
             try {
                 cached = new CachedGlobResult(Glob.toRegexPattern(address), null);
 
