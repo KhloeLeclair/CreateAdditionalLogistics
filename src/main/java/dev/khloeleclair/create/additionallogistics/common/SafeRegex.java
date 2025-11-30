@@ -69,9 +69,15 @@ public class SafeRegex {
 
     public static void assertReplacementSafe(@NotNull String regex, @NotNull String replacement) {
         var key = ObjectObjectImmutablePair.of(regex, replacement);
-        CachedReplacementResult cached = REPLACEMENT_CACHE.getIfPresent(key);
+        CachedReplacementResult cached;
 
-        if (cached == null) {
+        try {
+            cached = REPLACEMENT_CACHE.getIfPresent(key);
+
+            if (cached == null) {
+                throw new NullPointerException(); //see L176
+            }
+        } catch (NullPointerException npe) {
             try {
                 var rcache = processRegex(regex);
                 if (rcache.isError())
@@ -156,8 +162,16 @@ public class SafeRegex {
 
     @NotNull
     private static CachedRegexResult processRegex(@NotNull String regex) {
-        CachedRegexResult cached = REGEX_CACHE.getIfPresent(regex);
-        if (cached == null) {
+        CachedRegexResult cached;
+        try {
+            cached = REGEX_CACHE.getIfPresent(regex);
+
+            if (cached == null) {
+                throw new NullPointerException();
+                // direct a null result to the catch logic so that it doesn't have to be written twice (yes i know it's stupid but it looks nicer)
+                // basically keep the same logic for dealing with a null result but also use that logic for dealing with a null regex
+            }
+        } catch (NullPointerException npe) {
             try {
                 var pattern = Pattern.compile(regex);
 
@@ -170,7 +184,7 @@ public class SafeRegex {
                         RegexTokenizer.visitNodes(node, x -> x instanceof RegexTokenizer.ReferenceNode)
                 );
 
-            } catch(PatternSyntaxException ex) {
+            } catch (PatternSyntaxException ex) {
                 cached = new CachedRegexResult(ex);
             }
 
@@ -218,13 +232,22 @@ public class SafeRegex {
     }
 
     private static String cachedToRegexPattern(String address) {
-        var cached = GLOB_CACHE.getIfPresent(address);
-        if (cached == null) {
+        CachedGlobResult cached;
+
+        try {
+            cached = GLOB_CACHE.getIfPresent(address);
+
+            if (cached == null) {
+                throw new NullPointerException(); // see L176
+            }
+        } catch (NullPointerException npe) {
             try {
                 cached = new CachedGlobResult(Glob.toRegexPattern(address), null);
-            } catch(PatternSyntaxException ex) {
+
+            } catch (PatternSyntaxException ex) {
                 cached = new CachedGlobResult(null, ex);
             }
+
             GLOB_CACHE.put(address, cached);
         }
 
