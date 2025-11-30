@@ -69,15 +69,9 @@ public class SafeRegex {
 
     public static void assertReplacementSafe(@NotNull String regex, @NotNull String replacement) {
         var key = ObjectObjectImmutablePair.of(regex, replacement);
-        CachedReplacementResult cached;
+        CachedReplacementResult cached = REPLACEMENT_CACHE.getIfPresent(key);
 
-        try {
-            cached = REPLACEMENT_CACHE.getIfPresent(key);
-
-            if (cached == null) {
-                throw new NullPointerException(); //see L176
-            }
-        } catch (NullPointerException npe) {
+        if (cached == null) {
             try {
                 var rcache = processRegex(regex);
                 if (rcache.isError())
