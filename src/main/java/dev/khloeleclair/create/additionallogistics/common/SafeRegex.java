@@ -31,7 +31,11 @@ public class SafeRegex {
             .build();
 
 
-    private record CachedGlobResult(@Nullable String regex, @Nullable PatternSyntaxException error) {}
+    private record CachedGlobResult(@Nullable String regex, @Nullable PatternSyntaxException error) {
+        public boolean isError() {
+            return this.error != null;
+        }
+    }
 
     private record CachedReplacementResult(@Nullable PatternSyntaxException error) {
         boolean isError() { return this.error != null; }
@@ -155,13 +159,23 @@ public class SafeRegex {
     }
 
     @NotNull
-    private static CachedRegexResult processRegex(@NotNull String regex) {
-        CachedRegexResult cached = null;
+    private static CachedRegexResult processRegex(@NotNull CachedGlobResult cachedResult) {
+        CachedRegexResult cached;
 
-        if (regex != null) {
-            cached = REGEX_CACHE.getIfPresent(regex);
+        if (cachedResult.isError()) { // return a cached regex result with the error from cachedResult
+            cached = new CachedRegexResult(cachedResult.error);
+        } else {
+            String regex = cachedResult.regex;
+
+            cached = processRegex(regex);
         }
 
+        return cached;
+    }
+
+    @NotNull
+    private static CachedRegexResult processRegex(@NotNull String regex) {
+        CachedRegexResult cached = REGEX_CACHE.getIfPresent(regex);
         if (cached == null) {
             try {
                 var pattern = Pattern.compile(regex);
@@ -175,15 +189,11 @@ public class SafeRegex {
                         RegexTokenizer.visitNodes(node, x -> x instanceof RegexTokenizer.ReferenceNode)
                 );
 
-            } catch (PatternSyntaxException ex) {
+            } catch(PatternSyntaxException ex) {
                 cached = new CachedRegexResult(ex);
-            } catch (NullPointerException ex) {
-                cached = new CachedRegexResult(new PatternSyntaxException("the regex is a lie (regex is null)", "there is no regex", -1));
             }
 
-            if (regex != null) {
-                REGEX_CACHE.put(regex, cached);
-            }
+            REGEX_CACHE.put(regex, cached);
         }
 
         return cached;
@@ -226,29 +236,18 @@ public class SafeRegex {
 
     }
 
-    private static String cachedToRegexPattern(String address) {
-        CachedGlobResult cached = null;
-
-        if (address != null) {
-            cached = GLOB_CACHE.getIfPresent(address);
-        }
-
+    private static CachedGlobResult cachedToRegexPattern(String address) {
+        var cached = GLOB_CACHE.getIfPresent(address);
         if (cached == null) {
             try {
                 cached = new CachedGlobResult(Glob.toRegexPattern(address), null);
-
-            } catch (PatternSyntaxException ex) {
+            } catch(PatternSyntaxException ex) {
                 cached = new CachedGlobResult(null, ex);
-            } catch (NullPointerException npe) {
-                cached = new CachedGlobResult(null, new PatternSyntaxException("address is null", "no", -1)); // uh idk the best way to handle this
             }
-
-            if (address != null) {
-                GLOB_CACHE.put(address, cached);
-            }
+            GLOB_CACHE.put(address, cached);
         }
 
-        return cached.regex;
+        return cached;
     }
 
     /// An optimized version of PackageItem.matchAddress that uses caching and optimized logic.
