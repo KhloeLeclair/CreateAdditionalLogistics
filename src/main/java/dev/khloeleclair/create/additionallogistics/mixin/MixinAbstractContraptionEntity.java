@@ -9,7 +9,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 
 import javax.annotation.Nullable;
 
-@Mixin(AbstractContraptionEntity.class)
+@Mixin(value = AbstractContraptionEntity.class, priority = 0)
 public class MixinAbstractContraptionEntity {
 
     // I have no clue why this isn't working. At least it's of minor importance.
@@ -20,7 +20,8 @@ public class MixinAbstractContraptionEntity {
                     value = "INVOKE",
                     target = "Lcom/simibubi/create/content/contraptions/actors/seat/SeatEntity;getCustomEntitySeatOffset(Lnet/minecraft/world/entity/Entity;)D",
                     remap = false
-            )
+            ),
+            require = 0
     )
     private double CAL$getCustomEntitySeatOffset(@Nullable Entity entity) {
         return CustomSeatEntity.getCustomEntitySeatOffset(entity);

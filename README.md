@@ -243,6 +243,22 @@ the stock ticker. But at least you won't do it by accident.
 
 # Changelog
 
+## 1.4.5
+
+Hey everyone, sorry I've been absent from modding for a while. Just got really busy with
+other stuff. Here are some much needed fixes for a few things.
+
+### Fixed
+
+* Incompatibility with other mods that patch a Create method used for determining
+  the height of an entity when placed on a seat on a contraption, such as Another Furniture.
+* Incompatibility with Create: Factory Logistics causing purchases to not send items.
+  As a result of this fix, users with Factory Logistics installed will be unable to
+  use the currency conversion system.
+* Issue where regular expression validation issues could leak exceptions and cause crashes
+  in some situations. Thanks chaoticunnatural on GitHub!
+
+
 ## 1.4.4
 
 ### Fixed

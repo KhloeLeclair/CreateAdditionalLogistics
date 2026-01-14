@@ -5,7 +5,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import net.createmod.catnip.data.Glob;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
@@ -31,7 +30,11 @@ public class SafeRegex {
             .build();
 
 
-    private record CachedGlobResult(@Nullable String regex, @Nullable PatternSyntaxException error) {}
+    private record CachedGlobResult(@Nullable String regex, @Nullable PatternSyntaxException error) {
+        public boolean isError() {
+            return this.error != null;
+        }
+    }
 
     private record CachedReplacementResult(@Nullable PatternSyntaxException error) {
         boolean isError() { return this.error != null; }
@@ -67,7 +70,7 @@ public class SafeRegex {
         }
     }
 
-    public static void assertReplacementSafe(@NotNull String regex, @NotNull String replacement) {
+    public static void assertReplacementSafe(String regex, String replacement) {
         var key = ObjectObjectImmutablePair.of(regex, replacement);
         CachedReplacementResult cached = REPLACEMENT_CACHE.getIfPresent(key);
 
@@ -154,8 +157,7 @@ public class SafeRegex {
             throw cached.error;
     }
 
-    @NotNull
-    private static CachedRegexResult processRegex(@NotNull String regex) {
+    private static CachedRegexResult processRegex(String regex) {
         CachedRegexResult cached = REGEX_CACHE.getIfPresent(regex);
         if (cached == null) {
             try {
@@ -186,7 +188,7 @@ public class SafeRegex {
     /// unless they're allowed.
     ///
     /// Throws a PatternSyntaxException if a problem is detected.
-    public static CachedRegexResult assertSafe(@NotNull String regex, int starHeightLimit, int repetitionLimit, boolean allowBackreference) throws PatternSyntaxException {
+    public static CachedRegexResult assertSafe(String regex, int starHeightLimit, int repetitionLimit, boolean allowBackreference) throws PatternSyntaxException {
         CachedRegexResult cached = processRegex(regex);
 
         if (cached.isError())
@@ -204,20 +206,7 @@ public class SafeRegex {
         return cached;
     }
 
-    public static boolean isSafe(String regex, int starHeightLimit, int repetitionLimit, boolean allowBackreference) {
-
-        try {
-            assertSafe(regex, starHeightLimit, repetitionLimit, allowBackreference);
-        } catch(PatternSyntaxException ex) {
-            // TODO: Log?
-            return false;
-        }
-
-        return true;
-
-    }
-
-    private static String cachedToRegexPattern(String address) {
+    private static CachedGlobResult cachedToRegexPattern(String address) {
         var cached = GLOB_CACHE.getIfPresent(address);
         if (cached == null) {
             try {
@@ -228,7 +217,7 @@ public class SafeRegex {
             GLOB_CACHE.put(address, cached);
         }
 
-        return cached.regex;
+        return cached;
     }
 
     /// An optimized version of PackageItem.matchAddress that uses caching and optimized logic.
@@ -239,7 +228,10 @@ public class SafeRegex {
             return true;
 
         try {
-            var info = processRegex(cachedToRegexPattern(address));
+            var glob = cachedToRegexPattern(address);
+            if (glob.isError())
+                throw glob.error;
+            var info = processRegex(glob.regex);
             if (info.isError())
                 throw info.error;
             else if (info.pattern != null && info.pattern.matcher(boxAddress).matches())
@@ -249,7 +241,10 @@ public class SafeRegex {
         }
 
         try {
-            var info = processRegex(cachedToRegexPattern(boxAddress));
+            var glob = cachedToRegexPattern(boxAddress);
+            if (glob.isError())
+                throw glob.error;
+            var info = processRegex(glob.regex);
             if (info.isError())
                 throw info.error;
             else if (info.pattern != null && info.pattern.matcher(address).matches())
