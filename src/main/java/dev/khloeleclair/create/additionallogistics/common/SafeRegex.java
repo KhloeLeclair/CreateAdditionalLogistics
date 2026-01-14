@@ -31,7 +31,11 @@ public class SafeRegex {
             .build();
 
 
-    private record CachedGlobResult(@Nullable String regex, @Nullable PatternSyntaxException error) {}
+    private record CachedGlobResult(@Nullable String regex, @Nullable PatternSyntaxException error) {
+        public boolean isError() {
+            return this.error != null;
+        }
+    }
 
     private record CachedReplacementResult(@Nullable PatternSyntaxException error) {
         boolean isError() { return this.error != null; }
@@ -155,6 +159,21 @@ public class SafeRegex {
     }
 
     @NotNull
+    private static CachedRegexResult processRegex(@NotNull CachedGlobResult cachedResult) {
+        CachedRegexResult cached;
+
+        if (cachedResult.isError()) { // return a cached regex result with the error from cachedResult
+            cached = new CachedRegexResult(cachedResult.error);
+        } else {
+            String regex = cachedResult.regex;
+
+            cached = processRegex(regex);
+        }
+
+        return cached;
+    }
+
+    @NotNull
     private static CachedRegexResult processRegex(@NotNull String regex) {
         CachedRegexResult cached = REGEX_CACHE.getIfPresent(regex);
         if (cached == null) {
@@ -217,7 +236,7 @@ public class SafeRegex {
 
     }
 
-    private static String cachedToRegexPattern(String address) {
+    private static CachedGlobResult cachedToRegexPattern(String address) {
         var cached = GLOB_CACHE.getIfPresent(address);
         if (cached == null) {
             try {
@@ -228,7 +247,7 @@ public class SafeRegex {
             GLOB_CACHE.put(address, cached);
         }
 
-        return cached.regex;
+        return cached;
     }
 
     /// An optimized version of PackageItem.matchAddress that uses caching and optimized logic.
