@@ -243,7 +243,7 @@ the stock ticker. But at least you won't do it by accident.
 
 # Changelog
 
-## 1.4.4
+## 1.4.5
 
 Hey everyone, sorry I've been absent from modding for a while. Just got really busy with
 other stuff. Here are some much needed fixes for a few things.
@@ -257,6 +257,13 @@ other stuff. Here are some much needed fixes for a few things.
   use the currency conversion system.
 * Issue where regular expression validation issues could leak exceptions and cause crashes
   in some situations. Thanks chaoticunnatural on GitHub!
+
+
+## 1.4.4
+
+### Fixed
+
+* Issue causing dedicated servers to crash during startup on 1.20.1.
 
 
 ## 1.4.3
