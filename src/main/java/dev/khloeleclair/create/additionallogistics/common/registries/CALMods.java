@@ -1,6 +1,6 @@
 package dev.khloeleclair.create.additionallogistics.common.registries;
 
-import net.neoforged.fml.loading.LoadingModList;
+import net.minecraftforge.fml.loading.LoadingModList;
 
 public enum CALMods {
 
