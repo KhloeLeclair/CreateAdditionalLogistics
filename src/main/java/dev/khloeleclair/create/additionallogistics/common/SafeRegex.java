@@ -5,7 +5,6 @@ import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectObjectImmutablePair;
 import net.createmod.catnip.data.Glob;
-import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 import java.time.Duration;
@@ -71,7 +70,7 @@ public class SafeRegex {
         }
     }
 
-    public static void assertReplacementSafe(@NotNull String regex, @NotNull String replacement) {
+    public static void assertReplacementSafe(String regex, String replacement) {
         var key = ObjectObjectImmutablePair.of(regex, replacement);
         CachedReplacementResult cached = REPLACEMENT_CACHE.getIfPresent(key);
 
@@ -158,23 +157,7 @@ public class SafeRegex {
             throw cached.error;
     }
 
-    @NotNull
-    private static CachedRegexResult processRegex(@NotNull CachedGlobResult cachedResult) {
-        CachedRegexResult cached;
-
-        if (cachedResult.isError()) { // return a cached regex result with the error from cachedResult
-            cached = new CachedRegexResult(cachedResult.error);
-        } else {
-            String regex = cachedResult.regex;
-
-            cached = processRegex(regex);
-        }
-
-        return cached;
-    }
-
-    @NotNull
-    private static CachedRegexResult processRegex(@NotNull String regex) {
+    private static CachedRegexResult processRegex(String regex) {
         CachedRegexResult cached = REGEX_CACHE.getIfPresent(regex);
         if (cached == null) {
             try {
@@ -205,7 +188,7 @@ public class SafeRegex {
     /// unless they're allowed.
     ///
     /// Throws a PatternSyntaxException if a problem is detected.
-    public static CachedRegexResult assertSafe(@NotNull String regex, int starHeightLimit, int repetitionLimit, boolean allowBackreference) throws PatternSyntaxException {
+    public static CachedRegexResult assertSafe(String regex, int starHeightLimit, int repetitionLimit, boolean allowBackreference) throws PatternSyntaxException {
         CachedRegexResult cached = processRegex(regex);
 
         if (cached.isError())
@@ -221,19 +204,6 @@ public class SafeRegex {
             throw new PatternSyntaxException("Unsafe regex: usage of backref", regex, 0);
 
         return cached;
-    }
-
-    public static boolean isSafe(String regex, int starHeightLimit, int repetitionLimit, boolean allowBackreference) {
-
-        try {
-            assertSafe(regex, starHeightLimit, repetitionLimit, allowBackreference);
-        } catch(PatternSyntaxException ex) {
-            // TODO: Log?
-            return false;
-        }
-
-        return true;
-
     }
 
     private static CachedGlobResult cachedToRegexPattern(String address) {
@@ -258,7 +228,10 @@ public class SafeRegex {
             return true;
 
         try {
-            var info = processRegex(cachedToRegexPattern(address));
+            var glob = cachedToRegexPattern(address);
+            if (glob.isError())
+                throw glob.error;
+            var info = processRegex(glob.regex);
             if (info.isError())
                 throw info.error;
             else if (info.pattern != null && info.pattern.matcher(boxAddress).matches())
@@ -268,7 +241,10 @@ public class SafeRegex {
         }
 
         try {
-            var info = processRegex(cachedToRegexPattern(boxAddress));
+            var glob = cachedToRegexPattern(boxAddress);
+            if (glob.isError())
+                throw glob.error;
+            var info = processRegex(glob.regex);
             if (info.isError())
                 throw info.error;
             else if (info.pattern != null && info.pattern.matcher(address).matches())

@@ -7,7 +7,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(AbstractContraptionEntity.class)
+@Mixin(value = AbstractContraptionEntity.class, priority = 0)
 public class MixinAbstractContraptionEntity {
 
     @Redirect(
@@ -15,7 +15,8 @@ public class MixinAbstractContraptionEntity {
             at = @At(
                     value = "INVOKE",
                     target = "Lcom/simibubi/create/content/contraptions/actors/seat/SeatEntity;getCustomEntitySeatOffset(Lnet/minecraft/world/entity/Entity;)D"
-            )
+            ),
+            require = 0
     )
     private static double CAL$getCustomEntitySeatOffset(Entity entity) {
         return CustomSeatEntity.getCustomEntitySeatOffset(entity);

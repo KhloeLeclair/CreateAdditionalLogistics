@@ -17,6 +17,7 @@ import dev.khloeleclair.create.additionallogistics.common.CALLang;
 import dev.khloeleclair.create.additionallogistics.common.Config;
 import dev.khloeleclair.create.additionallogistics.common.content.logistics.cashRegister.CashRegisterBlockEntity;
 import dev.khloeleclair.create.additionallogistics.common.registries.CALDataMaps;
+import dev.khloeleclair.create.additionallogistics.common.registries.CALMods;
 import dev.khloeleclair.create.additionallogistics.mixin.IStockTickerBlockEntityAccessor;
 import dev.khloeleclair.create.additionallogistics.mixin.client.IBlueprintOverlayRendererAccessor;
 import it.unimi.dsi.fastutil.objects.Object2LongArrayMap;
@@ -89,6 +90,8 @@ public class CurrencyUtilities {
     }
 
     public static boolean isConversionEnabled(boolean is_cash_register) {
+        if (CALMods.FACTORY_LOGISTICS.isLoaded())
+            return false;
         if (!is_cash_register && !Config.Server.currencyStockTicker.get())
             return false;
         if (Config.Server.currencyCompression.get())
@@ -211,7 +214,7 @@ public class CurrencyUtilities {
     }
 
     public static void interactWithShop(Player player, Level level, BlockPos targetPos, ItemStack mainHandItem) {
-        if (level.isClientSide || !(level.getBlockEntity(targetPos) instanceof StockTickerBlockEntity tickerBE))
+        if (level.isClientSide || !(level.getBlockEntity(targetPos) instanceof StockTickerBlockEntity tickerBE) || CALMods.FACTORY_LOGISTICS.isLoaded())
             return;
 
         ShoppingListItem.ShoppingList list = ShoppingListItem.getList(mainHandItem);
