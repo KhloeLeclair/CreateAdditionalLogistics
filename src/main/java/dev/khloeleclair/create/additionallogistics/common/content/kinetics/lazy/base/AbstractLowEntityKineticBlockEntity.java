@@ -39,7 +39,13 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
     protected void read(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
         super.read(compound, registries, clientPacket);
         connections = null;
-        if (compound.contains("Connected", CompoundTag.TAG_LONG_ARRAY)) {
+
+        // A blueprint or a contraption hands us offsets that describe where the blocks used to be.
+        // They are not rotated by transform() and become meaningless once the structure moves, so
+        // rebuild the cluster from the world instead of trusting the saved list.
+        if (wasMoved) {
+            lazyDirty = true;
+        } else if (compound.contains("Connected", CompoundTag.TAG_LONG_ARRAY)) {
             var cache = compound.getLongArray("Connected");
             connections = new ArrayList<>(cache.length);
             for(long pos : cache)
@@ -161,48 +167,70 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
     }
 
     protected boolean setConnections(List<BlockPos> newConnections) {
-        // Find our index in the list of connections, so that we can pick out the block entities
-        // directly before and after us.
-        int index = 0;
-        for (; index < newConnections.size(); index++) {
-            if (worldPosition.equals(newConnections.get(index)))
-                break;
+        // The walk reports every entity of the cluster, but the cluster also contains blocks that
+        // have no block entity at all: a flexible shaft with no configured port is deactivated and
+        // drops its block entity, and Create cannot see such a block as a kinetic node. Two real
+        // entities therefore often sit on either side of one or more of those relay blocks, and the
+        // offset recorded here has to reach across them, because propagation can only travel
+        // between block entities.
+        //
+        // Sorting the cluster by position and taking the entries before and after us only works
+        // when the chain happens to run in coordinate order. It breaks as soon as the chain turns,
+        // which is why an L shaped cluster could carry rotation in one orientation and not in the
+        // other. Walk the connectors instead.
+        final Set<BlockPos> cluster = new HashSet<>(newConnections);
+        if (!cluster.contains(worldPosition))
+            return false;
+
+        final List<BlockPos> found = new ArrayList<>(4);
+        final Set<BlockPos> visited = new HashSet<>();
+        final Deque<BlockPos> queue = new ArrayDeque<>();
+
+        visited.add(worldPosition);
+        queue.add(worldPosition);
+
+        while (!queue.isEmpty()) {
+            BlockPos current = queue.removeFirst();
+            BlockState currentState = level.getBlockState(current);
+            if (!(currentState.getBlock() instanceof AbstractLowEntityKineticBlock<?> currentBlock))
+                continue;
+
+            for(Direction dir : Direction.values()) {
+                BlockPos next = current.relative(dir);
+                if (visited.contains(next))
+                    continue;
+
+                BlockState nextState = level.getBlockState(next);
+                if (!(nextState.getBlock() instanceof AbstractLowEntityKineticBlock<?>))
+                    continue;
+
+                // Only travel along links that are actually connected; a dyed or misaligned
+                // neighbour must not become part of this chain.
+                if (!currentBlock.connectsTo(level, current, currentState, dir, next, nextState))
+                    continue;
+
+                visited.add(next);
+
+                // Relay blocks have no block entity and only exist to pass the chain along.
+                if (cluster.contains(next))
+                    found.add(next.subtract(worldPosition));
+                else
+                    queue.add(next);
+            }
         }
 
-        // If we aren't in the list somehow, something went wrong. Abort.
-        if (index >= newConnections.size())
-            return false;
-
-        int previous = index - 1;
-        int next = index + 1;
-
-        if (connections == null)
-            connections = new ArrayList<>();
-
-        @Nullable BlockPos prevPos = previous == -1 ? null : newConnections.get(previous).subtract(worldPosition);
-        @Nullable BlockPos nextPos = next >= newConnections.size() ? null : newConnections.get(next).subtract(worldPosition);
-
-        int count = (prevPos == null ? 0 : 1) + (nextPos == null ? 0 : 1);
-
-        boolean contains_previous = prevPos == null || connections.contains(prevPos);
-        boolean contains_next = nextPos == null || connections.contains(nextPos);
-
         // If our connections aren't changing, we don't need to do anything and we can stop now.
-        if (contains_previous && contains_next && connections.size() == count)
+        if (connections != null && connections.equals(found))
             return false;
 
-        //CreateAdditionalLogistics.LOGGER.debug("Changed connections for {} -- {}, {}", worldPosition, prevPos, nextPos);
+        //CreateAdditionalLogistics.LOGGER.debug("Changed connections for {} -- {}", worldPosition, found);
 
         // Something did change, so we need to detach from the kinetic network.
         detachKinetics();
 
         // Make a new list of our new connections, and save it as pending for now. We won't swap in the new
         // list until after all our entities go through this step.
-        pendingConnections = new ArrayList<>();
-        if (prevPos != null)
-            pendingConnections.add(prevPos);
-        if (nextPos != null)
-            pendingConnections.add(nextPos);
+        pendingConnections = found;
 
         return true;
     }

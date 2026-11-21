@@ -144,8 +144,14 @@ public class FlexibleShaftBlockEntity extends AbstractLowEntityKineticBlockEntit
         var state = getBlockState();
         for(Direction side : Iterate.directions) {
             int index = side.ordinal();
-            if (state.getValue(AbstractFlexibleShaftBlock.SIDES[index]) && sideActive[index] != 0) {
-                if (hasConnection(side) && !detached) {
+
+            // A side property only says that this face touches another low entity block, not that
+            // the lazy chain is carrying rotation through it. Blueprints hand us the configured
+            // modes already in place while those properties are already set, so clearing on the
+            // property alone wipes legitimate ports and then deactivates the block, dropping its
+            // block entity for good. Only give the side up once the chain actually has a network.
+            if (state.getValue(AbstractFlexibleShaftBlock.SIDES[index]) && sideActive[index] != 0 && hasConnection(side)) {
+                if (!detached) {
                     detached = true;
                     detachKinetics();
                 }
