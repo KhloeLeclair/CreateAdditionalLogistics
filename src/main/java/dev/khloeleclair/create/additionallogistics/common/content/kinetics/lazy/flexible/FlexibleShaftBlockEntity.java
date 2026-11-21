@@ -259,21 +259,29 @@ public class FlexibleShaftBlockEntity extends AbstractLowEntityKineticBlockEntit
 
         byte[] sides = sideActive;
 
-        if (transform.mirror != Mirror.NONE) {
+        // A side's mode is the sign of its rotation relative to the positive end of that face's
+        // axis, so it has to be adjusted whenever a transform moves that positive end to the
+        // negative one. Blueprints only ever use the Y axis; anything else keeps the previous
+        // behaviour so that moving contraptions is unaffected.
+        final boolean yAxis = transform.rotationAxis == null || transform.rotationAxis == Direction.Axis.Y;
+
+        if (transform.mirror != null && transform.mirror != Mirror.NONE) {
             byte[] newSides = new byte[sides.length];
 
             for(Direction dir : Iterate.directions) {
-                newSides[transform.mirror.mirror(dir).ordinal()] = sides[dir.ordinal()];
+                Direction newDir = transform.mirror.mirror(dir);
+                newSides[newDir.ordinal()] = (byte) (sides[dir.ordinal()] * sideModeSign(dir, newDir, transform.mirror, null, yAxis));
             }
 
             sides = newSides;
         }
 
-        if (transform.rotation != Rotation.NONE) {
+        if (transform.rotation != null && transform.rotation != Rotation.NONE) {
             byte[] newSides = new byte[sides.length];
 
             for(Direction dir : Iterate.directions) {
-                newSides[transform.rotation.rotate(dir).ordinal()] = sides[dir.ordinal()];
+                Direction newDir = transform.rotation.rotate(dir);
+                newSides[newDir.ordinal()] = (byte) (sides[dir.ordinal()] * sideModeSign(dir, newDir, null, transform.rotation, yAxis));
             }
 
             sides = newSides;
@@ -281,5 +289,26 @@ public class FlexibleShaftBlockEntity extends AbstractLowEntityKineticBlockEntit
 
         System.arraycopy(sides, 0, sideActive, 0, sides.length);
 
+    }
+
+    /// Determine the sign factor applied to a side's mode when a structure transform remaps it.
+    ///
+    /// A mirror flips handedness and therefore negates. Regardless, a mode's sign is relative to the
+    /// positive end of its face's axis, so it must also be negated whenever the transform carries that
+    /// positive end onto the negative one.
+    private static int sideModeSign(Direction dir, Direction newDir, @Nullable Mirror mirror, @Nullable Rotation rotation, boolean yAxis) {
+        if (!yAxis)
+            return 1;
+
+        Direction mapped = Direction.fromAxisAndDirection(dir.getAxis(), Direction.AxisDirection.POSITIVE);
+        if (mirror != null)
+            mapped = mirror.mirror(mapped);
+        if (rotation != null)
+            mapped = rotation.rotate(mapped);
+
+        Direction anchor = Direction.fromAxisAndDirection(newDir.getAxis(), Direction.AxisDirection.POSITIVE);
+        final int handedness = mirror == null ? 1 : -1;
+
+        return handedness * (mapped == anchor ? 1 : -1);
     }
 }
