@@ -39,7 +39,13 @@ public abstract class AbstractLowEntityKineticBlockEntity extends SplitShaftBloc
     protected void read(CompoundTag compound, HolderLookup.Provider registries, boolean clientPacket) {
         super.read(compound, registries, clientPacket);
         connections = null;
-        if (compound.contains("Connected", CompoundTag.TAG_LONG_ARRAY)) {
+
+        // A blueprint or a contraption hands us offsets that describe where the blocks used to be.
+        // They are not rotated by transform() and become meaningless once the structure moves, so
+        // rebuild the cluster from the world instead of trusting the saved list.
+        if (wasMoved) {
+            lazyDirty = true;
+        } else if (compound.contains("Connected", CompoundTag.TAG_LONG_ARRAY)) {
             var cache = compound.getLongArray("Connected");
             connections = new ArrayList<>(cache.length);
             for(long pos : cache)
